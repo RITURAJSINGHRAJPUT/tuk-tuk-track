@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - TukTukTrack</title>
+    <link href="./css/style.css" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-100 font-sans transition-colors duration-200">
+
+    <div class="flex h-screen overflow-hidden">
+        <!-- Sidebar -->
+        <aside
+            class="w-72 bg-white/80 dark:bg-gray-900/90 backdrop-blur-xl border-r border-gray-200 dark:border-gray-800 hidden md:flex flex-col z-50 transition-all duration-300">
+            <div class="p-6 flex items-center gap-3 mb-2">
+                <div
+                    class="w-10 h-10 bg-gradient-to-tr from-purple-600 to-purple-400 rounded-xl flex items-center justify-center shadow-lg shadow-purple-500/20">
+                    <i data-lucide="truck" class="text-white w-6 h-6"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold tracking-tight text-gray-900 dark:text-white leading-none">TukTuk</h1>
+                    <span class="text-xs font-bold text-purple-500 tracking-widest uppercase">Admin</span>
+                </div>
+            </div>
+
+            <nav class="flex-1 px-4 space-y-2">
+                <p class="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2 mt-4">Overview</p>
+
+                <a href="admindashboard.html"
+                    class="flex items-center gap-3 px-4 py-3.5 bg-gradient-to-r from-purple-600 to-purple-500 text-white rounded-xl shadow-lg shadow-purple-500/20 transition-all group">
+                    <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+                    <span class="font-medium">Dashboard</span>
+                </a>
+
+                <p class="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2 mt-6">Management</p>
+
+                <a href="admin-shipments.html"
+                    class="flex items-center gap-3 px-4 py-3.5 text-gray-600 dark:text-gray-400 hover:bg-white dark:hover:bg-gray-800 hover:shadow-md hover:shadow-gray-200/50 dark:hover:shadow-black/20 rounded-xl transition-all group">
+                    <i data-lucide="truck" class="w-5 h-5 group-hover:text-purple-500 transition-colors"></i>
+                    <span
+                        class="font-medium group-hover:text-gray-900 dark:group-hover:text-white transition-colors">Shipments</span>
+                </a>
+
+                <a href="admin-users.html"
+                    class="flex items-center gap-3 px-4 py-3.5 text-gray-600 dark:text-gray-400 hover:bg-white dark:hover:bg-gray-800 hover:shadow-md hover:shadow-gray-200/50 dark:hover:shadow-black/20 rounded-xl transition-all group">
+                    <i data-lucide="user-circle" class="w-5 h-5 group-hover:text-purple-500 transition-colors"></i>
+                    <span
+                        class="font-medium group-hover:text-gray-900 dark:group-hover:text-white transition-colors">Users</span>
+                </a>
+
+                <p class="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2 mt-6">System</p>
+
+                <a href="admin-tracking.html"
+                    class="flex items-center gap-3 px-4 py-3.5 text-gray-600 dark:text-gray-400 hover:bg-white dark:hover:bg-gray-800 hover:shadow-md hover:shadow-gray-200/50 dark:hover:shadow-black/20 rounded-xl transition-all group">
+                    <i data-lucide="map" class="w-5 h-5 group-hover:text-purple-500 transition-colors"></i>
+                    <span
+                        class="font-medium group-hover:text-gray-900 dark:group-hover:text-white transition-colors">Live
+                        Tracking</span>
+                </a>
+            </nav>
+
+            <div
+                class="p-4 m-4 bg-gray-50 dark:bg-gray-800/50 rounded-2xl border border-gray-100 dark:border-gray-700/50">
+                <div class="flex items-center gap-3">
+                    <img src="https://ui-avatars.com/api/?name=Admin&background=9333ea&color=fff" alt="Admin"
+                        class="w-10 h-10 rounded-xl shadow-sm sidebar-user-img">
+                    <div class="overflow-hidden">
+                        <p class="text-sm font-bold text-gray-900 dark:text-white truncate sidebar-user-name">Admin
+                        </p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 truncate sidebar-user-role">admin@tuktuk.com
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <div class="flex-1 flex flex-col overflow-hidden relative">
+            <!-- Header -->
+            <header
+                class="h-20 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-800 flex items-center justify-between px-8 z-40">
+                <div class="flex items-center gap-4">
+                    <button
+                        class="md:hidden p-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors">
+                        <i data-lucide="menu" class="w-6 h-6"></i>
+                    </button>
+                    <div>
+                        <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Admin Dashboard (v2)</h1>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">Overview of system performance</p>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-4">
+                    <button id="theme-toggle"
+                        class="p-2.5 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl transition-colors border border-transparent hover:border-gray-200 dark:hover:border-gray-700">
+                        <i data-lucide="sun" class="w-5 h-5 hidden dark:block"></i>
+                        <i data-lucide="moon" class="w-5 h-5 block dark:hidden"></i>
+                    </button>
+                    <button id="logout-btn"
+                        class="p-2.5 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl transition-colors"
+                        title="Logout">
+                        <i data-lucide="log-out" class="w-5 h-5"></i>
+                    </button>
+                </div>
+            </header>
+
+            <!-- Scrollable Content -->
+            <main class="flex-1 overflow-y-auto p-8">
+                <!-- Stats Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                    <!-- Active Shipments -->
+                    <div
+                        class="relative overflow-hidden bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 group hover:shadow-lg transition-all duration-300">
+                        <div
+                            class="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 rounded-full blur-3xl -mr-16 -mt-16 transition-all group-hover:bg-blue-500/20">
+                        </div>
+                        <div class="relative z-10">
+                            <div class="flex justify-between items-start mb-4">
+                                <div>
+                                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Active Shipments</p>
+                                    <h3 class="text-3xl font-bold text-gray-900 dark:text-white mt-1"
+                                        id="active-shipments-count">0</h3>
+                                </div>
+                                <div
+                                    class="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-xl text-blue-600 dark:text-blue-400 group-hover:scale-110 transition-transform shadow-sm">
+                                    <i data-lucide="truck" class="w-6 h-6"></i>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-1 text-sm text-blue-500">
+                                <span class="font-medium">Live Updates</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Pending Requests -->
+                    <div
+                        class="relative overflow-hidden bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 group hover:shadow-lg transition-all duration-300">
+                        <div
+                            class="absolute top-0 right-0 w-32 h-32 bg-orange-500/10 rounded-full blur-3xl -mr-16 -mt-16 transition-all group-hover:bg-orange-500/20">
+                        </div>
+                        <div class="relative z-10">
+                            <div class="flex justify-between items-start mb-4">
+                                <div>
+                                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Pending Requests</p>
+                                    <h3 class="text-3xl font-bold text-gray-900 dark:text-white mt-1"
+                                        id="pending-count">0</h3>
+                                </div>
+                                <div
+                                    class="p-3 bg-orange-50 dark:bg-orange-900/20 rounded-xl text-orange-600 dark:text-orange-400 group-hover:scale-110 transition-transform shadow-sm">
+                                    <i data-lucide="clock" class="w-6 h-6"></i>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-1 text-sm text-orange-500">
+                                <span class="font-medium">Action Required</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Shipments Table -->
+                <div
+                    class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+                    <div
+                        class="p-6 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center bg-gray-50 dark:bg-gray-800/50">
+                        <h3 class="font-bold text-gray-900 dark:text-white">Recent Shipments</h3>
+                        <a href="admin-shipments.html"
+                            class="text-sm text-purple-600 dark:text-purple-400 font-medium hover:underline flex items-center gap-1">
+                            View All <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                        </a>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm">
+                            <thead
+                                class="bg-gray-50 dark:bg-gray-700/50 text-gray-500 dark:text-gray-400 uppercase tracking-wider text-xs">
+                                <tr>
+                                    <th class="px-6 py-4 font-semibold">User</th>
+                                    <th class="px-6 py-4 font-semibold">Goods</th>
+                                    <th class="px-6 py-4 font-semibold">Pickup</th>
+                                    <th class="px-6 py-4 font-semibold">Delivery</th>
+                                    <th class="px-6 py-4 font-semibold">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="shipments-table-body" class="divide-y divide-gray-100 dark:divide-gray-700">
+                                <!-- Rows will be populated by JS -->
+                                <tr class="animate-pulse">
+                                    <td colspan="5" class="p-8 text-center text-gray-500">
+                                        <div class="flex flex-col items-center gap-2">
+                                            <i data-lucide="loader-2" class="w-6 h-6 animate-spin text-purple-500"></i>
+                                            <span>Loading shipments...</span>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </main>
+        </div>
+    </div>
+
+    <script src="js/main.js"></script>
+    <script type="module">
+        import { initAdminGuard } from './js/admin-guard.js';
+        import { db, collection, query, orderBy, limit, onSnapshot } from './firebase-config.js';
+
+        initAdminGuard();
+        lucide.createIcons();
+
+        // Fetch Shipments
+        const shipmentsTableBody = document.getElementById('shipments-table-body');
+        const activeShipmentsCount = document.getElementById('active-shipments-count');
+        const pendingCount = document.getElementById('pending-count');
+
+        // Ensure we are querying correctly. If 'createdAt' doesn't exist on all docs, orderBy might filter them out.
+        // For safety, let's just query the collection first without orderBy to see if we get data, 
+        // or use a simpler query.
+        const q = query(collection(db, "shipments"), limit(10));
+
+        onSnapshot(q, (querySnapshot) => {
+            shipmentsTableBody.innerHTML = '';
+            let activeCount = 0;
+            let pending = 0;
+
+            if (querySnapshot.empty) {
+                shipmentsTableBody.innerHTML = `
+                    <tr class="border-b border-gray-100 dark:border-gray-700/50">
+                        <td colspan="5" class="p-8 text-center text-gray-500">No shipment requests found.</td>
+                    </tr>
+                `;
+            } else {
+                querySnapshot.forEach((doc) => {
+                    const data = doc.data();
+
+                    // Count stats (this is just for the visible 10, ideally we'd query for count)
+                    if (data.status === 'In Transit' || data.status === 'Pending') activeCount++;
+                    if (data.status === 'Pending') pending++;
+
+                    const row = `
+                        <tr class="border-b border-gray-100 dark:border-gray-700/50 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                            <td class="p-4 flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center text-xs font-bold">
+                                    ${data.userName ? data.userName.charAt(0).toUpperCase() : 'U'}
+                                </div>
+                                <div>
+                                    <p class="font-medium text-gray-900 dark:text-white">${data.userName || 'Unknown User'}</p>
+                                    <p class="text-xs text-gray-500">${data.userEmail || ''}</p>
+                                </div>
+                            </td>
+                            <td class="p-4 text-gray-600 dark:text-gray-300">${data.goodsType || 'N/A'}</td>
+                            <td class="p-4">
+                                <p class="text-sm font-medium text-gray-900 dark:text-white">${data.pickup?.place || 'N/A'}</p>
+                                <p class="text-xs text-gray-500">${data.pickup?.date || ''}</p>
+                            </td>
+                            <td class="p-4">
+                                <p class="text-sm font-medium text-gray-900 dark:text-white">${data.delivery?.place || 'N/A'}</p>
+                                <p class="text-xs text-gray-500">${data.delivery?.date || ''}</p>
+                            </td>
+                            <td class="p-4">
+                                <span class="px-2 py-1 rounded-full ${getStatusColor(data.status)} text-xs font-bold border border-opacity-20">
+                                    ${data.status || 'Pending'}
+                                </span>
+                            </td>
+                        </tr>
+                    `;
+                    shipmentsTableBody.innerHTML += row;
+                });
+                lucide.createIcons();
+            }
+
+            // Update stats
+            if (activeShipmentsCount) activeShipmentsCount.textContent = activeCount;
+            if (pendingCount) pendingCount.textContent = pending;
+
+        }, (error) => {
+            console.error("Error fetching shipments:", error);
+            shipmentsTableBody.innerHTML = `
+                <tr>
+                    <td colspan="5" class="p-8 text-center text-red-500">
+                        Error loading data: ${error.message}
+                    </td>
+                </tr>
+            `;
+        });
+
+        function getStatusColor(status) {
+            switch (status) {
+                case 'Pending': return 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400';
+                case 'In Transit': return 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400';
+                case 'Completed': return 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400';
+                case 'Cancelled': return 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400';
+                default: return 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400';
+            }
+        }
+    </script>
+    <script>
+        lucide.createIcons();
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Initialize Admin - TukTukTrack</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-900 text-white flex items-center justify-center h-screen">
+    <div class="max-w-md w-full p-8 bg-gray-800 rounded-2xl shadow-xl border border-gray-700">
+        <h1 class="text-2xl font-bold mb-4 text-purple-500">Initialize Admin User</h1>
+        <p class="mb-6 text-gray-400">This tool will link your existing Firebase Auth user to a Firestore Admin
+            document.</p>
+
+        <form id="init-form" class="space-y-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-400 mb-1">Email</label>
+                <input type="email" id="email" value="admin@tuktuk.com"
+                    class="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-2 focus:outline-none focus:border-purple-500"
+                    required>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-400 mb-1">Password</label>
+                <input type="password" id="password" placeholder="Enter your password"
+                    class="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-2 focus:outline-none focus:border-purple-500"
+                    required>
+            </div>
+            <button type="submit"
+                class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-lg transition-colors">
+                Create Admin Record
+            </button>
+        </form>
+
+        <div id="status" class="mt-4 text-sm text-center hidden"></div>
+    </div>
+
+    <script type="module">
+        import { auth, db, signInWithEmailAndPassword, doc, setDoc } from './firebase-config.js';
+
+        const form = document.getElementById('init-form');
+        const status = document.getElementById('status');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            status.textContent = "Authenticating...";
+            status.className = "mt-4 text-sm text-center text-blue-400 block";
+
+            try {
+                // 1. Sign in
+                const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
+
+                status.textContent = "Creating Firestore record...";
+
+                // 2. Create Admin Document in Firestore
+                await setDoc(doc(db, "users", user.uid), {
+                    name: "Admin",
+                    email: email,
+                    role: "admin",
+                    createdAt: new Date().toISOString(),
+                    phone: "N/A"
+                });
+
+                status.textContent = "Success! Admin record created. Redirecting to login...";
+                status.className = "mt-4 text-sm text-center text-green-400 block";
+
+                setTimeout(() => {
+                    window.location.href = 'admin-login.html';
+                }, 2000);
+
+            } catch (error) {
+                console.error(error);
+                status.textContent = "Error: " + error.message;
+                status.className = "mt-4 text-sm text-center text-red-500 block";
+            }
+        });
+    </script>
+</body>
+
+</html>

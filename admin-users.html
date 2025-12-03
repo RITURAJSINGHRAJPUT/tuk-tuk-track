@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Users - Admin TukTukTrack</title>
+    <link href="./css/style.css" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background-color: rgba(156, 163, 175, 0.5);
+            border-radius: 20px;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-100 font-sans transition-colors duration-200">
+
+    <div class="flex h-screen overflow-hidden">
+        <!-- Sidebar -->
+        <aside
+            class="w-72 bg-white/80 dark:bg-gray-900/90 backdrop-blur-xl border-r border-gray-200 dark:border-gray-800 hidden md:flex flex-col z-50 transition-all duration-300">
+            <div class="p-6 flex items-center gap-3 mb-2">
+                <div
+                    class="w-10 h-10 bg-gradient-to-tr from-purple-600 to-purple-400 rounded-xl flex items-center justify-center shadow-lg shadow-purple-500/20">
+                    <i data-lucide="truck" class="text-white w-6 h-6"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold tracking-tight text-gray-900 dark:text-white leading-none">TukTuk</h1>
+                    <span class="text-xs font-bold text-purple-500 tracking-widest uppercase">Admin</span>
+                </div>
+            </div>
+
+            <nav class="flex-1 px-4 space-y-2">
+                <p class="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2 mt-4">Overview</p>
+
+                <a href="admindashboard.html"
+                    class="flex items-center gap-3 px-4 py-3.5 text-gray-600 dark:text-gray-400 hover:bg-white dark:hover:bg-gray-800 hover:shadow-md hover:shadow-gray-200/50 dark:hover:shadow-black/20 rounded-xl transition-all group">
+                    <i data-lucide="layout-dashboard" class="w-5 h-5 group-hover:text-purple-500 transition-colors"></i>
+                    <span
+                        class="font-medium group-hover:text-gray-900 dark:group-hover:text-white transition-colors">Dashboard</span>
+                </a>
+
+                <p class="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2 mt-6">Management</p>
+
+                <a href="admin-shipments.html"
+                    class="flex items-center gap-3 px-4 py-3.5 text-gray-600 dark:text-gray-400 hover:bg-white dark:hover:bg-gray-800 hover:shadow-md hover:shadow-gray-200/50 dark:hover:shadow-black/20 rounded-xl transition-all group">
+                    <i data-lucide="truck" class="w-5 h-5 group-hover:text-purple-500 transition-colors"></i>
+                    <span
+                        class="font-medium group-hover:text-gray-900 dark:group-hover:text-white transition-colors">Shipments</span>
+                </a>
+
+                <a href="admin-users.html"
+                    class="flex items-center gap-3 px-4 py-3.5 bg-gradient-to-r from-purple-600 to-purple-500 text-white rounded-xl shadow-lg shadow-purple-500/20 transition-all group">
+                    <i data-lucide="user-circle" class="w-5 h-5"></i>
+                    <span class="font-medium">Users</span>
+                </a>
+
+                <p class="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2 mt-6">System</p>
+
+                <a href="admin-tracking.html"
+                    class="flex items-center gap-3 px-4 py-3.5 text-gray-600 dark:text-gray-400 hover:bg-white dark:hover:bg-gray-800 hover:shadow-md hover:shadow-gray-200/50 dark:hover:shadow-black/20 rounded-xl transition-all group">
+                    <i data-lucide="map" class="w-5 h-5 group-hover:text-purple-500 transition-colors"></i>
+                    <span
+                        class="font-medium group-hover:text-gray-900 dark:group-hover:text-white transition-colors">Live
+                        Tracking</span>
+                </a>
+            </nav>
+
+            <div
+                class="p-4 m-4 bg-gray-50 dark:bg-gray-800/50 rounded-2xl border border-gray-100 dark:border-gray-700/50">
+                <div class="flex items-center gap-3">
+                    <img src="https://ui-avatars.com/api/?name=Admin&background=9333ea&color=fff" alt="Admin"
+                        class="w-10 h-10 rounded-xl shadow-sm sidebar-user-img">
+                    <div class="overflow-hidden">
+                        <p class="text-sm font-bold text-gray-900 dark:text-white truncate sidebar-user-name">Admin
+                        </p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 truncate sidebar-user-role">admin@tuktuk.com
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <div class="flex-1 flex flex-col h-screen overflow-hidden relative">
+            <!-- Header -->
+            <header
+                class="h-20 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-800 flex items-center justify-between px-8 z-40">
+                <div class="flex items-center gap-4">
+                    <button
+                        class="md:hidden p-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors">
+                        <i data-lucide="menu" class="w-6 h-6"></i>
+                    </button>
+                    <div>
+                        <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Registered Users</h1>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">Manage system users and roles</p>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-4">
+                    <button id="theme-toggle"
+                        class="p-2.5 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl transition-colors border border-transparent hover:border-gray-200 dark:hover:border-gray-700">
+                        <i data-lucide="sun" class="w-5 h-5 hidden dark:block"></i>
+                        <i data-lucide="moon" class="w-5 h-5 block dark:hidden"></i>
+                    </button>
+                    <button id="logout-btn"
+                        class="p-2.5 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl transition-colors"
+                        title="Logout">
+                        <i data-lucide="log-out" class="w-5 h-5"></i>
+                    </button>
+                </div>
+            </header>
+
+            <!-- Scrollable Content -->
+            <main class="flex-1 overflow-y-auto p-8">
+                <div class="max-w-7xl mx-auto space-y-6">
+
+                    <!-- Search -->
+                    <div class="relative w-full max-w-md">
+                        <i data-lucide="search"
+                            class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400"></i>
+                        <input type="text" id="search-input" placeholder="Search users by name or email..."
+                            class="w-full pl-12 pr-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all shadow-sm">
+                    </div>
+
+                    <!-- Users Grid -->
+                    <div id="users-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <!-- Loading State -->
+                        <div class="col-span-full flex flex-col items-center justify-center py-20 text-gray-400">
+                            <i data-lucide="loader-2" class="w-8 h-8 animate-spin mb-4 text-purple-500"></i>
+                            <span class="text-base">Loading users...</span>
+                        </div>
+                    </div>
+
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- User Details Modal -->
+    <div id="user-modal" class="fixed inset-0 z-[100] hidden">
+        <!-- Backdrop -->
+        <div class="absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity" onclick="closeUserModal()"></div>
+
+        <!-- Modal Content -->
+        <div class="absolute right-0 top-0 h-full w-full max-w-md bg-white dark:bg-gray-900 shadow-2xl transform transition-transform duration-300 translate-x-full flex flex-col"
+            id="user-modal-content">
+
+            <!-- Header -->
+            <div
+                class="p-6 border-b border-gray-200 dark:border-gray-800 flex justify-between items-start bg-gray-50 dark:bg-gray-800/50">
+                <div class="flex items-center gap-4">
+                    <div id="modal-user-avatar"
+                        class="w-16 h-16 rounded-2xl bg-purple-100 text-purple-600 flex items-center justify-center text-2xl font-bold shadow-sm">
+                        U
+                    </div>
+                    <div>
+                        <h2 id="modal-user-name" class="text-xl font-bold text-gray-900 dark:text-white">User Name</h2>
+                        <p id="modal-user-email" class="text-sm text-gray-500 dark:text-gray-400">user@example.com</p>
+                        <span id="modal-user-role"
+                            class="inline-block mt-2 px-2 py-0.5 rounded-md bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 text-xs font-bold uppercase tracking-wider">User</span>
+                    </div>
+                </div>
+                <button onclick="closeUserModal()"
+                    class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+                    <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
+            </div>
+
+            <!-- Body -->
+            <div class="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-6">
+
+                <!-- Info Grid -->
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="p-3 bg-gray-50 dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700">
+                        <p class="text-xs text-gray-500 mb-1">Phone</p>
+                        <p id="modal-user-phone" class="font-medium text-gray-900 dark:text-white">N/A</p>
+                    </div>
+                    <div class="p-3 bg-gray-50 dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700">
+                        <p class="text-xs text-gray-500 mb-1">Joined</p>
+                        <p id="modal-user-joined" class="font-medium text-gray-900 dark:text-white">N/A</p>
+                    </div>
+                </div>
+
+                <!-- Shipments Section -->
+                <div>
+                    <h3 class="font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                        <i data-lucide="package" class="w-4 h-4 text-purple-500"></i>
+                        Shipment History
+                    </h3>
+                    <div id="modal-shipments-list" class="space-y-3">
+                        <!-- Shipments will be injected here -->
+                        <div class="text-center py-8 text-gray-400 text-sm">Loading shipments...</div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Footer -->
+            <div class="p-4 border-t border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50">
+                <button
+                    class="w-full py-3 bg-red-50 hover:bg-red-100 dark:bg-red-900/20 dark:hover:bg-red-900/40 text-red-600 dark:text-red-400 rounded-xl font-medium transition-colors flex items-center justify-center gap-2">
+                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                    Delete User
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/main.js"></script>
+    <script type="module">
+        import { initAdminGuard } from './js/admin-guard.js';
+        import { db, collection, getDocs, query, orderBy, where } from './firebase-config.js';
+
+        initAdminGuard();
+        lucide.createIcons();
+
+        // --- Elements ---
+        const usersGrid = document.getElementById('users-grid');
+        const searchInput = document.getElementById('search-input');
+
+        // Modal Elements
+        const modal = document.getElementById('user-modal');
+        const modalContent = document.getElementById('user-modal-content');
+        const modalName = document.getElementById('modal-user-name');
+        const modalEmail = document.getElementById('modal-user-email');
+        const modalRole = document.getElementById('modal-user-role');
+        const modalAvatar = document.getElementById('modal-user-avatar');
+        const modalPhone = document.getElementById('modal-user-phone');
+        const modalJoined = document.getElementById('modal-user-joined');
+        const modalShipmentsList = document.getElementById('modal-shipments-list');
+
+        let allUsers = [];
+
+        // --- Fetch Users ---
+        async function fetchUsers() {
+            try {
+                const q = query(collection(db, "users"), orderBy("createdAt", "desc"));
+                const querySnapshot = await getDocs(q);
+
+                allUsers = [];
+                querySnapshot.forEach((doc) => {
+                    allUsers.push({ id: doc.id, ...doc.data() });
+                });
+
+                renderUsers(allUsers);
+
+            } catch (error) {
+                console.error("Error fetching users:", error);
+                usersGrid.innerHTML = `
+                    <div class="col-span-full text-center py-10 text-red-500">
+                        Error loading users. Please try again.
+                    </div>
+                `;
+            }
+        }
+
+        // --- Render Users ---
+        function renderUsers(users) {
+            usersGrid.innerHTML = '';
+
+            if (users.length === 0) {
+                usersGrid.innerHTML = `
+                    <div class="col-span-full text-center py-10 text-gray-500">
+                        No users found.
+                    </div>
+                `;
+                return;
+            }
+
+            users.forEach(user => {
+                const initial = user.name ? user.name.charAt(0).toUpperCase() : 'U';
+                const date = user.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'N/A';
+
+                const card = document.createElement('div');
+                card.className = "bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-md hover:border-purple-200 dark:hover:border-purple-900/50 transition-all cursor-pointer group";
+                card.onclick = () => openUserModal(user);
+
+                card.innerHTML = `
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="w-12 h-12 rounded-xl bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 flex items-center justify-center text-xl font-bold group-hover:scale-110 transition-transform">
+                            ${initial}
+                        </div>
+                        <span class="px-2 py-1 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 text-xs font-bold uppercase tracking-wider">
+                            ${user.role || 'User'}
+                        </span>
+                    </div>
+                    
+                    <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-1 truncate">${user.name || 'Unknown User'}</h3>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-4 truncate">${user.email}</p>
+                    
+                    <div class="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400 border-t border-gray-100 dark:border-gray-700 pt-4">
+                        <div class="flex items-center gap-1">
+                            <i data-lucide="calendar" class="w-3 h-3"></i>
+                            ${date}
+                        </div>
+                        <div class="flex items-center gap-1 ml-auto text-purple-600 dark:text-purple-400 font-medium group-hover:translate-x-1 transition-transform">
+                            View Details <i data-lucide="arrow-right" class="w-3 h-3"></i>
+                        </div>
+                    </div>
+                `;
+                usersGrid.appendChild(card);
+            });
+            lucide.createIcons();
+        }
+
+        // --- Search ---
+        searchInput.addEventListener('input', (e) => {
+            const term = e.target.value.toLowerCase();
+            const filtered = allUsers.filter(user =>
+                (user.name || '').toLowerCase().includes(term) ||
+                (user.email || '').toLowerCase().includes(term)
+            );
+            renderUsers(filtered);
+        });
+
+        // --- Modal Logic ---
+        window.openUserModal = async (user) => {
+            // 1. Populate User Info
+            modalName.textContent = user.name || 'Unknown';
+            modalEmail.textContent = user.email || '';
+            modalRole.textContent = user.role || 'User';
+            modalPhone.textContent = user.phone || 'N/A';
+            modalJoined.textContent = user.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'N/A';
+            modalAvatar.textContent = user.name ? user.name.charAt(0).toUpperCase() : 'U';
+
+            // 2. Show Modal
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modalContent.classList.remove('translate-x-full');
+            }, 10);
+
+            // 3. Fetch Shipments
+            modalShipmentsList.innerHTML = '<div class="text-center py-8 text-gray-400 text-sm"><i data-lucide="loader-2" class="w-5 h-5 animate-spin inline mr-2"></i>Loading shipments...</div>';
+            lucide.createIcons();
+
+            try {
+                // Query shipments by user email
+                // Removed orderBy("createdAt", "desc") to avoid needing a composite index
+                const q = query(collection(db, "shipments"), where("userEmail", "==", user.email));
+                const snapshot = await getDocs(q);
+
+                modalShipmentsList.innerHTML = '';
+
+                if (snapshot.empty) {
+                    modalShipmentsList.innerHTML = `
+                        <div class="text-center py-6 bg-gray-50 dark:bg-gray-800 rounded-xl border border-dashed border-gray-200 dark:border-gray-700">
+                            <p class="text-sm text-gray-500">No shipments found for this user.</p>
+                        </div>
+                    `;
+                } else {
+                    let shipments = [];
+                    snapshot.forEach(doc => {
+                        shipments.push({ id: doc.id, ...doc.data() });
+                    });
+
+                    // Client-side sort
+                    shipments.sort((a, b) => {
+                        return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
+                    });
+
+                    shipments.forEach(s => {
+                        const statusColor = getStatusColor(s.status);
+
+                        const item = document.createElement('div');
+                        item.className = "p-3 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-purple-200 dark:hover:border-purple-800 transition-colors";
+                        item.innerHTML = `
+                            <div class="flex justify-between items-start mb-2">
+                                <span class="text-xs font-mono text-gray-500">${s.trackingId || '#' + s.id.slice(0, 6)}</span>
+                                <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase ${statusColor}">${s.status}</span>
+                            </div>
+                            <h4 class="font-bold text-gray-900 dark:text-white text-sm mb-1">${s.goodsType}</h4>
+                            <div class="flex items-center gap-2 text-xs text-gray-500">
+                                <span class="truncate max-w-[100px]">${s.pickup.place}</span>
+                                <i data-lucide="arrow-right" class="w-3 h-3"></i>
+                                <span class="truncate max-w-[100px]">${s.delivery.place}</span>
+                            </div>
+                        `;
+                        modalShipmentsList.appendChild(item);
+                    });
+                }
+                lucide.createIcons();
+
+            } catch (error) {
+                console.error("Error fetching user shipments:", error);
+                modalShipmentsList.innerHTML = `<div class="text-center py-4 text-red-500 text-sm">Failed to load shipments: ${error.message}</div>`;
+            }
+        };
+
+        window.closeUserModal = () => {
+            modalContent.classList.add('translate-x-full');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 300);
+        };
+
+        function getStatusColor(status) {
+            switch (status) {
+                case 'Pending': return 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400';
+                case 'In Transit': return 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400';
+                case 'Completed': return 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400';
+                default: return 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400';
+            }
+        }
+
+        // Initial Load
+        fetchUsers();
+
+    </script>
+</body>
+
+</html>

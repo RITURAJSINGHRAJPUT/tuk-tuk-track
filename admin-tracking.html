@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Tracking - Admin TukTukTrack</title>
+    <link href="./css/style.css" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .leaflet-popup-content-wrapper {
+            border-radius: 12px;
+            padding: 0;
+            overflow: hidden;
+        }
+
+        .leaflet-popup-content {
+            margin: 0;
+            width: 280px !important;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-100 font-sans transition-colors duration-200">
+
+    <div class="flex h-screen overflow-hidden">
+        <!-- Sidebar -->
+        <aside
+            class="w-72 bg-white/80 dark:bg-gray-900/90 backdrop-blur-xl border-r border-gray-200 dark:border-gray-800 hidden md:flex flex-col z-50 transition-all duration-300">
+            <div class="p-6 flex items-center gap-3 mb-2">
+                <div
+                    class="w-10 h-10 bg-gradient-to-tr from-purple-600 to-purple-400 rounded-xl flex items-center justify-center shadow-lg shadow-purple-500/20">
+                    <i data-lucide="truck" class="text-white w-6 h-6"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold tracking-tight text-gray-900 dark:text-white leading-none">TukTuk</h1>
+                    <span class="text-xs font-bold text-purple-500 tracking-widest uppercase">Admin</span>
+                </div>
+            </div>
+
+            <nav class="flex-1 px-4 space-y-2">
+                <p class="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2 mt-4">Overview</p>
+
+                <a href="admindashboard.html"
+                    class="flex items-center gap-3 px-4 py-3.5 text-gray-600 dark:text-gray-400 hover:bg-white dark:hover:bg-gray-800 hover:shadow-md hover:shadow-gray-200/50 dark:hover:shadow-black/20 rounded-xl transition-all group">
+                    <i data-lucide="layout-dashboard" class="w-5 h-5 group-hover:text-purple-500 transition-colors"></i>
+                    <span
+                        class="font-medium group-hover:text-gray-900 dark:group-hover:text-white transition-colors">Dashboard</span>
+                </a>
+
+                <p class="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2 mt-6">Management</p>
+
+                <a href="admin-shipments.html"
+                    class="flex items-center gap-3 px-4 py-3.5 text-gray-600 dark:text-gray-400 hover:bg-white dark:hover:bg-gray-800 hover:shadow-md hover:shadow-gray-200/50 dark:hover:shadow-black/20 rounded-xl transition-all group">
+                    <i data-lucide="truck" class="w-5 h-5 group-hover:text-purple-500 transition-colors"></i>
+                    <span
+                        class="font-medium group-hover:text-gray-900 dark:group-hover:text-white transition-colors">Shipments</span>
+                </a>
+
+                <a href="admin-users.html"
+                    class="flex items-center gap-3 px-4 py-3.5 text-gray-600 dark:text-gray-400 hover:bg-white dark:hover:bg-gray-800 hover:shadow-md hover:shadow-gray-200/50 dark:hover:shadow-black/20 rounded-xl transition-all group">
+                    <i data-lucide="user-circle" class="w-5 h-5 group-hover:text-purple-500 transition-colors"></i>
+                    <span
+                        class="font-medium group-hover:text-gray-900 dark:group-hover:text-white transition-colors">Users</span>
+                </a>
+
+                <p class="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2 mt-6">System</p>
+
+                <a href="admin-tracking.html"
+                    class="flex items-center gap-3 px-4 py-3.5 bg-gradient-to-r from-purple-600 to-purple-500 text-white rounded-xl shadow-lg shadow-purple-500/20 transition-all group">
+                    <i data-lucide="map" class="w-5 h-5"></i>
+                    <span class="font-medium">Live Tracking</span>
+                </a>
+            </nav>
+
+            <div
+                class="p-4 m-4 bg-gray-50 dark:bg-gray-800/50 rounded-2xl border border-gray-100 dark:border-gray-700/50">
+                <div class="flex items-center gap-3">
+                    <img src="https://ui-avatars.com/api/?name=Admin&background=9333ea&color=fff" alt="Admin"
+                        class="w-10 h-10 rounded-xl shadow-sm sidebar-user-img">
+                    <div class="overflow-hidden">
+                        <p class="text-sm font-bold text-gray-900 dark:text-white truncate sidebar-user-name">Admin
+                        </p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 truncate sidebar-user-role">admin@tuktuk.com
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <div class="flex-1 flex flex-col h-screen overflow-hidden relative">
+            <!-- Header -->
+            <header
+                class="h-20 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-800 flex items-center justify-between px-8 z-40">
+                <div class="flex items-center gap-4">
+                    <button
+                        class="md:hidden p-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors">
+                        <i data-lucide="menu" class="w-6 h-6"></i>
+                    </button>
+                    <div>
+                        <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Live Tracking</h1>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">Real-time vehicle monitoring</p>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-4">
+                    <button id="theme-toggle"
+                        class="p-2.5 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl transition-colors border border-transparent hover:border-gray-200 dark:hover:border-gray-700">
+                        <i data-lucide="sun" class="w-5 h-5 hidden dark:block"></i>
+                        <i data-lucide="moon" class="w-5 h-5 block dark:hidden"></i>
+                    </button>
+                    <button id="logout-btn"
+                        class="p-2.5 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl transition-colors"
+                        title="Logout">
+                        <i data-lucide="log-out" class="w-5 h-5"></i>
+                    </button>
+                </div>
+            </header>
+
+            <!-- Scrollable Content -->
+            <main class="flex-1 overflow-hidden p-6">
+                <div class="max-w-[1600px] mx-auto h-full flex flex-col gap-6">
+
+                    <!-- Top Stats Row -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 shrink-0">
+                        <!-- Active Vehicles -->
+                        <div
+                            class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 flex items-center gap-4">
+                            <div
+                                class="p-4 bg-green-100 dark:bg-green-900/30 rounded-xl text-green-600 dark:text-green-400">
+                                <i data-lucide="truck" class="w-8 h-8"></i>
+                            </div>
+                            <div>
+                                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Active Vehicles</p>
+                                <h3 class="text-2xl font-bold text-gray-900 dark:text-white" id="active-count">0</h3>
+                            </div>
+                        </div>
+
+                        <!-- Current Temperature -->
+                        <div
+                            class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 flex items-center gap-4">
+                            <div
+                                class="p-4 bg-blue-100 dark:bg-blue-900/30 rounded-xl text-blue-600 dark:text-blue-400">
+                                <i data-lucide="thermometer" class="w-8 h-8"></i>
+                            </div>
+                            <div>
+                                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Current Temperature</p>
+                                <h3 class="text-2xl font-bold text-gray-900 dark:text-white">-2.4°C</h3>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Main Content Grid -->
+                    <div class="flex-1 grid grid-cols-1 lg:grid-cols-3 gap-6 min-h-0">
+
+                        <!-- Left Column: List + Graph -->
+                        <div class="flex flex-col gap-6 h-full min-h-0">
+
+                            <!-- Active Fleet List -->
+                            <div
+                                class="flex-1 bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 flex flex-col overflow-hidden min-h-0">
+                                <div class="p-5 border-b border-gray-200 dark:border-gray-700 shrink-0">
+                                    <h2 class="text-lg font-bold text-gray-900 dark:text-white">Active Fleet</h2>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Select a vehicle to track</p>
+                                </div>
+                                <div id="vehicle-list" class="flex-1 overflow-y-auto p-4 space-y-3 custom-scrollbar">
+                                    <!-- Loading -->
+                                    <div class="flex flex-col items-center justify-center h-40 text-gray-400">
+                                        <i data-lucide="loader-2" class="w-8 h-8 animate-spin mb-2"></i>
+                                        <span class="text-base">Loading fleet data...</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Temperature Graph Card -->
+                            <div
+                                class="bg-white dark:bg-gray-800 p-5 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 shrink-0 h-64 flex flex-col">
+                                <div class="flex justify-between items-center mb-4">
+                                    <h3 class="font-bold text-gray-900 dark:text-white text-sm">Temperature Trend</h3>
+                                    <span
+                                        class="text-xs font-medium text-gray-500 bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded-lg">24h</span>
+                                </div>
+                                <div class="flex-1 w-full min-h-0 relative">
+                                    <canvas id="mainTempChart"></canvas>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <!-- Map Area -->
+                        <div
+                            class="lg:col-span-2 bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden relative h-full">
+                            <div id="map" class="w-full h-full z-0"></div>
+
+                            <!-- Map Controls -->
+                            <div
+                                class="absolute bottom-6 right-6 z-[400] bg-white dark:bg-gray-900 p-2 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 flex flex-col gap-2">
+                                <button onclick="map.setView([20.5937, 78.9629], 5)"
+                                    class="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+                                    title="Reset View">
+                                    <i data-lucide="globe" class="w-5 h-5 text-gray-600 dark:text-gray-400"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="js/main.js"></script>
+    <script type="module">
+        import { initAdminGuard } from './js/admin-guard.js';
+        import { db, collection, query, where, onSnapshot } from './firebase-config.js';
+
+        initAdminGuard();
+        lucide.createIcons();
+
+        // --- Map Initialization ---
+        const map = L.map('map').setView([20.5937, 78.9629], 5);
+
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+            attribution: '&copy; OpenStreetMap &copy; CARTO',
+            subdomains: 'abcd',
+            maxZoom: 20
+        }).addTo(map);
+
+        // --- Chart Initialization ---
+        const ctx = document.getElementById('mainTempChart').getContext('2d');
+        const mainTempChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00'],
+                datasets: [{
+                    label: 'Temp (°C)',
+                    data: [-2, -3, -1, -2, -4, -2],
+                    borderColor: '#3b82f6', // Blue for cold/temp
+                    backgroundColor: (context) => {
+                        const ctx = context.chart.ctx;
+                        const gradient = ctx.createLinearGradient(0, 0, 0, 200);
+                        gradient.addColorStop(0, 'rgba(59, 130, 246, 0.2)');
+                        gradient.addColorStop(1, 'rgba(59, 130, 246, 0)');
+                        return gradient;
+                    },
+                    borderWidth: 2,
+                    tension: 0.4,
+                    pointRadius: 3,
+                    pointHoverRadius: 5,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false,
+                        backgroundColor: 'rgba(17, 24, 39, 0.9)',
+                        titleColor: '#fff',
+                        bodyColor: '#fff',
+                        borderColor: 'rgba(255,255,255,0.1)',
+                        borderWidth: 1,
+                        padding: 10,
+                        displayColors: false
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: { display: false },
+                        ticks: {
+                            color: '#9ca3af',
+                            font: { size: 10 }
+                        }
+                    },
+                    y: {
+                        grid: { color: 'rgba(156, 163, 175, 0.1)' },
+                        ticks: {
+                            color: '#9ca3af',
+                            font: { size: 10 }
+                        },
+                        suggestedMin: -5,
+                        suggestedMax: 0
+                    }
+                },
+                interaction: {
+                    mode: 'nearest',
+                    axis: 'x',
+                    intersect: false
+                }
+            }
+        });
+
+        // --- State ---
+        let markers = {};
+        let activeShipments = [];
+        let selectedShipmentId = null;
+
+        // --- DOM Elements ---
+        const vehicleList = document.getElementById('vehicle-list');
+        const activeCountEl = document.getElementById('active-count');
+
+        // --- Fetch Data ---
+        const q = query(collection(db, "shipments"), where("status", "==", "In Transit"));
+
+        onSnapshot(q, (snapshot) => {
+            activeShipments = [];
+            snapshot.forEach(doc => {
+                activeShipments.push({ id: doc.id, ...doc.data() });
+            });
+
+            updateVehicleList();
+            updateMapMarkers();
+            activeCountEl.textContent = activeShipments.length;
+        });
+
+        // --- UI Functions ---
+        function updateVehicleList() {
+            vehicleList.innerHTML = '';
+
+            if (activeShipments.length === 0) {
+                vehicleList.innerHTML = `
+                    <div class="flex flex-col items-center justify-center h-full text-gray-400 text-center p-8">
+                        <div class="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mb-4">
+                            <i data-lucide="truck" class="w-8 h-8 opacity-50"></i>
+                        </div>
+                        <h3 class="text-lg font-medium text-gray-900 dark:text-white">No Active Vehicles</h3>
+                        <p class="text-sm text-gray-500 mt-1">There are currently no shipments in transit.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            activeShipments.forEach(shipment => {
+                const isSelected = selectedShipmentId === shipment.id;
+                const el = document.createElement('div');
+                el.className = `p-4 rounded-xl border cursor-pointer transition-all duration-200 group ${isSelected
+                    ? 'bg-purple-50 dark:bg-purple-900/20 border-purple-200 dark:border-purple-800 ring-1 ring-purple-500/30 shadow-md'
+                    : 'bg-gray-50 dark:bg-gray-700/30 border-gray-200 dark:border-gray-700 hover:border-purple-300 dark:hover:border-purple-700 hover:shadow-sm'}`;
+
+                el.onclick = () => selectVehicle(shipment);
+
+                el.innerHTML = `
+                    <div class="flex justify-between items-start mb-2">
+                        <div class="flex items-center gap-2">
+                            <div class="p-1.5 bg-white dark:bg-gray-800 rounded-lg shadow-sm text-purple-600 dark:text-purple-400">
+                                <i data-lucide="truck" class="w-4 h-4"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-gray-900 dark:text-white text-sm">${shipment.goodsType}</h3>
+                                <p class="text-xs font-mono text-gray-500 dark:text-gray-400 tracking-wider">${shipment.trackingId || '#' + shipment.id.slice(0, 6)}</p>
+                            </div>
+                        </div>
+                        <span class="flex h-2 w-2 relative mt-1">
+                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                            <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                        </span>
+                    </div>
+                    
+                    <div class="space-y-1.5">
+                        <div class="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-300">
+                            <i data-lucide="map-pin" class="w-3 h-3 text-red-500"></i>
+                            <span class="truncate">To: <span class="font-medium">${shipment.delivery.place}</span></span>
+                        </div>
+                    </div>
+                `;
+                vehicleList.appendChild(el);
+            });
+            lucide.createIcons();
+        }
+
+        function updateMapMarkers() {
+            activeShipments.forEach(shipment => {
+                if (!markers[shipment.id]) {
+                    const lat = 20 + (Math.random() * 10 - 5);
+                    const lng = 78 + (Math.random() * 10 - 5);
+
+                    const markerIcon = L.divIcon({
+                        className: 'custom-div-icon',
+                        html: `<div class="w-10 h-10 bg-purple-600 rounded-full border-4 border-white dark:border-gray-900 shadow-xl flex items-center justify-center text-white transform hover:scale-110 transition-transform cursor-pointer">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/></svg>
+                               </div>`,
+                        iconSize: [40, 40],
+                        iconAnchor: [20, 20]
+                    });
+
+                    const marker = L.marker([lat, lng], { icon: markerIcon }).addTo(map);
+
+                    // Accessible Popup
+                    const popupContent = `
+                        <div class="p-4 bg-white dark:bg-gray-900">
+                            <div class="flex justify-between items-start mb-2">
+                                <h3 class="font-bold text-gray-900 dark:text-white">${shipment.goodsType}</h3>
+                                <span class="text-xs font-mono text-purple-600">${shipment.trackingId || 'ID: ' + shipment.id.slice(0, 4)}</span>
+                            </div>
+                            <div class="space-y-1 text-sm text-gray-600 dark:text-gray-300 mb-3">
+                                <p>To: ${shipment.delivery.place}</p>
+                                <p>Driver: ${shipment.driver?.name || 'N/A'}</p>
+                            </div>
+                            <div class="grid grid-cols-2 gap-2 text-center">
+                                <div class="bg-gray-100 dark:bg-gray-800 p-2 rounded-lg">
+                                    <p class="text-xs text-gray-500">Speed</p>
+                                    <p class="font-bold text-gray-900 dark:text-white">45 km/h</p>
+                                </div>
+                                <div class="bg-gray-100 dark:bg-gray-800 p-2 rounded-lg">
+                                    <p class="text-xs text-gray-500">Temp</p>
+                                    <p class="font-bold text-red-500">-2°C</p>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+
+                    marker.bindPopup(popupContent);
+                    marker.on('click', () => selectVehicle(shipment));
+                    markers[shipment.id] = marker;
+                }
+            });
+        }
+
+        function selectVehicle(shipment) {
+            selectedShipmentId = shipment.id;
+            updateVehicleList(); // Refresh styling to show active state
+
+            if (markers[shipment.id]) {
+                const latLng = markers[shipment.id].getLatLng();
+                map.flyTo(latLng, 10, {
+                    animate: true,
+                    duration: 1.5
+                });
+                markers[shipment.id].openPopup();
+            }
+        }
+
+    </script>
+</body>
+
+</html>

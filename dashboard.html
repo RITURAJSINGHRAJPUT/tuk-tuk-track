@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transport Tracking Dashboard</title>
+    <link href="./css/style.css" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+</head>
+
+<body class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-100 font-sans transition-colors duration-200">
+
+    <div class="flex h-screen overflow-hidden">
+        <!-- Sidebar -->
+        <aside
+            class="w-72 bg-white/80 dark:bg-gray-900/90 backdrop-blur-xl border-r border-gray-200 dark:border-gray-800 hidden md:flex flex-col z-50 transition-all duration-300">
+            <div class="p-6 flex items-center gap-3 mb-2">
+                <div
+                    class="w-10 h-10 bg-gradient-to-tr from-blue-600 to-blue-400 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20">
+                    <i data-lucide="truck" class="text-white w-6 h-6"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold tracking-tight text-gray-900 dark:text-white leading-none">TukTuk</h1>
+                    <span class="text-xs font-bold text-blue-500 tracking-widest uppercase">Track</span>
+                </div>
+            </div>
+
+            <nav class="flex-1 px-4 space-y-2">
+                <p class="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2 mt-4">Menu</p>
+
+                <a href="dashboard.html"
+                    class="flex items-center gap-3 px-4 py-3.5 bg-gradient-to-r from-blue-600 to-blue-500 text-white rounded-xl shadow-lg shadow-blue-500/20 transition-all group">
+                    <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+                    <span class="font-medium">Dashboard</span>
+                </a>
+
+                <a href="track.html"
+                    class="flex items-center gap-3 px-4 py-3.5 text-gray-600 dark:text-gray-400 hover:bg-white dark:hover:bg-gray-800 hover:shadow-md hover:shadow-gray-200/50 dark:hover:shadow-black/20 rounded-xl transition-all group">
+                    <i data-lucide="map" class="w-5 h-5 group-hover:text-blue-500 transition-colors"></i>
+                    <span
+                        class="font-medium group-hover:text-gray-900 dark:group-hover:text-white transition-colors">Tracking</span>
+                </a>
+
+                <a href="request.html"
+                    class="flex items-center gap-3 px-4 py-3.5 text-gray-600 dark:text-gray-400 hover:bg-white dark:hover:bg-gray-800 hover:shadow-md hover:shadow-gray-200/50 dark:hover:shadow-black/20 rounded-xl transition-all group">
+                    <i data-lucide="package-plus" class="w-5 h-5 group-hover:text-blue-500 transition-colors"></i>
+                    <span
+                        class="font-medium group-hover:text-gray-900 dark:group-hover:text-white transition-colors">Request
+                        Shipment</span>
+                </a>
+
+            </nav>
+
+            <div
+                class="p-4 m-4 bg-gray-50 dark:bg-gray-800/50 rounded-2xl border border-gray-100 dark:border-gray-700/50">
+                <div class="flex items-center gap-3">
+                    <img src="https://ui-avatars.com/api/?name=User&background=3b82f6&color=fff" alt="User"
+                        class="w-10 h-10 rounded-xl shadow-sm sidebar-user-img">
+                    <div class="overflow-hidden">
+                        <p class="text-sm font-bold text-gray-900 dark:text-white truncate sidebar-user-name">User
+                        </p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 truncate sidebar-user-role">Customer</p>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <div class="flex-1 flex flex-col overflow-hidden relative">
+            <!-- Header -->
+            <header
+                class="h-20 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-800 flex items-center justify-between px-8 z-40">
+                <div class="flex items-center gap-4">
+                    <button
+                        class="md:hidden p-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors">
+                        <i data-lucide="menu" class="w-6 h-6"></i>
+                    </button>
+                    <div>
+                        <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">Overview of your shipments</p>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-4">
+                    <button id="theme-toggle"
+                        class="p-2.5 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl transition-colors border border-transparent hover:border-gray-200 dark:hover:border-gray-700">
+                        <i data-lucide="sun" class="w-5 h-5 dark:hidden"></i>
+                        <i data-lucide="moon" class="w-5 h-5 hidden dark:block"></i>
+                    </button>
+                    <button id="logout-btn"
+                        class="p-2.5 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl transition-colors"
+                        title="Logout">
+                        <i data-lucide="log-out" class="w-5 h-5"></i>
+                    </button>
+                </div>
+            </header>
+
+            <!-- Content Scrollable Area -->
+            <main class="flex-1 overflow-y-auto p-8">
+                <!-- Stats Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <!-- Total Shipments -->
+                    <div
+                        class="relative overflow-hidden bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 group hover:shadow-lg transition-all duration-300">
+                        <div
+                            class="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 rounded-full blur-3xl -mr-16 -mt-16 transition-all group-hover:bg-blue-500/20">
+                        </div>
+                        <div class="relative z-10">
+                            <div class="flex justify-between items-start mb-4">
+                                <div>
+                                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Shipments</p>
+                                    <h3 class="text-3xl font-bold text-gray-900 dark:text-white mt-1"
+                                        id="total-shipments">0</h3>
+                                </div>
+                                <div
+                                    class="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-xl text-blue-600 dark:text-blue-400 group-hover:scale-110 transition-transform shadow-sm">
+                                    <i data-lucide="package" class="w-6 h-6"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Active Shipments -->
+                    <div
+                        class="relative overflow-hidden bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 group hover:shadow-lg transition-all duration-300">
+                        <div
+                            class="absolute top-0 right-0 w-32 h-32 bg-green-500/10 rounded-full blur-3xl -mr-16 -mt-16 transition-all group-hover:bg-green-500/20">
+                        </div>
+                        <div class="relative z-10">
+                            <div class="flex justify-between items-start mb-4">
+                                <div>
+                                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Active Shipments</p>
+                                    <h3 class="text-3xl font-bold text-gray-900 dark:text-white mt-1"
+                                        id="active-shipments">0</h3>
+                                </div>
+                                <div
+                                    class="p-3 bg-green-50 dark:bg-green-900/20 rounded-xl text-green-600 dark:text-green-400 group-hover:scale-110 transition-transform shadow-sm">
+                                    <i data-lucide="truck" class="w-6 h-6"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Pending Shipments -->
+                    <div
+                        class="relative overflow-hidden bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 group hover:shadow-lg transition-all duration-300">
+                        <div
+                            class="absolute top-0 right-0 w-32 h-32 bg-orange-500/10 rounded-full blur-3xl -mr-16 -mt-16 transition-all group-hover:bg-orange-500/20">
+                        </div>
+                        <div class="relative z-10">
+                            <div class="flex justify-between items-start mb-4">
+                                <div>
+                                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Pending</p>
+                                    <h3 class="text-3xl font-bold text-gray-900 dark:text-white mt-1"
+                                        id="pending-shipments">0</h3>
+                                </div>
+                                <div
+                                    class="p-3 bg-orange-50 dark:bg-orange-900/20 rounded-xl text-orange-600 dark:text-orange-400 group-hover:scale-110 transition-transform shadow-sm">
+                                    <i data-lucide="clock" class="w-6 h-6"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Completed Shipments -->
+                    <div
+                        class="relative overflow-hidden bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 group hover:shadow-lg transition-all duration-300">
+                        <div
+                            class="absolute top-0 right-0 w-32 h-32 bg-purple-500/10 rounded-full blur-3xl -mr-16 -mt-16 transition-all group-hover:bg-purple-500/20">
+                        </div>
+                        <div class="relative z-10">
+                            <div class="flex justify-between items-start mb-4">
+                                <div>
+                                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Completed</p>
+                                    <h3 class="text-3xl font-bold text-gray-900 dark:text-white mt-1"
+                                        id="completed-shipments">0</h3>
+                                </div>
+                                <div
+                                    class="p-3 bg-purple-50 dark:bg-purple-900/20 rounded-xl text-purple-600 dark:text-purple-400 group-hover:scale-110 transition-transform shadow-sm">
+                                    <i data-lucide="check-circle" class="w-6 h-6"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Orders Section -->
+                <div class="flex flex-col">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+                        <h2 class="text-xl font-bold text-gray-900 dark:text-white">Your Shipments</h2>
+                    </div>
+
+                    <!-- Orders Grid -->
+                    <div id="orders-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                        <!-- Dynamic Content will be loaded here -->
+                        <div class="col-span-full text-center py-12">
+                            <i data-lucide="loader-2" class="w-8 h-8 text-blue-500 animate-spin mx-auto mb-4"></i>
+                            <p class="text-gray-500">Loading your shipments...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Order Details Modal -->
+                <div id="order-modal" class="fixed inset-0 z-[100] hidden">
+                    <div class="absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity"
+                        onclick="closeOrderModal()"></div>
+                    <div
+                        class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-2xl bg-white dark:bg-gray-900 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 p-0 overflow-hidden animate-fade-in-up">
+
+                        <!-- Modal Header -->
+                        <div
+                            class="p-6 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center bg-gray-50 dark:bg-gray-800/50">
+                            <div>
+                                <h3 class="text-xl font-bold text-gray-900 dark:text-white">Shipment Details</h3>
+                                <p class="text-sm text-gray-500 dark:text-gray-400" id="modal-id">#ORD-...</p>
+                            </div>
+                            <button onclick="closeOrderModal()"
+                                class="p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-full transition-colors">
+                                <i data-lucide="x" class="w-5 h-5 text-gray-500"></i>
+                            </button>
+                        </div>
+
+                        <!-- Modal Body -->
+                        <div class="p-6 max-h-[70vh] overflow-y-auto">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                                <div class="space-y-4">
+                                    <div>
+                                        <p class="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-1">
+                                            Status</p>
+                                        <span id="modal-status"
+                                            class="px-3 py-1 rounded-full text-sm font-bold bg-gray-100 text-gray-700">Loading...</span>
+                                    </div>
+                                    <div>
+                                        <p class="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-1">
+                                            Goods Type</p>
+                                        <p class="font-medium text-gray-900 dark:text-white capitalize"
+                                            id="modal-goods">...</p>
+                                    </div>
+                                </div>
+                                <div class="space-y-4">
+                                    <div>
+                                        <p class="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-1">
+                                            From</p>
+                                        <p class="font-medium text-gray-900 dark:text-white" id="modal-from">...</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-1">
+                                            To</p>
+                                        <p class="font-medium text-gray-900 dark:text-white" id="modal-to">...</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Timeline in Modal -->
+                            <div class="border-t border-gray-100 dark:border-gray-700 pt-6">
+                                <h4 class="font-bold text-gray-900 dark:text-white mb-4">Shipment Progress</h4>
+                                <div class="relative pl-4 border-l-2 border-gray-200 dark:border-gray-700 space-y-6"
+                                    id="modal-timeline">
+                                    <!-- Dynamic Timeline -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Modal Footer -->
+                        <div
+                            class="p-6 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 flex justify-end gap-3">
+                            <button onclick="closeOrderModal()"
+                                class="px-4 py-2 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors font-medium text-sm">Close</button>
+                            <a href="track.html"
+                                class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-medium text-sm flex items-center gap-2">
+                                <i data-lucide="map" class="w-4 h-4"></i> Track Live
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="js/main.js"></script>
+    <script type="module">
+        import { initAuthUI } from './js/auth-ui.js';
+        import { auth, db, collection, query, where, orderBy, onSnapshot } from './firebase-config.js';
+
+        initAuthUI();
+        lucide.createIcons();
+
+        const pendingShipmentsEl = document.getElementById('pending-shipments');
+        const activeShipmentsEl = document.getElementById('active-shipments');
+        const totalShipmentsEl = document.getElementById('total-shipments');
+        const completedShipmentsEl = document.getElementById('completed-shipments');
+        const ordersGrid = document.getElementById('orders-grid');
+
+        // Modal Elements
+        const modal = document.getElementById('order-modal');
+        const modalTitle = document.getElementById('modal-id');
+        const modalStatus = document.getElementById('modal-status');
+        const modalGoods = document.getElementById('modal-goods');
+        const modalFrom = document.getElementById('modal-from');
+        const modalTo = document.getElementById('modal-to');
+        const modalTimeline = document.getElementById('modal-timeline');
+
+        let currentUser = null;
+        let shipmentsData = [];
+
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                currentUser = user;
+                fetchUserShipments(user.uid);
+            } else {
+                window.location.href = 'login.html';
+            }
+        });
+
+        function fetchUserShipments(userId) {
+            const q = query(
+                collection(db, "shipments"),
+                where("userId", "==", userId),
+                orderBy("createdAt", "desc")
+            );
+
+            onSnapshot(q, (snapshot) => {
+                shipmentsData = [];
+                let total = 0;
+                let active = 0;
+                let pending = 0;
+                let completed = 0;
+
+                ordersGrid.innerHTML = '';
+
+                if (snapshot.empty) {
+                    ordersGrid.innerHTML = `
+                        <div class="col-span-full text-center py-12">
+                            <div class="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <i data-lucide="package-open" class="w-8 h-8 text-gray-400"></i>
+                            </div>
+                            <h3 class="text-lg font-medium text-gray-900 dark:text-white">No shipments found</h3>
+                            <p class="text-gray-500 dark:text-gray-400 mt-1">Request a shipment to get started.</p>
+                            <a href="request.html"
+                                class="inline-flex items-center gap-2 mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                                <i data-lucide="plus" class="w-4 h-4"></i> Request Shipment
+                            </a>
+                        </div>
+                    `;
+                    lucide.createIcons();
+                    // Update Stats to 0
+                    if (totalShipmentsEl) totalShipmentsEl.textContent = 0;
+                    if (activeShipmentsEl) activeShipmentsEl.textContent = 0;
+                    if (pendingShipmentsEl) pendingShipmentsEl.textContent = 0;
+                    if (completedShipmentsEl) completedShipmentsEl.textContent = 0;
+                    return;
+                }
+
+                snapshot.forEach((doc) => {
+                    const data = doc.data();
+                    data.id = doc.id;
+                    shipmentsData.push(data);
+
+                    // Stats
+                    total++;
+                    if (data.status === 'In Transit') active++;
+                    if (data.status === 'Pending') pending++;
+                    if (data.status === 'Completed') completed++;
+
+                    // Render Card
+                    const card = createShipmentCard(data);
+                    ordersGrid.innerHTML += card;
+                });
+
+                // Update Stats
+                if (totalShipmentsEl) totalShipmentsEl.textContent = total;
+                if (activeShipmentsEl) activeShipmentsEl.textContent = active;
+                if (pendingShipmentsEl) pendingShipmentsEl.textContent = pending;
+                if (completedShipmentsEl) completedShipmentsEl.textContent = completed;
+
+                lucide.createIcons();
+            }, (error) => {
+                console.error("Error fetching shipments:", error);
+                ordersGrid.innerHTML = `<p class="text-red-500 text-center col-span-full">Error loading shipments: ${error.message}</p>`;
+            });
+        }
+
+        function createShipmentCard(data) {
+            const statusColor = getStatusColor(data.status);
+            const statusBg = getStatusBg(data.status);
+
+            return `
+                <div onclick="window.openOrderModal('${data.id}')"
+                    class="bg-white dark:bg-gray-800 rounded-2xl p-5 shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-md hover:border-blue-500/50 dark:hover:border-blue-500/50 transition-all cursor-pointer group relative overflow-hidden">
+                    <div
+                        class="absolute top-0 right-0 w-16 h-16 ${statusBg.replace('100', '500/5')} rounded-bl-full -mr-8 -mt-8 transition-all group-hover:${statusBg.replace('100', '500/10')}">
+                    </div>
+
+                    <div class="flex justify-between items-start mb-4 relative">
+                        <div>
+                            <span class="text-xs font-mono text-gray-500 dark:text-gray-400">${data.trackingId || '#' + data.id.slice(0, 8)}</span>
+                            <h3 class="font-bold text-gray-900 dark:text-white text-lg capitalize">${data.goodsType}</h3>
+                        </div>
+                        <span class="px-2.5 py-1 rounded-lg text-xs font-bold ${statusBg} ${statusColor} border border-opacity-20">${data.status}</span>
+                    </div>
+
+                    <div class="space-y-3 mb-5 relative">
+                        <div class="flex items-start gap-3">
+                            <div class="mt-1 min-w-[16px]"><i data-lucide="map-pin" class="w-4 h-4 text-gray-400"></i></div>
+                            <div>
+                                <p class="text-xs text-gray-500 dark:text-gray-400">From</p>
+                                <p class="text-sm font-medium text-gray-900 dark:text-white truncate">${data.pickup.place}</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <div class="mt-1 min-w-[16px]"><i data-lucide="navigation" class="w-4 h-4 text-gray-400"></i></div>
+                            <div>
+                                <p class="text-xs text-gray-500 dark:text-gray-400">To</p>
+                                <p class="text-sm font-medium text-gray-900 dark:text-white truncate">${data.delivery.place}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-between pt-4 border-t border-gray-100 dark:border-gray-700 relative">
+                        <div class="flex items-center gap-2">
+                            <div class="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-gray-400">
+                                <i data-lucide="truck" class="w-4 h-4"></i>
+                            </div>
+                            <div>
+                                <p class="text-xs font-bold text-gray-900 dark:text-white">TukTuk Express</p>
+                                <p class="text-[10px] text-gray-500">${data.weight} kg</p>
+                            </div>
+                        </div>
+                        <button class="p-2 bg-gray-50 dark:bg-gray-700/50 rounded-lg text-gray-500 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+                            <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function getStatusColor(status) {
+            switch (status) {
+                case 'Pending': return 'text-orange-700 dark:text-orange-400';
+                case 'In Transit': return 'text-blue-700 dark:text-blue-400';
+                case 'Completed': return 'text-green-700 dark:text-green-400';
+                case 'Cancelled': return 'text-red-700 dark:text-red-400';
+                default: return 'text-gray-700 dark:text-gray-400';
+            }
+        }
+
+        function getStatusBg(status) {
+            switch (status) {
+                case 'Pending': return 'bg-orange-100 dark:bg-orange-900/30';
+                case 'In Transit': return 'bg-blue-100 dark:bg-blue-900/30';
+                case 'Completed': return 'bg-green-100 dark:bg-green-900/30';
+                case 'Cancelled': return 'bg-red-100 dark:bg-red-900/30';
+                default: return 'bg-gray-100 dark:bg-gray-800';
+            }
+        }
+
+        // Modal Logic
+        window.openOrderModal = function (id) {
+            const shipment = shipmentsData.find(s => s.id === id);
+            if (!shipment) return;
+
+            modalTitle.innerText = shipment.trackingId || '#' + id;
+            modalStatus.innerText = shipment.status;
+
+            // Update Status Badge
+            const statusBg = getStatusBg(shipment.status);
+            const statusColor = getStatusColor(shipment.status);
+            modalStatus.className = `px-3 py-1 rounded-full text-sm font-bold border border-opacity-20 ${statusBg} ${statusColor}`;
+
+            // Populate Details
+            if (modalGoods) modalGoods.innerText = shipment.goodsType;
+            if (modalFrom) modalFrom.innerText = shipment.pickup.place;
+            if (modalTo) modalTo.innerText = shipment.delivery.place;
+
+            // Render Timeline
+            renderTimeline(shipment);
+
+            modal.classList.remove('hidden');
+        }
+
+        function renderTimeline(shipment) {
+            if (!modalTimeline) return;
+
+            const steps = [
+                { status: 'Pending', label: 'Order Placed', date: shipment.createdAt },
+                { status: 'In Transit', label: 'In Transit', date: shipment.pickup.date },
+                { status: 'Completed', label: 'Delivered', date: shipment.delivery.date }
+            ];
+
+            let html = '';
+            let currentFound = false;
+
+            steps.forEach((step, index) => {
+                let active = false;
+                let completed = false;
+
+                if (shipment.status === step.status) {
+                    active = true;
+                    currentFound = true;
+                } else if (!currentFound && (shipment.status === 'In Transit' && step.status === 'Pending') || (shipment.status === 'Completed')) {
+                    completed = true;
+                }
+
+                const color = active ? 'blue' : (completed ? 'green' : 'gray');
+                const dateStr = step.date ? new Date(step.date).toLocaleDateString() : 'Pending';
+
+                html += `
+                    <div class="relative">
+                        <div class="absolute -left-[21px] top-1 w-4 h-4 rounded-full bg-${color}-500 border-2 border-white dark:border-gray-900"></div>
+                        <p class="text-sm font-bold text-gray-900 dark:text-white ${!active && !completed ? 'text-gray-400' : ''}">${step.label}</p>
+                        <p class="text-xs text-gray-500">${dateStr}</p>
+                    </div>
+                `;
+            });
+
+            modalTimeline.innerHTML = html;
+        }
+
+        window.closeOrderModal = function () {
+            modal.classList.add('hidden');
+        }
+    </script>
+</body>
+
+</html>
