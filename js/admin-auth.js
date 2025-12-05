@@ -1,4 +1,4 @@
-import { auth, db, signInWithEmailAndPassword, doc, getDoc, signOut } from '../firebase-config.js';
+import { adminAuth as auth, db, signInWithEmailAndPassword, doc, getDoc, signOut, setPersistence, browserSessionPersistence } from '../firebase-config.js';
 
 const loginForm = document.getElementById('admin-login-form');
 
@@ -15,7 +15,10 @@ if (loginForm) {
             submitBtn.innerHTML = 'Verifying Access...';
             submitBtn.disabled = true;
 
-            // 1. Authenticate with Firebase Auth
+            // 1. Set Persistence to SESSION (forces isolation from LocalStorage users)
+            await setPersistence(auth, browserSessionPersistence);
+
+            // 2. Authenticate with Firebase Auth
             const userCredential = await signInWithEmailAndPassword(auth, email, password);
             const user = userCredential.user;
 

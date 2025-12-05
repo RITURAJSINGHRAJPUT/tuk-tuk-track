@@ -1,6 +1,6 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getAuth, RecaptchaVerifier, signInWithPhoneNumber, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, updateProfile } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { getAuth, RecaptchaVerifier, signInWithPhoneNumber, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, updateProfile, setPersistence, browserSessionPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 import { getFirestore, collection, addDoc, getDocs, getDoc, doc, setDoc, updateDoc, deleteDoc, query, where, orderBy, onSnapshot, runTransaction, limit } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 // Your web app's Firebase configuration
@@ -18,10 +18,17 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
+// Initialize separate Admin App for isolated session
+const adminApp = initializeApp(firebaseConfig, "AdminApp");
+const adminAuth = getAuth(adminApp);
+const adminDb = getFirestore(adminApp); // Optional, but keeps things consistent
+
 export {
   app,
   auth,
+  adminAuth,
   db,
+  adminDb,
   RecaptchaVerifier,
   signInWithPhoneNumber,
   createUserWithEmailAndPassword,
@@ -29,6 +36,9 @@ export {
   onAuthStateChanged,
   signOut,
   updateProfile,
+  setPersistence,
+  browserSessionPersistence,
+  browserLocalPersistence,
   collection,
   addDoc,
   getDocs,

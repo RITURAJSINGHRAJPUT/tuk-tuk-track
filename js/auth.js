@@ -1,4 +1,4 @@
-import { auth, db, createUserWithEmailAndPassword, signInWithEmailAndPassword, doc, setDoc, updateProfile, signOut } from '../firebase-config.js';
+import { auth, db, createUserWithEmailAndPassword, signInWithEmailAndPassword, doc, setDoc, updateProfile, signOut, setPersistence, browserLocalPersistence } from '../firebase-config.js';
 
 // Register Form Handler
 const registerForm = document.getElementById('register-form');
@@ -16,6 +16,9 @@ if (registerForm) {
         try {
             submitBtn.innerHTML = 'Creating Account...';
             submitBtn.disabled = true;
+
+            // Ensure Local Persistence for new accounts too
+            await setPersistence(auth, browserLocalPersistence);
 
             // Create Auth User
             const userCredential = await createUserWithEmailAndPassword(auth, email, password);
@@ -62,6 +65,9 @@ if (loginForm) {
         try {
             submitBtn.innerHTML = 'Logging In...';
             submitBtn.disabled = true;
+
+            // Ensure Local Persistence for login
+            await setPersistence(auth, browserLocalPersistence);
 
             await signInWithEmailAndPassword(auth, email, password);
 

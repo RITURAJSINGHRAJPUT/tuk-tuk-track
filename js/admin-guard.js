@@ -1,4 +1,4 @@
-import { auth, db, onAuthStateChanged, doc, getDoc, signOut } from '../firebase-config.js';
+import { adminAuth as auth, db, onAuthStateChanged, doc, getDoc, signOut } from '../firebase-config.js';
 
 export function initAdminGuard() {
     // Check Auth State
@@ -15,24 +15,21 @@ export function initAdminGuard() {
                 if (userDoc.exists()) {
                     const userData = userDoc.data();
                     if (userData.role !== 'admin') {
-                        // Not an admin -> Sign out and Redirect
-                        await signOut(auth);
-                        window.location.href = 'admin-login.html';
+                        // Not an admin -> Redirect, do NOT sign out (preserves user session if shared)
                         alert("Access Denied: Administrator privileges required.");
+                        window.location.href = 'index.html'; // Or login.html
                     } else {
                         // Is Admin -> Update UI (Sidebar, etc.)
                         updateAdminUI(user, userData);
                     }
                 } else {
-                    // No user record -> Sign out and Redirect
-                    await signOut(auth);
-                    window.location.href = 'admin-login.html';
+                    // No user record -> Redirect
+                    window.location.href = 'index.html';
                 }
             } catch (error) {
                 console.error("Error verifying admin role:", error);
-                // On error, safer to kick out
-                await signOut(auth);
-                window.location.href = 'admin-login.html';
+                // On error, redirect
+                window.location.href = 'index.html';
             }
         }
     });
