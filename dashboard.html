@@ -207,70 +207,89 @@
                 <div id="order-modal" class="fixed inset-0 z-[100] hidden">
                     <div class="absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity"
                         onclick="closeOrderModal()"></div>
+                    <!-- Increased width for better layout -->
                     <div
-                        class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-2xl bg-white dark:bg-gray-900 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 p-0 overflow-hidden animate-fade-in-up">
+                        class="absolute center-modal top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-2xl bg-white dark:bg-gray-900 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 p-0 overflow-hidden animate-fade-in-up flex flex-col max-h-[90vh]">
 
                         <!-- Modal Header -->
                         <div
                             class="p-6 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center bg-gray-50 dark:bg-gray-800/50">
                             <div>
                                 <h3 class="text-xl font-bold text-gray-900 dark:text-white">Shipment Details</h3>
-                                <p class="text-sm text-gray-500 dark:text-gray-400" id="modal-id">#ORD-...</p>
+                                <p class="text-sm text-gray-500 dark:text-gray-400 font-mono" id="modal-id">#ORD-...</p>
                             </div>
                             <button onclick="closeOrderModal()"
-                                class="p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-full transition-colors">
-                                <i data-lucide="x" class="w-5 h-5 text-gray-500"></i>
+                                class="p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
+                                <i data-lucide="x" class="w-6 h-6"></i>
                             </button>
                         </div>
 
                         <!-- Modal Body -->
-                        <div class="p-6 max-h-[70vh] overflow-y-auto">
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                                <div class="space-y-4">
-                                    <div>
-                                        <p class="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-1">
-                                            Status</p>
-                                        <span id="modal-status"
-                                            class="px-3 py-1 rounded-full text-sm font-bold bg-gray-100 text-gray-700">Loading...</span>
-                                    </div>
-                                    <div>
-                                        <p class="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-1">
-                                            Goods Type</p>
-                                        <p class="font-medium text-gray-900 dark:text-white capitalize"
-                                            id="modal-goods">...</p>
-                                    </div>
+                        <div class="flex-1 overflow-y-auto custom-scrollbar p-8">
+
+                            <!-- Summary Grid -->
+                            <div class="grid grid-cols-2 lg:grid-cols-4 gap-8 mb-10">
+                                <div>
+                                    <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Status</p>
+                                    <span id="modal-status"
+                                        class="px-3 py-1 rounded-full text-sm font-bold bg-gray-100 text-gray-700">Loading...</span>
                                 </div>
-                                <div class="space-y-4">
-                                    <div>
-                                        <p class="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-1">
-                                            From</p>
-                                        <p class="font-medium text-gray-900 dark:text-white" id="modal-from">...</p>
-                                    </div>
-                                    <div>
-                                        <p class="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-1">
-                                            To</p>
-                                        <p class="font-medium text-gray-900 dark:text-white" id="modal-to">...</p>
-                                    </div>
+
+                                <div>
+                                    <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">From</p>
+                                    <p id="modal-from"
+                                        class="font-bold text-gray-900 dark:text-white text-base mb-1 capitalize">
+                                        ...</p>
+                                    <p id="modal-from-address" class="text-xs text-gray-500 leading-relaxed capitalize">
+                                        ...</p>
+                                </div>
+
+                                <div>
+                                    <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Goods Type
+                                    </p>
+                                    <p id="modal-goods" class="font-medium text-gray-900 dark:text-white capitalize">...
+                                    </p>
+                                </div>
+
+                                <div>
+                                    <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">To</p>
+                                    <p id="modal-to"
+                                        class="font-bold text-gray-900 dark:text-white text-base mb-1 capitalize">...
+                                    </p>
+                                    <p id="modal-to-address" class="text-xs text-gray-500 leading-relaxed capitalize">
+                                        ...</p>
                                 </div>
                             </div>
 
                             <!-- Timeline in Modal -->
-                            <div class="border-t border-gray-100 dark:border-gray-700 pt-6">
-                                <h4 class="font-bold text-gray-900 dark:text-white mb-4">Shipment Progress</h4>
-                                <div class="relative pl-4 border-l-2 border-gray-200 dark:border-gray-700 space-y-6"
-                                    id="modal-timeline">
+                            <div class="border-t border-gray-100 dark:border-gray-700 pt-8 mb-8">
+                                <h4 class="font-bold text-gray-900 dark:text-white mb-6">Shipment Progress</h4>
+                                <div id="modal-timeline">
                                     <!-- Dynamic Timeline -->
                                 </div>
                             </div>
+
+                            <!-- Driver Info (New) -->
+                            <div class="pt-6 border-t border-gray-100 dark:border-gray-700">
+                                <h4 class="font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                                    <i data-lucide="steering-wheel" class="w-4 h-4 text-purple-500"></i>
+                                    Driver Details
+                                </h4>
+                                <div id="modal-driver"
+                                    class="p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-gray-100 dark:border-gray-700 flex items-center justify-between">
+                                    <span class="text-sm text-gray-500 italic">No driver assigned yet.</span>
+                                </div>
+                            </div>
+
                         </div>
 
                         <!-- Modal Footer -->
                         <div
                             class="p-6 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 flex justify-end gap-3">
                             <button onclick="closeOrderModal()"
-                                class="px-4 py-2 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors font-medium text-sm">Close</button>
-                            <a href="track.html"
-                                class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-medium text-sm flex items-center gap-2">
+                                class="px-6 py-2.5 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors font-medium text-sm">Close</button>
+                            <a id="modal-track-btn" href="#"
+                                class="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-medium text-sm flex items-center gap-2 shadow-sm hover:shadow-md">
                                 <i data-lucide="map" class="w-4 h-4"></i> Track Live
                             </a>
                         </div>
@@ -300,8 +319,12 @@
         const modalStatus = document.getElementById('modal-status');
         const modalGoods = document.getElementById('modal-goods');
         const modalFrom = document.getElementById('modal-from');
+        const modalFromAddress = document.getElementById('modal-from-address'); // New
         const modalTo = document.getElementById('modal-to');
+        const modalToAddress = document.getElementById('modal-to-address'); // New
         const modalTimeline = document.getElementById('modal-timeline');
+        const modalDriver = document.getElementById('modal-driver'); // New
+        const modalTrackBtn = document.getElementById('modal-track-btn'); // New
 
         let currentUser = null;
         let shipmentsData = [];
@@ -468,17 +491,47 @@
             // Update Status Badge
             const statusBg = getStatusBg(shipment.status);
             const statusColor = getStatusColor(shipment.status);
-            modalStatus.className = `px-3 py-1 rounded-full text-sm font-bold border border-opacity-20 ${statusBg} ${statusColor}`;
+            modalStatus.className = `px-3 py-1 rounded-full text-sm font-bold ${statusBg} ${statusColor}`;
 
             // Populate Details
             if (modalGoods) modalGoods.innerText = shipment.goodsType;
             if (modalFrom) modalFrom.innerText = shipment.pickup.place;
+            if (modalFromAddress) modalFromAddress.innerText = shipment.pickup.address || ''; // Address
             if (modalTo) modalTo.innerText = shipment.delivery.place;
+            if (modalToAddress) modalToAddress.innerText = shipment.delivery.address || ''; // Address
+
+            // Driver Details
+            if (modalDriver) {
+                if (shipment.driver) {
+                    modalDriver.innerHTML = `
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold">
+                                ${shipment.driver.name.charAt(0).toUpperCase()}
+                            </div>
+                            <div>
+                                <p class="font-bold text-gray-900 dark:text-white text-sm capitalize">${shipment.driver.name}</p>
+                                <p class="text-xs text-gray-500">${shipment.driver.phone}</p>
+                            </div>
+                        </div>
+                        <a href="tel:${shipment.driver.phone}" class="p-2 bg-green-50 text-green-600 rounded-lg hover:bg-green-100 transition-colors" title="Call Driver">
+                            <i data-lucide="phone" class="w-4 h-4"></i>
+                        </a>
+                     `;
+                } else {
+                    modalDriver.innerHTML = `<span class="text-sm text-gray-500 italic">No driver assigned yet. details will appear here once assigned.</span>`;
+                }
+            }
+
+            // Update Track Button Link
+            if (modalTrackBtn) {
+                modalTrackBtn.href = `track.html?id=${id}`;
+            }
 
             // Render Timeline
             renderTimeline(shipment);
 
             modal.classList.remove('hidden');
+            lucide.createIcons();
         }
 
         function renderTimeline(shipment) {
@@ -486,35 +539,58 @@
 
             const steps = [
                 { status: 'Pending', label: 'Order Placed', date: shipment.createdAt },
-                { status: 'In Transit', label: 'In Transit', date: shipment.pickup.date },
-                { status: 'Completed', label: 'Delivered', date: shipment.delivery.date }
+                { status: 'In Transit', label: 'In Transit', date: shipment.pickup?.date || shipment.updatedAt },
+                { status: 'Completed', label: 'Delivered', date: shipment.delivery?.date }
             ];
 
-            let html = '';
+            // Horizontal Layout
+            let html = ``;
+            let itemsHtml = '';
+
+            // Logic for active state
             let currentFound = false;
 
             steps.forEach((step, index) => {
                 let active = false;
                 let completed = false;
 
+                // Determine state
                 if (shipment.status === step.status) {
                     active = true;
                     currentFound = true;
-                } else if (!currentFound && (shipment.status === 'In Transit' && step.status === 'Pending') || (shipment.status === 'Completed')) {
-                    completed = true;
+                } else if (!currentFound) {
+                    // Check if passed phases should be completed
+                    if ((shipment.status === 'In Transit' && step.status === 'Pending') ||
+                        (shipment.status === 'Completed')) {
+                        completed = true;
+                    }
                 }
 
-                const color = active ? 'blue' : (completed ? 'green' : 'gray');
-                const dateStr = step.date ? new Date(step.date).toLocaleDateString() : 'Pending';
+                // Styles
+                const dotColor = active ? 'bg-blue-500 border-blue-500 ring-4 ring-blue-100 dark:ring-blue-900' : (completed ? 'bg-green-500 border-green-500' : 'bg-gray-200 border-gray-200 dark:bg-gray-700 dark:border-gray-700');
+                const textColor = active || completed ? 'text-gray-900 dark:text-white' : 'text-gray-400';
+                const dateStr = step.date ? new Date(step.date).toLocaleDateString() : '';
 
-                html += `
-                    <div class="relative">
-                        <div class="absolute -left-[21px] top-1 w-4 h-4 rounded-full bg-${color}-500 border-2 border-white dark:border-gray-900"></div>
-                        <p class="text-sm font-bold text-gray-900 dark:text-white ${!active && !completed ? 'text-gray-400' : ''}">${step.label}</p>
-                        <p class="text-xs text-gray-500">${dateStr}</p>
+                // Item HTML
+                itemsHtml += `
+                     <div class="flex flex-col items-center relative z-10 w-1/3">
+                        <div class="w-4 h-4 rounded-full border-2 border-white dark:border-gray-900 shadow-sm mb-3 transition-all duration-300 ${dotColor}"></div>
+                        <h4 class="text-sm font-bold ${textColor} text-center leading-tight mb-1">${step.label}</h4>
+                        <p class="text-xs text-gray-500 text-center">${dateStr}</p>
                     </div>
                 `;
             });
+
+            // Wrapper with Horizontal Line
+            html = `
+                <div class="relative flex justify-between items-start w-full px-2 mt-4">
+                    <!-- Horizontal Line Background -->
+                    <div class="absolute top-[7px] left-16 right-16 h-0.5 bg-gray-100 dark:bg-gray-800 -z-0"></div>
+                     <!-- Progress Line (Optional: could be dynamic width based on progress) -->
+                    
+                    ${itemsHtml}
+                </div>
+            `;
 
             modalTimeline.innerHTML = html;
         }

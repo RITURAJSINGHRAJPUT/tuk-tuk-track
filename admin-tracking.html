@@ -318,6 +318,18 @@
             updateVehicleList();
             updateMapMarkers();
             activeCountEl.textContent = activeShipments.length;
+
+            // Check for Query Param
+            const urlParams = new URLSearchParams(window.location.search);
+            const trackingId = urlParams.get('id');
+            if (trackingId) {
+                const shipment = activeShipments.find(s => s.id === trackingId);
+                if (shipment) {
+                    selectVehicle(shipment);
+                    // Clear param so it doesn't re-trigger on updates if user navigates away
+                    // window.history.replaceState({}, document.title, window.location.pathname);
+                }
+            }
         });
 
         // --- UI Functions ---

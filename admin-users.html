@@ -126,7 +126,7 @@
                 <div class="max-w-7xl mx-auto space-y-6">
 
                     <!-- Search -->
-                    <div class="relative w-full max-w-md">
+                    <div class="relative w-full">
                         <i data-lucide="search"
                             class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400"></i>
                         <input type="text" id="search-input" placeholder="Search users by name or email..."
@@ -217,10 +217,114 @@
         </div>
     </div>
 
+    <!-- Shipment Details Modal -->
+    <div id="shipment-modal" class="fixed inset-0 z-[200] hidden">
+        <div class="absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity" onclick="closeShipmentDetails()">
+        </div>
+        <div class="absolute right-0 top-0 h-full w-full max-w-md bg-white dark:bg-gray-900 shadow-2xl transform transition-transform duration-300 translate-x-full flex flex-col"
+            id="shipment-modal-content">
+
+            <div
+                class="p-6 border-b border-gray-200 dark:border-gray-800 flex justify-between items-start bg-gray-50 dark:bg-gray-800/50">
+                <div>
+                    <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-1">Shipment Details</h2>
+                    <p id="modal-shipment-id" class="text-xs font-mono text-purple-600 dark:text-purple-400">#TUK-0000
+                    </p>
+                </div>
+                <button onclick="closeShipmentDetails()"
+                    class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+                    <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
+            </div>
+
+            <div class="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-6">
+                <!-- Status -->
+                <div
+                    class="bg-gray-50 dark:bg-gray-800 p-4 rounded-xl border border-gray-100 dark:border-gray-700 text-center">
+                    <p class="text-sm text-gray-500 mb-1">Current Status</p>
+                    <span id="modal-shipment-status"
+                        class="px-3 py-1 rounded-full text-sm font-bold bg-blue-100 text-blue-700">In Transit</span>
+                </div>
+
+                <!-- From / To -->
+                <div class="relative pl-1">
+                    <!-- Vertical Line -->
+                    <div
+                        class="absolute left-[19px] top-3 bottom-0 w-0.5 border-l-2 border-dashed border-gray-200 dark:border-gray-700">
+                    </div>
+
+                    <!-- Pickup -->
+                    <div class="flex gap-4 items-start relative z-10 mb-6">
+                        <div
+                            class="w-8 h-8 rounded-full bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center shrink-0 border-2 border-white dark:border-gray-900 shadow-sm">
+                            <i data-lucide="circle-dot" class="w-4 h-4 text-blue-500"></i>
+                        </div>
+                        <div>
+                            <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-0.5">Pickup</p>
+                            <p id="modal-shipment-pickup"
+                                class="text-base font-semibold text-gray-900 dark:text-white leading-tight">New Delhi
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Delivery -->
+                    <div class="flex gap-4 items-start relative z-10">
+                        <div
+                            class="w-8 h-8 rounded-full bg-red-50 dark:bg-red-900/20 flex items-center justify-center shrink-0 border-2 border-white dark:border-gray-900 shadow-sm">
+                            <i data-lucide="map-pin" class="w-4 h-4 text-red-500"></i>
+                        </div>
+                        <div>
+                            <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-0.5">Delivery</p>
+                            <p id="modal-shipment-delivery"
+                                class="text-base font-semibold text-gray-900 dark:text-white leading-tight">Mumbai</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Info Grid -->
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="p-3 bg-gray-50 dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700">
+                        <p class="text-xs text-gray-500 mb-1">Goods Type</p>
+                        <p id="modal-shipment-goods" class="font-medium text-gray-900 dark:text-white">Electronics</p>
+                    </div>
+                    <div class="p-3 bg-gray-50 dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700">
+                        <p class="text-xs text-gray-500 mb-1">Weight</p>
+                        <p id="modal-shipment-weight" class="font-medium text-gray-900 dark:text-white">10 kg</p>
+                    </div>
+                </div>
+
+                <!-- Driver -->
+                <div>
+                    <h3 class="font-bold text-gray-900 dark:text-white mb-3 text-sm flex items-center gap-2">
+                        <i data-lucide="steering-wheel" class="w-4 h-4 text-purple-500"></i>
+                        Driver Info
+                    </h3>
+                    <div id="modal-shipment-driver"
+                        class="p-3 bg-gray-50 dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700">
+                        <!-- Driver details or 'Unassigned' -->
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="p-4 border-t border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 flex gap-3">
+                <button onclick="closeShipmentDetails()"
+                    class="flex-1 py-3 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-xl font-medium transition-colors">
+                    Back
+                </button>
+                <button id="track-live-btn"
+                    class="flex-1 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-medium transition-colors flex items-center justify-center gap-2">
+                    <i data-lucide="map" class="w-4 h-4"></i>
+                    Track Live
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script src="js/main.js"></script>
     <script type="module">
         import { initAdminGuard } from './js/admin-guard.js';
-        import { db, collection, getDocs, query, orderBy, where } from './firebase-config.js';
+        import { db, collection, getDocs, query, orderBy, where, doc, deleteDoc } from './firebase-config.js';
 
         initAdminGuard();
         lucide.createIcons();
@@ -239,8 +343,22 @@
         const modalPhone = document.getElementById('modal-user-phone');
         const modalJoined = document.getElementById('modal-user-joined');
         const modalShipmentsList = document.getElementById('modal-shipments-list');
+        const modalDeleteBtn = document.querySelector('#user-modal button.bg-red-50');
+
+        // Shipment Modal Elements
+        const shipmentModal = document.getElementById('shipment-modal');
+        const shipmentModalContent = document.getElementById('shipment-modal-content');
+        const modalShipmentId = document.getElementById('modal-shipment-id');
+        const modalShipmentStatus = document.getElementById('modal-shipment-status');
+        const modalShipmentPickup = document.getElementById('modal-shipment-pickup');
+        const modalShipmentDelivery = document.getElementById('modal-shipment-delivery');
+        const modalShipmentGoods = document.getElementById('modal-shipment-goods');
+        const modalShipmentWeight = document.getElementById('modal-shipment-weight');
+        const modalShipmentDriver = document.getElementById('modal-shipment-driver');
+        const trackLiveBtn = document.getElementById('track-live-btn');
 
         let allUsers = [];
+        let storedUser = null;
 
         // --- Fetch Users ---
         async function fetchUsers() {
@@ -327,6 +445,7 @@
         // --- Modal Logic ---
         window.openUserModal = async (user) => {
             // 1. Populate User Info
+            storedUser = user;
             modalName.textContent = user.name || 'Unknown';
             modalEmail.textContent = user.email || '';
             modalRole.textContent = user.role || 'User';
@@ -334,19 +453,21 @@
             modalJoined.textContent = user.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'N/A';
             modalAvatar.textContent = user.name ? user.name.charAt(0).toUpperCase() : 'U';
 
-            // 2. Show Modal
+            // 2. Attach Delete Handler
+            modalDeleteBtn.onclick = () => deleteUser(user.id);
+
+            // 3. Show Modal
             modal.classList.remove('hidden');
             setTimeout(() => {
                 modalContent.classList.remove('translate-x-full');
             }, 10);
 
-            // 3. Fetch Shipments
+            // 4. Fetch Shipments
             modalShipmentsList.innerHTML = '<div class="text-center py-8 text-gray-400 text-sm"><i data-lucide="loader-2" class="w-5 h-5 animate-spin inline mr-2"></i>Loading shipments...</div>';
             lucide.createIcons();
 
             try {
                 // Query shipments by user email
-                // Removed orderBy("createdAt", "desc") to avoid needing a composite index
                 const q = query(collection(db, "shipments"), where("userEmail", "==", user.email));
                 const snapshot = await getDocs(q);
 
@@ -373,10 +494,13 @@
                         const statusColor = getStatusColor(s.status);
 
                         const item = document.createElement('div');
-                        item.className = "p-3 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-purple-200 dark:hover:border-purple-800 transition-colors";
+                        item.className = "p-3 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-purple-200 dark:hover:border-purple-800 transition-colors cursor-pointer group";
+                        // Add click handler to open details
+                        item.onclick = () => openShipmentDetails(s);
+
                         item.innerHTML = `
                             <div class="flex justify-between items-start mb-2">
-                                <span class="text-xs font-mono text-gray-500">${s.trackingId || '#' + s.id.slice(0, 6)}</span>
+                                <span class="text-xs font-mono text-gray-500 group-hover:text-purple-600 transition-colors">${s.trackingId || '#' + s.id.slice(0, 6)}</span>
                                 <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase ${statusColor}">${s.status}</span>
                             </div>
                             <h4 class="font-bold text-gray-900 dark:text-white text-sm mb-1">${s.goodsType}</h4>
@@ -401,6 +525,89 @@
             modalContent.classList.add('translate-x-full');
             setTimeout(() => {
                 modal.classList.add('hidden');
+            }, 300);
+        };
+
+        window.deleteUser = async (userId) => {
+            if (!confirm("Are you sure you want to delete this user? This cannot be undone.")) return;
+
+            try {
+                // Note: This only deletes the Firestore document. Deleting Auth requires Admin SDK.
+                await deleteDoc(doc(db, "users", userId));
+                closeUserModal();
+                fetchUsers(); // Refresh list
+                // Optional: Toast message
+            } catch (error) {
+                console.error("Error deleting user:", error);
+                alert("Failed to delete user. " + error.message);
+            }
+        };
+
+        window.openShipmentDetails = (s) => {
+            // Hide User Modal
+            modalContent.classList.add('translate-x-full');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+
+                // Show Shipment Modal
+                shipmentModal.classList.remove('hidden');
+                setTimeout(() => {
+                    shipmentModalContent.classList.remove('translate-x-full');
+                }, 10);
+            }, 300);
+
+            // Populate Data
+            modalShipmentId.textContent = s.trackingId || '#' + s.id.slice(0, 8);
+
+            modalShipmentStatus.textContent = s.status;
+            modalShipmentStatus.className = `px-3 py-1 rounded-full text-sm font-bold ${getStatusColor(s.status)}`;
+
+            modalShipmentPickup.innerHTML = `
+                ${s.pickup.place}
+                <div class="text-xs text-gray-500 font-normal mt-0.5">${s.pickup.address || ''}</div>
+            `;
+            modalShipmentDelivery.innerHTML = `
+                ${s.delivery.place}
+                <div class="text-xs text-gray-500 font-normal mt-0.5">${s.delivery.address || ''}</div>
+            `;
+            modalShipmentGoods.textContent = s.goodsType;
+            modalShipmentWeight.textContent = (s.weight || 'N/A') + ' kg';
+
+            // Driver
+            if (s.driver) {
+                modalShipmentDriver.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold">
+                            ${s.driver.name.charAt(0).toUpperCase()}
+                        </div>
+                        <div>
+                             <p class="font-medium text-gray-900 dark:text-white">${s.driver.name}</p>
+                             <p class="text-xs text-gray-500">${s.driver.phone}</p>
+                        </div>
+                    </div>
+                `;
+            } else {
+                modalShipmentDriver.innerHTML = `<p class="text-sm text-gray-400 italic">No driver assigned.</p>`;
+            }
+
+            // Track Live Button
+            trackLiveBtn.onclick = () => window.location.href = `admin-tracking.html?id=${s.id}`;
+
+            lucide.createIcons();
+        };
+
+        window.closeShipmentDetails = () => {
+            shipmentModalContent.classList.add('translate-x-full');
+            setTimeout(() => {
+                shipmentModal.classList.add('hidden');
+
+                // Re-open User Modal
+                if (storedUser) {
+                    modal.classList.remove('hidden');
+                    setTimeout(() => {
+                        modalContent.classList.remove('translate-x-full');
+                    }, 10);
+                }
             }, 300);
         };
 
