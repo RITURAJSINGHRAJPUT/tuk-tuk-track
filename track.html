@@ -10,13 +10,24 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    </script>
 </head>
 
 <body class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-100 font-sans transition-colors duration-200">
 
-    <div class="flex h-screen overflow-hidden">
+    <div class="flex h-screen overflow-hidden relative">
+        <!-- Sidebar Backdrop (Mobile) -->
+        <div id="sidebar-backdrop"
+            class="fixed inset-0 bg-black/50 z-[55] hidden md:hidden backdrop-blur-sm transition-opacity"></div>
+
         <!-- Sidebar -->
-        <aside
+        <aside id="sidebar"
             class="w-72 bg-white/80 dark:bg-gray-900/90 backdrop-blur-xl border-r border-gray-200 dark:border-gray-800 hidden md:flex flex-col z-50 transition-all duration-300">
             <div class="p-6 flex items-center gap-3 mb-2">
                 <div
@@ -77,7 +88,8 @@
             <header
                 class="h-16 bg-white/80 dark:bg-gray-900/90 backdrop-blur-xl border-b border-gray-200 dark:border-gray-800 flex items-center justify-between px-4 sm:px-6 z-40">
                 <div class="flex items-center gap-4">
-                    <button class="md:hidden p-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg">
+                    <button id="sidebar-toggle"
+                        class="md:hidden p-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg">
                         <i data-lucide="menu" class="w-6 h-6"></i>
                     </button>
                     <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Track Shipment</h2>

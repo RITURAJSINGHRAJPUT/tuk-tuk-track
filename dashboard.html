@@ -9,13 +9,26 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <script>
+        // On page load or when changing themes, best to add inline in `head` to avoid FOUC
+        if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    </script>
 </head>
 
 <body class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-100 font-sans transition-colors duration-200">
 
-    <div class="flex h-screen overflow-hidden">
+    <div class="flex h-screen overflow-hidden relative">
+        <!-- Sidebar Backdrop (Mobile) -->
+        <div id="sidebar-backdrop"
+            class="fixed inset-0 bg-black/50 z-[55] hidden md:hidden backdrop-blur-sm transition-opacity"></div>
+
         <!-- Sidebar -->
-        <aside
+        <aside id="sidebar"
             class="w-72 bg-white/80 dark:bg-gray-900/90 backdrop-blur-xl border-r border-gray-200 dark:border-gray-800 hidden md:flex flex-col z-50 transition-all duration-300">
             <div class="p-6 flex items-center gap-3 mb-2">
                 <div
@@ -72,15 +85,16 @@
         <div class="flex-1 flex flex-col overflow-hidden relative">
             <!-- Header -->
             <header
-                class="h-20 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-800 flex items-center justify-between px-8 z-40">
+                class="h-16 md:h-20 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-800 flex items-center justify-between px-4 md:px-8 z-40">
                 <div class="flex items-center gap-4">
-                    <button
+                    <button id="sidebar-toggle"
                         class="md:hidden p-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors">
                         <i data-lucide="menu" class="w-6 h-6"></i>
                     </button>
                     <div>
-                        <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
-                        <p class="text-sm text-gray-500 dark:text-gray-400">Overview of your shipments</p>
+                        <h1 class="text-xl md:text-2xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
+                        <p class="text-xs md:text-sm text-gray-500 dark:text-gray-400 hidden sm:block">Overview of your
+                            shipments</p>
                     </div>
                 </div>
 
@@ -99,7 +113,7 @@
             </header>
 
             <!-- Content Scrollable Area -->
-            <main class="flex-1 overflow-y-auto p-8">
+            <main class="flex-1 overflow-y-auto p-4 md:p-8">
                 <!-- Stats Cards -->
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                     <!-- Total Shipments -->
@@ -111,8 +125,9 @@
                         <div class="relative z-10">
                             <div class="flex justify-between items-start mb-4">
                                 <div>
-                                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Shipments</p>
-                                    <h3 class="text-3xl font-bold text-gray-900 dark:text-white mt-1"
+                                    <p class="text-xs md:text-sm font-medium text-gray-500 dark:text-gray-400">Total
+                                        Shipments</p>
+                                    <h3 class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mt-1"
                                         id="total-shipments">0</h3>
                                 </div>
                                 <div
@@ -132,8 +147,9 @@
                         <div class="relative z-10">
                             <div class="flex justify-between items-start mb-4">
                                 <div>
-                                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Active Shipments</p>
-                                    <h3 class="text-3xl font-bold text-gray-900 dark:text-white mt-1"
+                                    <p class="text-xs md:text-sm font-medium text-gray-500 dark:text-gray-400">Active
+                                        Shipments</p>
+                                    <h3 class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mt-1"
                                         id="active-shipments">0</h3>
                                 </div>
                                 <div
@@ -153,8 +169,9 @@
                         <div class="relative z-10">
                             <div class="flex justify-between items-start mb-4">
                                 <div>
-                                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Pending</p>
-                                    <h3 class="text-3xl font-bold text-gray-900 dark:text-white mt-1"
+                                    <p class="text-xs md:text-sm font-medium text-gray-500 dark:text-gray-400">Pending
+                                    </p>
+                                    <h3 class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mt-1"
                                         id="pending-shipments">0</h3>
                                 </div>
                                 <div
@@ -174,8 +191,9 @@
                         <div class="relative z-10">
                             <div class="flex justify-between items-start mb-4">
                                 <div>
-                                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Completed</p>
-                                    <h3 class="text-3xl font-bold text-gray-900 dark:text-white mt-1"
+                                    <p class="text-xs md:text-sm font-medium text-gray-500 dark:text-gray-400">Completed
+                                    </p>
+                                    <h3 class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mt-1"
                                         id="completed-shipments">0</h3>
                                 </div>
                                 <div
@@ -207,94 +225,113 @@
                 <div id="order-modal" class="fixed inset-0 z-[100] hidden">
                     <div class="absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity"
                         onclick="closeOrderModal()"></div>
-                    <!-- Increased width for better layout -->
-                    <div
-                        class="absolute center-modal top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-2xl bg-white dark:bg-gray-900 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 p-0 overflow-hidden animate-fade-in-up flex flex-col max-h-[90vh]">
 
-                        <!-- Modal Header -->
+                    <!-- Modal Container (Flex Centered) -->
+                    <div class="fixed inset-0 z-[101] flex items-center justify-center p-4 pointer-events-none">
+                        <!-- Modal Content -->
                         <div
-                            class="p-6 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center bg-gray-50 dark:bg-gray-800/50">
-                            <div>
-                                <h3 class="text-xl font-bold text-gray-900 dark:text-white">Shipment Details</h3>
-                                <p class="text-sm text-gray-500 dark:text-gray-400 font-mono" id="modal-id">#ORD-...</p>
-                            </div>
-                            <button onclick="closeOrderModal()"
-                                class="p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
-                                <i data-lucide="x" class="w-6 h-6"></i>
-                            </button>
-                        </div>
+                            class="w-full max-w-[90%] md:max-w-2xl bg-white dark:bg-gray-900 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden animate-fade-in-up flex flex-col max-h-[80vh] pointer-events-auto">
 
-                        <!-- Modal Body -->
-                        <div class="flex-1 overflow-y-auto custom-scrollbar p-8">
-
-                            <!-- Summary Grid -->
-                            <div class="grid grid-cols-2 lg:grid-cols-4 gap-8 mb-10">
+                            <!-- Modal Header -->
+                            <div
+                                class="p-4 md:p-6 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center bg-gray-50 dark:bg-gray-800/50">
                                 <div>
-                                    <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Status</p>
-                                    <span id="modal-status"
-                                        class="px-3 py-1 rounded-full text-sm font-bold bg-gray-100 text-gray-700">Loading...</span>
+                                    <h3 class="text-lg md:text-xl font-bold text-gray-900 dark:text-white">Shipment
+                                        Details</h3>
+                                    <p class="text-xs md:text-sm text-gray-500 dark:text-gray-400 font-mono"
+                                        id="modal-id">#ORD-...</p>
                                 </div>
-
-                                <div>
-                                    <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">From</p>
-                                    <p id="modal-from"
-                                        class="font-bold text-gray-900 dark:text-white text-base mb-1 capitalize">
-                                        ...</p>
-                                    <p id="modal-from-address" class="text-xs text-gray-500 leading-relaxed capitalize">
-                                        ...</p>
-                                </div>
-
-                                <div>
-                                    <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Goods Type
-                                    </p>
-                                    <p id="modal-goods" class="font-medium text-gray-900 dark:text-white capitalize">...
-                                    </p>
-                                </div>
-
-                                <div>
-                                    <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">To</p>
-                                    <p id="modal-to"
-                                        class="font-bold text-gray-900 dark:text-white text-base mb-1 capitalize">...
-                                    </p>
-                                    <p id="modal-to-address" class="text-xs text-gray-500 leading-relaxed capitalize">
-                                        ...</p>
-                                </div>
+                                <button onclick="closeOrderModal()"
+                                    class="p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
+                                    <i data-lucide="x" class="w-5 h-5 md:w-6 md:h-6"></i>
+                                </button>
                             </div>
 
-                            <!-- Timeline in Modal -->
-                            <div class="border-t border-gray-100 dark:border-gray-700 pt-8 mb-8">
-                                <h4 class="font-bold text-gray-900 dark:text-white mb-6">Shipment Progress</h4>
-                                <div id="modal-timeline">
-                                    <!-- Dynamic Timeline -->
+                            <!-- Modal Body -->
+                            <div class="flex-1 overflow-y-auto custom-scrollbar p-4 md:p-8">
+
+                                <!-- Summary Grid -->
+                                <div class="grid grid-cols-2 lg:grid-cols-4 gap-x-4 gap-y-6 md:gap-8 mb-8 md:mb-10">
+                                    <div class="col-span-1">
+                                        <p
+                                            class="text-[10px] md:text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">
+                                            Status</p>
+                                        <span id="modal-status"
+                                            class="inline-block px-2.5 py-1 rounded-full text-xs md:text-sm font-bold bg-gray-100 text-gray-700">Loading...</span>
+                                    </div>
+
+                                    <div class="col-span-1">
+                                        <p
+                                            class="text-[10px] md:text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">
+                                            Goods Type</p>
+                                        <p id="modal-goods"
+                                            class="text-sm md:text-base font-medium text-gray-900 dark:text-white capitalize truncate">
+                                            ...</p>
+                                    </div>
+
+                                    <div class="col-span-1">
+                                        <p
+                                            class="text-[10px] md:text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">
+                                            From</p>
+                                        <p id="modal-from"
+                                            class="font-bold text-gray-900 dark:text-white text-sm md:text-base mb-1 capitalize truncate">
+                                            ...</p>
+                                        <p id="modal-from-address"
+                                            class="text-[10px] md:text-xs text-gray-500 leading-relaxed capitalize line-clamp-2">
+                                            ...</p>
+                                    </div>
+
+                                    <div class="col-span-1">
+                                        <p
+                                            class="text-[10px] md:text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">
+                                            To</p>
+                                        <p id="modal-to"
+                                            class="font-bold text-gray-900 dark:text-white text-sm md:text-base mb-1 capitalize truncate">
+                                            ...
+                                        </p>
+                                        <p id="modal-to-address"
+                                            class="text-[10px] md:text-xs text-gray-500 leading-relaxed capitalize line-clamp-2">
+                                            ...</p>
+                                    </div>
                                 </div>
+
+                                <!-- Timeline in Modal -->
+                                <div class="border-t border-gray-100 dark:border-gray-700 pt-6 md:pt-8 mb-6 md:mb-8">
+                                    <h4 class="font-bold text-gray-900 dark:text-white mb-4 md:mb-6">Shipment Progress
+                                    </h4>
+                                    <div id="modal-timeline">
+                                        <!-- Dynamic Timeline -->
+                                    </div>
+                                </div>
+
+                                <!-- Driver Info (New) -->
+                                <div class="pt-4 md:pt-6 border-t border-gray-100 dark:border-gray-700">
+                                    <h4
+                                        class="font-bold text-gray-900 dark:text-white mb-3 md:mb-4 flex items-center gap-2">
+                                        <i data-lucide="steering-wheel" class="w-4 h-4 text-purple-500"></i>
+                                        Driver Details
+                                    </h4>
+                                    <div id="modal-driver"
+                                        class="p-3 md:p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-gray-100 dark:border-gray-700 flex items-center justify-between">
+                                        <span class="text-xs md:text-sm text-gray-500 italic">No driver assigned
+                                            yet.</span>
+                                    </div>
+                                </div>
+
                             </div>
 
-                            <!-- Driver Info (New) -->
-                            <div class="pt-6 border-t border-gray-100 dark:border-gray-700">
-                                <h4 class="font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-                                    <i data-lucide="steering-wheel" class="w-4 h-4 text-purple-500"></i>
-                                    Driver Details
-                                </h4>
-                                <div id="modal-driver"
-                                    class="p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-gray-100 dark:border-gray-700 flex items-center justify-between">
-                                    <span class="text-sm text-gray-500 italic">No driver assigned yet.</span>
-                                </div>
+                            <!-- Modal Footer -->
+                            <div
+                                class="p-4 md:p-6 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 flex justify-end gap-3">
+                                <button onclick="closeOrderModal()"
+                                    class="px-4 py-2 md:px-6 md:py-2.5 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors font-medium text-xs md:text-sm">Close</button>
+                                <a id="modal-track-btn" href="#"
+                                    class="px-4 py-2 md:px-6 md:py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-medium text-xs md:text-sm flex items-center gap-2 shadow-sm hover:shadow-md">
+                                    <i data-lucide="map" class="w-4 h-4"></i> Track Live
+                                </a>
                             </div>
-
-                        </div>
-
-                        <!-- Modal Footer -->
-                        <div
-                            class="p-6 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 flex justify-end gap-3">
-                            <button onclick="closeOrderModal()"
-                                class="px-6 py-2.5 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors font-medium text-sm">Close</button>
-                            <a id="modal-track-btn" href="#"
-                                class="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-medium text-sm flex items-center gap-2 shadow-sm hover:shadow-md">
-                                <i data-lucide="map" class="w-4 h-4"></i> Track Live
-                            </a>
                         </div>
                     </div>
-                </div>
             </main>
         </div>
     </div>
@@ -419,25 +456,25 @@
 
                     <div class="flex justify-between items-start mb-4 relative">
                         <div>
-                            <span class="text-xs font-mono text-gray-500 dark:text-gray-400">${data.trackingId || '#' + data.id.slice(0, 8)}</span>
-                            <h3 class="font-bold text-gray-900 dark:text-white text-lg capitalize">${data.goodsType}</h3>
+                            <span class="text-[10px] md:text-xs font-mono text-gray-500 dark:text-gray-400">${data.trackingId || '#' + data.id.slice(0, 8)}</span>
+                            <h3 class="font-bold text-gray-900 dark:text-white text-base md:text-lg capitalize">${data.goodsType}</h3>
                         </div>
-                        <span class="px-2.5 py-1 rounded-lg text-xs font-bold ${statusBg} ${statusColor} border border-opacity-20">${data.status}</span>
+                        <span class="px-2.5 py-1 rounded-lg text-[10px] md:text-xs font-bold ${statusBg} ${statusColor} border border-opacity-20">${data.status}</span>
                     </div>
 
                     <div class="space-y-3 mb-5 relative">
                         <div class="flex items-start gap-3">
                             <div class="mt-1 min-w-[16px]"><i data-lucide="map-pin" class="w-4 h-4 text-gray-400"></i></div>
                             <div>
-                                <p class="text-xs text-gray-500 dark:text-gray-400">From</p>
-                                <p class="text-sm font-medium text-gray-900 dark:text-white truncate">${data.pickup.place}</p>
+                                <p class="text-[10px] md:text-xs text-gray-500 dark:text-gray-400">From</p>
+                                <p class="text-xs md:text-sm font-medium text-gray-900 dark:text-white truncate">${data.pickup.place}</p>
                             </div>
                         </div>
                         <div class="flex items-start gap-3">
                             <div class="mt-1 min-w-[16px]"><i data-lucide="navigation" class="w-4 h-4 text-gray-400"></i></div>
                             <div>
-                                <p class="text-xs text-gray-500 dark:text-gray-400">To</p>
-                                <p class="text-sm font-medium text-gray-900 dark:text-white truncate">${data.delivery.place}</p>
+                                <p class="text-[10px] md:text-xs text-gray-500 dark:text-gray-400">To</p>
+                                <p class="text-xs md:text-sm font-medium text-gray-900 dark:text-white truncate">${data.delivery.place}</p>
                             </div>
                         </div>
                     </div>
@@ -505,20 +542,20 @@
                 if (shipment.driver) {
                     modalDriver.innerHTML = `
                         <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold">
+                            <div class="w-8 h-8 md:w-10 md:h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-xs md:text-base">
                                 ${shipment.driver.name.charAt(0).toUpperCase()}
                             </div>
                             <div>
-                                <p class="font-bold text-gray-900 dark:text-white text-sm capitalize">${shipment.driver.name}</p>
-                                <p class="text-xs text-gray-500">${shipment.driver.phone}</p>
+                                <p class="font-bold text-gray-900 dark:text-white text-sm md:text-base capitalize">${shipment.driver.name}</p>
+                                <p class="text-[10px] md:text-xs text-gray-500">${shipment.driver.phone}</p>
                             </div>
                         </div>
-                        <a href="tel:${shipment.driver.phone}" class="p-2 bg-green-50 text-green-600 rounded-lg hover:bg-green-100 transition-colors" title="Call Driver">
+                        <a href="tel:${shipment.driver.phone}" class="p-1.5 md:p-2 bg-green-50 text-green-600 rounded-lg hover:bg-green-100 transition-colors" title="Call Driver">
                             <i data-lucide="phone" class="w-4 h-4"></i>
                         </a>
                      `;
                 } else {
-                    modalDriver.innerHTML = `<span class="text-sm text-gray-500 italic">No driver assigned yet. details will appear here once assigned.</span>`;
+                    modalDriver.innerHTML = `<span class="text-xs md:text-sm text-gray-500 italic">No driver assigned yet. details will appear here once assigned.</span>`;
                 }
             }
 
@@ -575,8 +612,8 @@
                 itemsHtml += `
                      <div class="flex flex-col items-center relative z-10 w-1/3">
                         <div class="w-4 h-4 rounded-full border-2 border-white dark:border-gray-900 shadow-sm mb-3 transition-all duration-300 ${dotColor}"></div>
-                        <h4 class="text-sm font-bold ${textColor} text-center leading-tight mb-1">${step.label}</h4>
-                        <p class="text-xs text-gray-500 text-center">${dateStr}</p>
+                        <h4 class="text-xs md:text-sm font-bold ${textColor} text-center leading-tight mb-1">${step.label}</h4>
+                        <p class="text-[10px] md:text-xs text-gray-500 text-center">${dateStr}</p>
                     </div>
                 `;
             });
