@@ -202,10 +202,12 @@
                                     </div>
                                     <div class="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
                                         <div class="flex items-center gap-2 mb-2 text-gray-500 dark:text-gray-400">
-                                            <i data-lucide="battery" class="w-4 h-4"></i>
-                                            <span class="text-xs font-medium uppercase">Battery</span>
+                                            <i data-lucide="map-pin" class="w-4 h-4"></i>
+                                            <span class="text-xs font-medium uppercase">Current Location</span>
                                         </div>
-                                        <p class="text-xl font-bold text-gray-900 dark:text-white">82%</p>
+                                        <p id="vehicle-location"
+                                            class="text-sm font-bold text-gray-900 dark:text-white line-clamp-2"
+                                            title="Loading...">Locating...</p>
                                     </div>
                                 </div>
                                 <div class="mt-6">
@@ -250,16 +252,34 @@
     <script src="js/main.js"></script>
     <script type="module">
         import { initAuthUI } from './js/auth-ui.js';
-        import { db, collection, query, where, getDocs } from './firebase-config.js';
+        import { auth, db, collection, query, where, getDocs } from './firebase-config.js';
 
         initAuthUI();
         lucide.createIcons();
 
         let map = null;
+        let currentUser = null;
+
+        auth.onAuthStateChanged((user) => {
+            currentUser = user;
+            // Optional: If you want to force login for this page, check here
+            // if (!user) window.location.href = 'login.html'; 
+            // But usually public tracking pages might exist, but here we are restricting it.
+        });
 
         window.trackShipment = async function () {
             const id = document.getElementById('tracking-id').value.trim();
             if (!id) return;
+
+            if (!currentUser) {
+                alert("Please log in to track your shipments.");
+                // return; // Uncomment to force login check locally if desired, 
+                // but checking userId mismatch later handles it too (null !== userId).
+                // But strict requirement says "user who has requested...". 
+                // So better to enforce login.
+                window.location.href = 'login.html';
+                return;
+            }
 
             const btn = document.querySelector('button[onclick="trackShipment()"]');
             const originalText = btn.innerHTML;
@@ -278,7 +298,31 @@
                 }
 
                 const shipmentData = querySnapshot.docs[0].data();
+
+                // Security Check: Verify Ownership
+                if (shipmentData.userId !== currentUser.uid) {
+                    alert("Access Denied: You can only track shipments that belong to your account.");
+                    btn.innerHTML = originalText;
+                    // Hide result if visible
+                    document.getElementById('tracking-result').classList.add('hidden');
+                    return;
+                }
+
                 const status = shipmentData.status || 'Pending';
+
+                // Status Check: Block if not started
+                if (status === 'Pending') {
+                    alert("Tracking Unavailable: This shipment has not yet been started by the administrator.");
+                    btn.innerHTML = originalText;
+                    document.getElementById('tracking-result').classList.add('hidden');
+                    return;
+                }
+
+                // Get Live Data or Defaults
+                // Prioritize Current Location -> Pickup Location -> Default (Delhi)
+                const lat = shipmentData.currentLocation ? shipmentData.currentLocation.lat : (shipmentData.pickup && shipmentData.pickup.lat ? shipmentData.pickup.lat : 28.6139);
+                const lng = shipmentData.currentLocation ? shipmentData.currentLocation.lng : (shipmentData.pickup && shipmentData.pickup.lng ? shipmentData.pickup.lng : 77.2090);
+                const temp = shipmentData.currentTemperature !== undefined ? shipmentData.currentTemperature : -4.5;
 
                 // Update UI with Real Data
                 document.getElementById('tracking-result').classList.remove('hidden');
@@ -287,7 +331,32 @@
                 const statusCard = document.querySelector('.bg-gradient-to-br');
                 statusCard.querySelector('h3').textContent = status;
 
-                // Update Timeline (Simplified for now)
+                // Update Vehicle Stats
+                const statsCols = document.querySelectorAll('.bg-gray-50 p.text-xl'); // Temp 
+                if (statsCols.length >= 1) {
+                    statsCols[0].textContent = `${temp}°C`; // Temp
+                }
+
+                // Update Location
+                const locationEl = document.getElementById('vehicle-location');
+                if (locationEl) {
+                    fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
+                        .then(res => res.json())
+                        .then(data => {
+                            const addr = data.address;
+                            const shortName = addr.neighbourhood || addr.suburb || addr.street || addr.city || data.name || 'Unknown Location';
+                            const city = addr.city || addr.town || addr.village || addr.state;
+                            const finalText = (city && !shortName.includes(city)) ? `${shortName}, ${city}` : shortName;
+
+                            locationEl.innerText = finalText;
+                            locationEl.title = data.display_name;
+                        })
+                        .catch(err => {
+                            locationEl.innerText = `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+                        });
+                }
+
+                // Update Timeline
                 const timelineContainer = document.querySelector('.border-l-2');
                 timelineContainer.innerHTML = `
                     <div class="relative">
@@ -297,128 +366,172 @@
                             <span class="text-xs text-blue-600 bg-blue-100 dark:bg-blue-900/30 px-2 py-0.5 rounded-full">Active</span>
                         </div>
                         <p class="text-sm text-gray-500">
-                            ${status === 'Pending' ? 'Shipment request received.' :
-                        status === 'In Transit' ? 'Shipment is on the way.' :
-                            status === 'Completed' ? 'Shipment delivered successfully.' : 'Shipment status updated.'}
+                             Latest Update: Location [${lat.toFixed(4)}, ${lng.toFixed(4)}]
                         </p>
                         <span class="text-xs text-gray-400 mt-1 block">${new Date().toLocaleTimeString()}</span>
                     </div>
-                    <div class="relative mt-8">
-                        <div class="absolute -left-[21px] top-0 w-4 h-4 bg-gray-300 dark:bg-gray-600 rounded-full border-2 border-white dark:border-gray-800"></div>
-                        <h4 class="font-medium text-gray-900 dark:text-white">Request Created</h4>
-                        <p class="text-sm text-gray-500">Shipment details submitted.</p>
-                        <span class="text-xs text-gray-400 mt-1 block">${new Date(shipmentData.createdAt).toLocaleString()}</span>
+                `;
+
+                // Initialize Map with LIVE location
+                if (map) {
+                    map.remove(); // Reset map to re-center
+                    map = null;
+                }
+
+                // Prepare Data for Map History
+                let pathCoords = [];
+                let history = [];
+                let lastUpdateStr = new Date().toLocaleTimeString();
+
+                if (shipmentData.locationHistory && shipmentData.locationHistory.length > 0) {
+                    // Sort history by timestamp
+                    history = shipmentData.locationHistory.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+                    pathCoords = history.map(h => [h.lat, h.lng]);
+
+                    const lastEntry = history[history.length - 1];
+                    if (lastEntry.timestamp) lastUpdateStr = new Date(lastEntry.timestamp).toLocaleTimeString();
+                }
+
+                // Add current point to path
+                pathCoords.push([lat, lng]);
+
+                map = L.map('tracking-map').setView([lat, lng], 13);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '&copy; OpenStreetMap'
+                }).addTo(map);
+
+                // Draw Polyline and Detailed Markers
+                if (pathCoords.length > 1) {
+                    L.polyline(pathCoords, { color: 'blue', weight: 4, opacity: 0.7, dashArray: '10, 10' }).addTo(map);
+
+                    // Add markers for history points
+                    history.forEach((point, index) => {
+                        let pointTemp = 'N/A';
+                        if (shipmentData.temperatureHistory) {
+                            const matching = shipmentData.temperatureHistory.find(t => t.timestamp === point.timestamp);
+                            if (matching) pointTemp = matching.temp;
+                        }
+
+                        const timeStr = point.timestamp ? new Date(point.timestamp).toLocaleTimeString() : 'Unknown';
+                        const uniqueId = `history-addr-${index}`;
+
+                        const marker = L.circleMarker([point.lat, point.lng], {
+                            radius: 5,
+                            color: 'blue',
+                            fillColor: 'white',
+                            fillOpacity: 1
+                        }).addTo(map);
+
+                        marker.bindPopup(`
+                            <div class="text-xs font-sans p-1">
+                                <strong id="${uniqueId}" class="text-blue-600">Loading Location...</strong><br>
+                                <span class="text-gray-500">Time:</span> ${timeStr}<br>
+                                <span class="text-gray-500">Temp:</span> ${pointTemp}°C
+                            </div>
+                        `);
+
+                        marker.on('popupopen', () => {
+                            const el = document.getElementById(uniqueId);
+                            if (el && el.innerText === 'Loading Location...') {
+                                fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${point.lat}&lon=${point.lng}`)
+                                    .then(res => res.json())
+                                    .then(data => {
+                                        const addr = data.address;
+                                        // Construct a concise location name
+                                        const shortName = addr.neighbourhood || addr.suburb || addr.street || addr.city || addr.town || addr.village || data.name || 'Unknown Location';
+
+                                        // If we have a city/town and it's different from the short name, append it for context
+                                        const city = addr.city || addr.town || addr.village || addr.state;
+                                        const finalText = (city && !shortName.includes(city)) ? `${shortName}, ${city}` : shortName;
+
+                                        el.innerText = finalText;
+                                        el.title = data.display_name; // Full address on hover
+                                    })
+                                    .catch(err => {
+                                        console.error("Geo error:", err);
+                                        el.innerText = "Location Unavailable";
+                                    });
+                            }
+                        });
+                    });
+                }
+
+                const vehicleIcon = L.divIcon({
+                    className: 'custom-div-icon',
+                    html: `<div class="relative">
+                        <div class="w-4 h-4 bg-blue-600 rounded-full border-2 border-white shadow-lg"></div>
+                        <div class="absolute -top-1 -left-1 w-6 h-6 bg-blue-500 rounded-full opacity-30 animate-ping"></div>
+                    </div>`,
+                    iconSize: [24, 24],
+                    iconAnchor: [12, 12]
+                });
+
+                const popupContent = `
+                    <div class="text-sm">
+                        <p class="font-bold text-gray-900 mb-1">Current Status</p>
+                        <ul class="space-y-1">
+                            <li><span class="text-gray-500">Status:</span> ${status}</li>
+                            <li><span class="text-gray-500">Time:</span> ${lastUpdateStr}</li>
+                            <li><span class="text-gray-500">Loc:</span> ${lat.toFixed(5)}, ${lng.toFixed(5)}</li>
+                            <li><span class="text-gray-500">Temp:</span> ${temp}°C</li>
+                        </ul>
                     </div>
                 `;
 
-                // Update Driver Info
-                // Update Driver Info
-                const driverCard = document.getElementById('driver-card-container');
-
-                if (driverCard) {
-                    if (shipmentData.driver) {
-                        driverCard.innerHTML = `
-                            <h3 class="font-semibold mb-6 text-gray-900 dark:text-white flex items-center gap-2">
-                                <i data-lucide="user" class="w-5 h-5 text-blue-500"></i>
-                                Driver
-                            </h3>
-                            <div class="flex items-center gap-4">
-                                <img src="https://ui-avatars.com/api/?name=${encodeURIComponent(shipmentData.driver.name)}&background=0D8ABC&color=fff"
-                                    alt="Driver" class="w-12 h-12 rounded-full">
-                                <div>
-                                    <h4 class="font-medium text-gray-900 dark:text-white">${shipmentData.driver.name}</h4>
-                                    <div class="flex items-center gap-1 text-yellow-500 text-sm">
-                                        <i data-lucide="star" class="w-3 h-3 fill-current"></i>
-                                        <span class="font-medium text-gray-700 dark:text-gray-300">4.8</span>
-                                    </div>
-                                </div>
-                                <button onclick="window.location.href='tel:${shipmentData.driver.phone}'"
-                                    class="ml-auto p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-full" title="Call Driver">
-                                    <i data-lucide="phone" class="w-5 h-5"></i>
-                                </button>
-                            </div>
-                        `;
-                    } else {
-                        driverCard.innerHTML = `
-                             <h3 class="font-semibold mb-6 text-gray-900 dark:text-white flex items-center gap-2">
-                                <i data-lucide="user" class="w-5 h-5 text-gray-400"></i>
-                                Driver
-                            </h3>
-                            <div class="text-center py-4 text-gray-500 text-sm italic">
-                                No driver assigned yet.
-                            </div>
-                        `;
-                    }
-                    lucide.createIcons();
-                }
-
-                // Initialize Map
-                if (!map) {
-                    map = L.map('tracking-map').setView([28.6139, 77.2090], 13);
-                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                        attribution: '&copy; OpenStreetMap'
-                    }).addTo(map);
-
-                    const vehicleIcon = L.divIcon({
-                        className: 'custom-div-icon',
-                        html: `<div class="relative">
-                            <div class="w-4 h-4 bg-blue-600 rounded-full border-2 border-white shadow-lg"></div>
-                            <div class="absolute -top-1 -left-1 w-6 h-6 bg-blue-500 rounded-full opacity-30 animate-ping"></div>
-                        </div>`,
-                        iconSize: [24, 24],
-                        iconAnchor: [12, 12]
-                    });
-
-                    L.marker([28.6139, 77.2090], { icon: vehicleIcon }).addTo(map)
-                        .bindPopup(`<b>${id}</b><br>${status}`)
-                        .openPopup();
-                }
+                L.marker([lat, lng], { icon: vehicleIcon }).addTo(map)
+                    .bindPopup(popupContent)
+                    .openPopup();
 
                 // Scroll to result
                 document.getElementById('tracking-result').scrollIntoView({ behavior: 'smooth' });
 
-                // Initialize Chart (Static for now)
+                // Initialize Chart with HISTORY
                 const ctx = document.getElementById('tempChart').getContext('2d');
-                new Chart(ctx, {
+
+                // Parse history or use default small graph
+                let labels = [];
+                let dataPoints = [];
+
+                if (shipmentData.temperatureHistory && shipmentData.temperatureHistory.length > 0) {
+                    // Sort by timestamp
+                    const history = shipmentData.temperatureHistory.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+                    // Take last 10 points
+                    const recent = history.slice(-10);
+
+                    labels = recent.map(h => new Date(h.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
+                    dataPoints = recent.map(h => h.temp);
+                } else {
+                    // Add current point as starting point
+                    labels = [new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })];
+                    dataPoints = [temp];
+                }
+
+                // Destroy existing chart instance if any (Chart.js doesn't do this auto)
+                if (window.myTempChart) window.myTempChart.destroy();
+
+                window.myTempChart = new Chart(ctx, {
                     type: 'line',
                     data: {
-                        labels: ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00'],
+                        labels: labels,
                         datasets: [{
                             label: 'Temperature (°C)',
-                            data: [-4, -5, -4.5, -5.2, -4.8, -5],
+                            data: dataPoints,
                             borderColor: '#3b82f6',
                             backgroundColor: 'rgba(59, 130, 246, 0.1)',
                             borderWidth: 2,
                             tension: 0.4,
                             fill: true,
-                            pointRadius: 0,
-                            pointHoverRadius: 4
+                            pointRadius: 3,
+                            pointHoverRadius: 5
                         }]
                     },
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
-                        plugins: {
-                            legend: { display: false },
-                            tooltip: {
-                                mode: 'index',
-                                intersect: false,
-                            }
-                        },
+                        plugins: { legend: { display: false } },
                         scales: {
-                            y: {
-                                grid: { color: '#374151', drawBorder: false },
-                                ticks: { display: false }
-                            },
-                            x: {
-                                grid: { display: false },
-                                ticks: { color: '#9ca3af', font: { size: 10 } }
-                            }
-                        },
-                        interaction: {
-                            mode: 'nearest',
-                            axis: 'x',
-                            intersect: false
+                            y: { grid: { color: '#374151', drawBorder: false } },
+                            x: { grid: { display: false }, ticks: { color: '#9ca3af', font: { size: 10 } } }
                         }
                     }
                 });

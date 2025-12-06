@@ -308,6 +308,7 @@
         let markers = {};
         let activeShipments = [];
         let selectedShipmentId = null;
+        let currentPathLayer = L.layerGroup().addTo(map);
 
         // --- DOM Elements ---
         const vehicleList = document.getElementById('vehicle-list');
@@ -326,6 +327,14 @@
             updateMapMarkers();
             activeCountEl.textContent = activeShipments.length;
 
+            // Re-draw path if the selected shipment was updated
+            if (selectedShipmentId) {
+                const updatedShipment = activeShipments.find(s => s.id === selectedShipmentId);
+                if (updatedShipment) {
+                    drawShipmentPath(updatedShipment);
+                }
+            }
+
             // Check for Query Param
             const urlParams = new URLSearchParams(window.location.search);
             const trackingId = urlParams.get('id');
@@ -333,13 +342,12 @@
                 const shipment = activeShipments.find(s => s.id === trackingId);
                 if (shipment) {
                     selectVehicle(shipment);
-                    // Clear param so it doesn't re-trigger on updates if user navigates away
-                    // window.history.replaceState({}, document.title, window.location.pathname);
                 }
             }
         });
 
         // --- UI Functions ---
+
         function updateVehicleList() {
             vehicleList.innerHTML = '';
 
@@ -395,11 +403,34 @@
         }
 
         function updateMapMarkers() {
-            activeShipments.forEach(shipment => {
-                if (!markers[shipment.id]) {
-                    const lat = 20 + (Math.random() * 10 - 5);
-                    const lng = 78 + (Math.random() * 10 - 5);
+            // Remove markers for shipments that are no longer active
+            const activeIds = new Set(activeShipments.map(s => s.id));
+            Object.keys(markers).forEach(id => {
+                if (!activeIds.has(id)) {
+                    markers[id].remove();
+                    delete markers[id];
+                }
+            });
 
+            activeShipments.forEach(shipment => {
+                // Use real location or fallback to default
+                let lat = 20.5937, lng = 78.9629; // Center of India
+                if (shipment.currentLocation) {
+                    lat = shipment.currentLocation.lat;
+                    lng = shipment.currentLocation.lng;
+                } else {
+                    // Skip if no location (or handle fallback)
+                    return;
+                }
+
+                if (markers[shipment.id]) {
+                    // Update existing marker
+                    markers[shipment.id].setLatLng([lat, lng]);
+
+                    // Update popup content dynamically if needed (optional for now, but good practice)
+                    // For now, we assume popup content is mostly static metadata
+                } else {
+                    // Create new marker
                     const markerIcon = L.divIcon({
                         className: 'custom-div-icon',
                         html: `<div class="w-10 h-10 bg-purple-600 rounded-full border-4 border-white dark:border-gray-900 shadow-xl flex items-center justify-center text-white transform hover:scale-110 transition-transform cursor-pointer">
@@ -424,18 +455,41 @@
                             </div>
                             <div class="grid grid-cols-2 gap-2 text-center">
                                 <div class="bg-gray-100 dark:bg-gray-800 p-2 rounded-lg">
-                                    <p class="text-xs text-gray-500">Speed</p>
-                                    <p class="font-bold text-gray-900 dark:text-white">45 km/h</p>
+                                    <p class="text-xs text-gray-500">Current Loc</p>
+                                    <p class="font-bold text-gray-900 dark:text-white text-xs">${lat.toFixed(4)}, ${lng.toFixed(4)}</p>
+                                    <p id="addr-${shipment.id}" class="text-[10px] text-gray-500 mt-1 truncate">Loading...</p>
                                 </div>
-                                <div class="bg-gray-100 dark:bg-gray-800 p-2 rounded-lg">
+                                <div class="bg-gray-100 dark:bg-gray-800 dark:border-gray-700 p-2 rounded-lg">
                                     <p class="text-xs text-gray-500">Temp</p>
-                                    <p class="font-bold text-red-500">-2°C</p>
+                                    <p class="font-bold text-red-500">${shipment.currentTemperature || 'N/A'}°C</p>
                                 </div>
                             </div>
                         </div>
                     `;
 
                     marker.bindPopup(popupContent);
+
+                    // Fetch Address on Click/Open
+                    marker.on('popupopen', () => {
+                        fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
+                            .then(res => res.json())
+                            .then(data => {
+                                const el = document.getElementById(`addr-${shipment.id}`);
+                                if (el) {
+                                    // Make it short: City, State or just Name
+                                    const addr = data.address;
+                                    const shortName = addr.city || addr.town || addr.village || addr.suburb || data.name || 'Unknown Area';
+                                    el.textContent = shortName;
+                                    el.title = data.display_name; // Tooltip for full address
+                                }
+                            })
+                            .catch(err => {
+                                console.error("Geo error:", err);
+                                const el = document.getElementById(`addr-${shipment.id}`);
+                                if (el) el.textContent = "Locating...";
+                            });
+                    });
+
                     marker.on('click', () => selectVehicle(shipment));
                     markers[shipment.id] = marker;
                 }
@@ -448,11 +502,61 @@
 
             if (markers[shipment.id]) {
                 const latLng = markers[shipment.id].getLatLng();
-                map.flyTo(latLng, 10, {
+                map.flyTo(latLng, 13, {
                     animate: true,
                     duration: 1.5
                 });
                 markers[shipment.id].openPopup();
+            }
+
+            drawShipmentPath(shipment);
+        }
+
+        function drawShipmentPath(shipment) {
+            currentPathLayer.clearLayers();
+
+            if (!shipment.locationHistory || shipment.locationHistory.length === 0) return;
+
+            // Sort history
+            const history = shipment.locationHistory.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+            const pathCoords = history.map(h => [h.lat, h.lng]);
+
+            // Add current location if available (from local computed or data)
+            // The marker is at 'shipment.currentLocation' usually.
+            if (shipment.currentLocation) {
+                pathCoords.push([shipment.currentLocation.lat, shipment.currentLocation.lng]);
+            }
+
+            // Draw Polyline
+            if (pathCoords.length > 1) {
+                L.polyline(pathCoords, { color: 'blue', weight: 4, opacity: 0.7, dashArray: '10, 10' }).addTo(currentPathLayer);
+
+                // Add Markers
+                history.forEach((point) => {
+                    let pointTemp = 'N/A';
+                    // Fuzzy match temperature if available
+                    if (shipment.temperatureHistory) {
+                        const matching = shipment.temperatureHistory.find(t => t.timestamp === point.timestamp);
+                        if (matching) pointTemp = matching.temp;
+                    }
+
+                    const timeStr = point.timestamp ? new Date(point.timestamp).toLocaleTimeString() : 'Unknown';
+
+                    const marker = L.circleMarker([point.lat, point.lng], {
+                        radius: 5,
+                        color: 'blue',
+                        fillColor: 'white',
+                        fillOpacity: 1
+                    }).addTo(currentPathLayer);
+
+                    marker.bindPopup(`
+                        <div class="text-xs font-sans p-1">
+                            <strong class="text-blue-600">History Point</strong><br>
+                            <span class="text-gray-500">Time:</span> ${timeStr}<br>
+                            <span class="text-gray-500">Temp:</span> ${pointTemp}°C
+                        </div>
+                    `);
+                });
             }
         }
 

@@ -230,86 +230,73 @@
                     <div class="fixed inset-0 z-[101] flex items-center justify-center p-4 pointer-events-none">
                         <!-- Modal Content -->
                         <div
-                            class="w-full max-w-[90%] md:max-w-2xl bg-white dark:bg-gray-900 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden animate-fade-in-up flex flex-col max-h-[80vh] md:max-h-[85vh] pointer-events-auto">
+                            class="w-full max-w-[90%] md:max-w-2xl bg-white dark:bg-gray-900 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden animate-fade-in-up flex flex-col max-h-[80vh] pointer-events-auto">
 
                             <!-- Modal Header -->
                             <div
-                                class="p-4 md:p-6 border-b border-gray-100 dark:border-gray-700 flex justify-between items-start bg-white dark:bg-gray-800 z-10 relative">
+                                class="p-4 md:p-6 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center bg-gray-50 dark:bg-gray-800/50">
                                 <div>
-                                    <div class="flex items-center gap-3 mb-1">
-                                        <div
-                                            class="p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-blue-600 dark:text-blue-400">
-                                            <i data-lucide="package" class="w-6 h-6"></i>
-                                        </div>
-                                        <h3 class="text-xl md:text-2xl font-bold text-gray-900 dark:text-white">Shipment
-                                            Details</h3>
-                                    </div>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400 font-mono ml-11" id="modal-id">
-                                        #ORD-...</p>
+                                    <h3 class="text-lg md:text-xl font-bold text-gray-900 dark:text-white">Shipment
+                                        Details</h3>
+                                    <p class="text-xs md:text-sm text-gray-500 dark:text-gray-400 font-mono"
+                                        id="modal-id">#ORD-...</p>
                                 </div>
                                 <button onclick="closeOrderModal()"
-                                    class="p-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 rounded-full transition-colors text-gray-600 dark:text-gray-200 shadow-sm z-50 relative">
-                                    <i data-lucide="x" class="w-5 h-5"></i>
+                                    class="p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
+                                    <i data-lucide="x" class="w-5 h-5 md:w-6 md:h-6"></i>
                                 </button>
                             </div>
 
                             <!-- Modal Body -->
-                            <div class="flex-1 overflow-y-auto custom-scrollbar p-5 md:p-8 bg-white dark:bg-gray-800">
+                            <div class="flex-1 overflow-y-auto custom-scrollbar p-4 md:p-8">
 
                                 <!-- Summary Grid -->
-                                <div class="grid grid-cols-2 lg:grid-cols-4 gap-2 mb-4">
-                                    <div
-                                        class="col-span-1 p-3 bg-gray-50 dark:bg-gray-800/50 rounded-2xl border border-gray-100 dark:border-gray-700/50">
+                                <div class="grid grid-cols-2 lg:grid-cols-4 gap-x-4 gap-y-6 md:gap-8 mb-8 md:mb-10">
+                                    <div class="col-span-1">
                                         <p
-                                            class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 flex items-center gap-2">
-                                            <i data-lucide="activity" class="w-3 h-3"></i> Status
-                                        </p>
+                                            class="text-[10px] md:text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">
+                                            Status</p>
                                         <span id="modal-status"
-                                            class="inline-block px-3 py-1 rounded-full text-sm font-bold bg-gray-200 text-gray-700">Loading...</span>
+                                            class="inline-block px-2.5 py-1 rounded-full text-xs md:text-sm font-bold bg-gray-100 text-gray-700">Loading...</span>
                                     </div>
 
-                                    <div
-                                        class="col-span-1 p-3 bg-gray-50 dark:bg-gray-800/50 rounded-2xl border border-gray-100 dark:border-gray-700/50">
+                                    <div class="col-span-1">
                                         <p
-                                            class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 flex items-center gap-2">
-                                            <i data-lucide="box" class="w-3 h-3"></i> Goods Type
-                                        </p>
+                                            class="text-[10px] md:text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">
+                                            Goods Type</p>
                                         <p id="modal-goods"
-                                            class="text-base font-bold text-gray-900 dark:text-white capitalize truncate">
+                                            class="text-sm md:text-base font-medium text-gray-900 dark:text-white capitalize truncate">
                                             ...</p>
                                     </div>
 
-                                    <div
-                                        class="col-span-1 p-3 bg-gray-50 dark:bg-gray-800/50 rounded-2xl border border-gray-100 dark:border-gray-700/50">
+                                    <div class="col-span-1">
                                         <p
-                                            class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 flex items-center gap-2">
-                                            <i data-lucide="map-pin" class="w-3 h-3 text-blue-500"></i> From
-                                        </p>
+                                            class="text-[10px] md:text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">
+                                            From</p>
                                         <p id="modal-from"
-                                            class="font-bold text-gray-900 dark:text-white text-base mb-1 capitalize truncate">
+                                            class="font-bold text-gray-900 dark:text-white text-sm md:text-base mb-1 capitalize truncate">
                                             ...</p>
                                         <p id="modal-from-address"
-                                            class="text-xs text-gray-500 leading-relaxed capitalize line-clamp-2">...
-                                        </p>
+                                            class="text-[10px] md:text-xs text-gray-500 leading-relaxed capitalize line-clamp-2">
+                                            ...</p>
                                     </div>
 
-                                    <div
-                                        class="col-span-1 p-3 bg-gray-50 dark:bg-gray-800/50 rounded-2xl border border-gray-100 dark:border-gray-700/50">
+                                    <div class="col-span-1">
                                         <p
-                                            class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 flex items-center gap-2">
-                                            <i data-lucide="map-pin" class="w-3 h-3 text-green-500"></i> To
-                                        </p>
+                                            class="text-[10px] md:text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">
+                                            To</p>
                                         <p id="modal-to"
-                                            class="font-bold text-gray-900 dark:text-white text-base mb-1 capitalize truncate">
-                                            ...</p>
-                                        <p id="modal-to-address"
-                                            class="text-xs text-gray-500 leading-relaxed capitalize line-clamp-2">...
+                                            class="font-bold text-gray-900 dark:text-white text-sm md:text-base mb-1 capitalize truncate">
+                                            ...
                                         </p>
+                                        <p id="modal-to-address"
+                                            class="text-[10px] md:text-xs text-gray-500 leading-relaxed capitalize line-clamp-2">
+                                            ...</p>
                                     </div>
                                 </div>
 
                                 <!-- Timeline in Modal -->
-                                <div class="border-t border-gray-100 dark:border-gray-700 pt-4 md:pt-6 mb-4 md:mb-6">
+                                <div class="border-t border-gray-100 dark:border-gray-700 pt-6 md:pt-8 mb-6 md:mb-8">
                                     <h4 class="font-bold text-gray-900 dark:text-white mb-4 md:mb-6">Shipment Progress
                                     </h4>
                                     <div id="modal-timeline">
@@ -318,7 +305,7 @@
                                 </div>
 
                                 <!-- Driver Info (New) -->
-                                <div class="pt-3 md:pt-4 border-t border-gray-100 dark:border-gray-700">
+                                <div class="pt-4 md:pt-6 border-t border-gray-100 dark:border-gray-700">
                                     <h4
                                         class="font-bold text-gray-900 dark:text-white mb-3 md:mb-4 flex items-center gap-2">
                                         <i data-lucide="steering-wheel" class="w-4 h-4 text-purple-500"></i>
@@ -532,233 +519,113 @@
 
         // Modal Logic
         window.openOrderModal = function (id) {
-            try {
-                // Debug log
-                console.log("Opening modal for ID:", id);
+            const shipment = shipmentsData.find(s => s.id === id);
+            if (!shipment) return;
 
-                const shipment = shipmentsData.find(s => s.id === id);
-                if (!shipment) {
-                    console.error("Shipment not found:", id);
-                    return;
-                }
+            modalTitle.innerText = shipment.trackingId || '#' + id;
+            modalStatus.innerText = shipment.status;
 
-                modalTitle.innerText = shipment.trackingId || '#' + id;
-                modalStatus.innerText = shipment.status;
+            // Update Status Badge
+            const statusBg = getStatusBg(shipment.status);
+            const statusColor = getStatusColor(shipment.status);
+            modalStatus.className = `px-3 py-1 rounded-full text-sm font-bold ${statusBg} ${statusColor}`;
 
-                // Update Status Badge
-                const statusBg = getStatusBg(shipment.status);
-                const statusColor = getStatusColor(shipment.status);
-                modalStatus.className = `px-3 py-1 rounded-full text-sm font-bold ${statusBg} ${statusColor}`;
+            // Populate Details
+            if (modalGoods) modalGoods.innerText = shipment.goodsType;
+            if (modalFrom) modalFrom.innerText = shipment.pickup.place;
+            if (modalFromAddress) modalFromAddress.innerText = shipment.pickup.address || ''; // Address
+            if (modalTo) modalTo.innerText = shipment.delivery.place;
+            if (modalToAddress) modalToAddress.innerText = shipment.delivery.address || ''; // Address
 
-                // Populate Details with Safeguards
-                if (modalGoods) modalGoods.innerText = shipment.goodsType || 'N/A';
-
-                const pickup = shipment.pickup || {};
-                const delivery = shipment.delivery || {};
-
-                if (modalFrom) modalFrom.innerText = pickup.place || 'N/A';
-                if (modalFromAddress) modalFromAddress.innerText = pickup.address || '';
-
-                if (modalTo) modalTo.innerText = delivery.place || 'N/A';
-                if (modalToAddress) modalToAddress.innerText = delivery.address || '';
-
-                // Driver Details - Enhanced UI
-                if (modalDriver) {
-                    if (shipment.driver && shipment.driver.name) {
-                        // Mobile: Clean Row (Minimal) - Visible only on mobile
-                        const driverHtmlMobile = `
-                            <div class="block md:hidden">
-                                <div class="flex items-center justify-between px-1 pt-3 mt-1 border-t border-gray-100 dark:border-gray-800">
-                                    <div class="flex items-center gap-2">
-                                        <div class="w-8 h-8 rounded-full bg-gray-50 dark:bg-gray-800 flex items-center justify-center text-gray-700 dark:text-gray-300 font-bold text-xs border border-gray-100 dark:border-gray-700">
-                                            ${(shipment.driver.name || 'D').charAt(0).toUpperCase()}
-                                        </div>
-                                        <div>
-                                            <p class="font-bold text-gray-900 dark:text-white text-xs capitalize leading-none mb-0.5">${shipment.driver.name}</p>
-                                            <span class="text-[10px] text-gray-500 dark:text-gray-400 leading-none">${shipment.driver.phone || 'No Phone'}</span>
-                                        </div>
-                                    </div>
-                                    <div class="flex gap-2">
-                                        <a href="tel:${shipment.driver.phone || '#'}" class="w-8 h-8 flex items-center justify-center bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 rounded-full hover:bg-green-100 transition-colors" title="Call Driver">
-                                            <i data-lucide="phone" class="w-4 h-4"></i>
-                                        </a>
-                                    </div>
-                                </div>
+            // Driver Details
+            if (modalDriver) {
+                if (shipment.driver) {
+                    modalDriver.innerHTML = `
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 md:w-10 md:h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-xs md:text-base">
+                                ${shipment.driver.name.charAt(0).toUpperCase()}
                             </div>
-                        `;
-
-                        // Desktop: Card Design (Rich) - Visible only on desktop
-                        const driverHtmlDesktop = `
-                            <div class="hidden md:block">
-                                <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-gray-100 dark:border-gray-700">
-                                    <div class="flex items-center gap-3">
-                                        <div class="w-10 h-10 rounded-full bg-white dark:bg-gray-700 flex items-center justify-center text-gray-700 dark:text-gray-300 font-bold text-sm border border-gray-200 dark:border-gray-600 shadow-sm">
-                                            ${(shipment.driver.name || 'D').charAt(0).toUpperCase()}
-                                        </div>
-                                        <div>
-                                            <p class="font-bold text-gray-900 dark:text-white text-sm capitalize leading-tight mb-0.5">${shipment.driver.name}</p>
-                                            <div class="flex items-center gap-1.5">
-                                                <div class="flex items-center gap-1">
-                                                    <i data-lucide="star" class="w-3 h-3 text-yellow-400 fill-yellow-400"></i>
-                                                    <span class="text-xs font-medium text-gray-600 dark:text-gray-300">4.9</span>
-                                                </div>
-                                                <span class="text-gray-300 dark:text-gray-600 text-xs">•</span>
-                                                <span class="text-xs text-gray-500 dark:text-gray-400">${shipment.driver.phone || 'No Phone'}</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="flex gap-2">
-                                        <button class="p-2 bg-white dark:bg-gray-700 text-gray-400 hover:text-blue-600 rounded-lg border border-gray-200 dark:border-gray-600 transition-colors shadow-sm">
-                                            <i data-lucide="message-square" class="w-4 h-4"></i>
-                                        </button>    
-                                        <a href="tel:${shipment.driver.phone || '#'}" class="p-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors shadow-sm shadow-green-200 dark:shadow-none">
-                                            <i data-lucide="phone" class="w-4 h-4"></i>
-                                        </a>
-                                    </div>
-                                </div>
+                            <div>
+                                <p class="font-bold text-gray-900 dark:text-white text-sm md:text-base capitalize">${shipment.driver.name}</p>
+                                <p class="text-[10px] md:text-xs text-gray-500">${shipment.driver.phone}</p>
                             </div>
-                        `;
-
-                        modalDriver.innerHTML = driverHtmlMobile + driverHtmlDesktop;
-                    }
+                        </div>
+                        <a href="tel:${shipment.driver.phone}" class="p-1.5 md:p-2 bg-green-50 text-green-600 rounded-lg hover:bg-green-100 transition-colors" title="Call Driver">
+                            <i data-lucide="phone" class="w-4 h-4"></i>
+                        </a>
+                     `;
+                } else {
+                    modalDriver.innerHTML = `<span class="text-xs md:text-sm text-gray-500 italic">No driver assigned yet. details will appear here once assigned.</span>`;
                 }
-
-                // Update Track Button Link
-                if (modalTrackBtn) {
-                    modalTrackBtn.href = `track.html ? id = ${id} `;
-                }
-
-                // Render Timeline
-                renderTimeline(shipment);
-
-                modal.classList.remove('hidden');
-                lucide.createIcons();
-            } catch (error) {
-                console.error("Error opening modal:", error);
-                alert("Error: " + error.message);
             }
+
+            // Update Track Button Link
+            if (modalTrackBtn) {
+                modalTrackBtn.href = `track.html?id=${id}`;
+            }
+
+            // Render Timeline
+            renderTimeline(shipment);
+
+            modal.classList.remove('hidden');
+            lucide.createIcons();
         }
 
         function renderTimeline(shipment) {
             if (!modalTimeline) return;
 
             const steps = [
-                { status: 'Pending', label: 'Pending', date: shipment.createdAt },
+                { status: 'Pending', label: 'Order Placed', date: shipment.createdAt },
                 { status: 'In Transit', label: 'In Transit', date: shipment.pickup?.date || shipment.updatedAt },
-                { status: 'Completed', label: 'Completed', date: shipment.delivery?.date }
+                { status: 'Completed', label: 'Delivered', date: shipment.delivery?.date }
             ];
 
-            // Calculate active index
-            let activeIndex = -1;
-            steps.forEach((step, index) => {
-                if (shipment.status === step.status) activeIndex = index;
-            });
+            // Horizontal Layout
+            let html = ``;
+            let itemsHtml = '';
 
-            // If completed, we want ALL steps to be green. 
-            if (shipment.status === 'Completed') activeIndex = steps.length;
-
-            // Mobile Vertical Timeline items
-            let itemsVerticalHtml = '<div class="flex items-start justify-between w-full pt-2 pb-6 px-1">';
-            let html = '';
+            // Logic for active state
+            let currentFound = false;
 
             steps.forEach((step, index) => {
-                let isActive = index === activeIndex;
-                let isCompleted = index < activeIndex;
+                let active = false;
+                let completed = false;
 
-                let dotClass = '';
-                let textClass = 'text-gray-400 dark:text-gray-500';
-                let checkIcon = '';
-
-                // Active/Completed Styles
-                if (isActive) {
-                    dotClass = 'bg-blue-600 border-2 border-blue-50 dark:border-blue-900 ring-2 ring-blue-600';
-                    textClass = 'text-blue-600 dark:text-blue-400 font-bold';
-                } else if (isCompleted) {
-                    dotClass = 'bg-green-500 border-2 border-green-50 dark:border-green-900 ring-2 ring-green-500';
-                    textClass = 'text-gray-900 dark:text-white font-medium';
-                    checkIcon = `<i data-lucide="check" class="w-2.5 h-2.5 text-white absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"></i>`;
-                } else {
-                    dotClass = 'bg-gray-200 dark:bg-gray-700';
+                // Determine state
+                if (shipment.status === step.status) {
+                    active = true;
+                    currentFound = true;
+                } else if (!currentFound) {
+                    // Check if passed phases should be completed
+                    if ((shipment.status === 'In Transit' && step.status === 'Pending') ||
+                        (shipment.status === 'Completed')) {
+                        completed = true;
+                    }
                 }
 
-                // Date String (Simplified)
-                const dateStr = step.date ? new Date(step.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : '<span class="text-gray-300 dark:text-gray-600 text-[8px]">—</span>';
+                // Styles
+                const dotColor = active ? 'bg-blue-500 border-blue-500 ring-4 ring-blue-100 dark:ring-blue-900' : (completed ? 'bg-green-500 border-green-500' : 'bg-gray-200 border-gray-200 dark:bg-gray-700 dark:border-gray-700');
+                const textColor = active || completed ? 'text-gray-900 dark:text-white' : 'text-gray-400';
+                const dateStr = step.date ? new Date(step.date).toLocaleDateString() : '';
 
-                // Step Item
-                itemsVerticalHtml += `
-                    <div class="flex flex-col items-center relative z-10 w-16">
-                        <div class="w-5 h-5 rounded-full transition-all duration-300 flex items-center justify-center ${dotClass} mb-1.5">
-                            ${checkIcon}
-                        </div>
-                        <div class="flex flex-col items-center text-center w-full">
-                             <h4 class="text-[9px] ${textClass} leading-tight whitespace-nowrap">${step.label}</h4>
-                             <p class="text-[8px] text-gray-400 leading-tight mt-0.5 whitespace-nowrap">${dateStr}</p>
-                        </div>
-                    </div>
-                `;
-
-                // Connecting Line (if not last)
-                if (index < steps.length - 1) {
-                    let isLineColored = index < activeIndex;
-                    let lineColorClass = isLineColored ? 'bg-green-500' : 'bg-gray-200 dark:bg-gray-700';
-                    itemsVerticalHtml += `<div class="flex-1 h-0.5 ${lineColorClass} mt-2.5 -mx-2 relative -z-0"></div>`;
-                }
-            });
-            itemsVerticalHtml += '</div>';
-
-            // Desktop Horizontal Timeline (Existing Logic Improved)
-            let itemsHorizontalHtml = '';
-            steps.forEach((step, index) => {
-                let isActive = index === activeIndex;
-                let isCompleted = index < activeIndex || shipment.status === 'Completed';
-
-                let dotClass = '';
-                let textClass = 'text-gray-400 dark:text-gray-500';
-                let checkIcon = '';
-
-                if (isActive) {
-                    dotClass = 'bg-blue-600 border-4 border-blue-100 dark:border-blue-900 ring-2 ring-blue-600';
-                    textClass = 'text-blue-600 dark:text-blue-400 font-bold';
-                } else if (isCompleted) {
-                    dotClass = 'bg-green-500 border-4 border-green-100 dark:border-green-900 ring-2 ring-green-500';
-                    textClass = 'text-gray-900 dark:text-white font-medium';
-                    checkIcon = `<i data-lucide="check" class="w-3 h-3 text-white absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"></i>`;
-                } else {
-                    dotClass = 'bg-gray-200 dark:bg-gray-700';
-                }
-
-                const dateStr = step.date ? new Date(step.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : '<span class="text-gray-300 dark:text-gray-600 text-[10px]">—</span>';
-
-                itemsHorizontalHtml += `
-                    <div class="flex flex-col items-center relative z-10 flex-1 group">
-                        <div class="w-8 h-8 rounded-full transition-all duration-300 mb-3 relative flex-shrink-0 ${dotClass}">
-                            ${checkIcon}
-                        </div>
-                        <h4 class="text-xs md:text-sm ${textClass} text-center leading-tight mb-1 transition-colors whitespace-nowrap">${step.label}</h4>
-                        <p class="text-[10px] md:text-xs text-gray-500 text-center font-medium">${dateStr}</p>
+                // Item HTML
+                itemsHtml += `
+                     <div class="flex flex-col items-center relative z-10 w-1/3">
+                        <div class="w-4 h-4 rounded-full border-2 border-white dark:border-gray-900 shadow-sm mb-3 transition-all duration-300 ${dotColor}"></div>
+                        <h4 class="text-xs md:text-sm font-bold ${textColor} text-center leading-tight mb-1">${step.label}</h4>
+                        <p class="text-[10px] md:text-xs text-gray-500 text-center">${dateStr}</p>
                     </div>
                 `;
             });
 
-
-            let progressWidth = '0%';
-            if (activeIndex >= 1) progressWidth = '50%';
-            if (activeIndex >= 2) progressWidth = '100%';
-
+            // Wrapper with Horizontal Line
             html = `
-                <!-- Mobile Vertical Timeline -->
-                <div class="flex flex-col md:hidden pl-2">
-                    ${itemsVerticalHtml}
-                </div>
-
-                <!-- Desktop Horizontal Timeline -->
-                <div class="hidden md:flex relative justify-between items-start w-full px-4 mt-6">
-                    <!-- Background Line -->
-                    <div class="absolute top-4 left-[16%] right-[16%] h-1 bg-gray-100 dark:bg-gray-700 -z-0 rounded-full"></div>
-                    <!-- Active Progress Line -->
-                    <div class="absolute top-4 left-[16%] h-1 bg-gradient-to-r from-blue-500 to-green-500 -z-0 rounded-full transition-all duration-1000 ease-out" style="width: calc(${progressWidth} * 0.68)"></div>
+                <div class="relative flex justify-between items-start w-full px-2 mt-4">
+                    <!-- Horizontal Line Background -->
+                    <div class="absolute top-[7px] left-16 right-16 h-0.5 bg-gray-100 dark:bg-gray-800 -z-0"></div>
+                     <!-- Progress Line (Optional: could be dynamic width based on progress) -->
                     
-                    ${itemsHorizontalHtml}
+                    ${itemsHtml}
                 </div>
             `;
 

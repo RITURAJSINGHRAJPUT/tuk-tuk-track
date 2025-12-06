@@ -1,4 +1,4 @@
-import { auth, db, createUserWithEmailAndPassword, signInWithEmailAndPassword, doc, setDoc, updateProfile, signOut, setPersistence, browserLocalPersistence } from '../firebase-config.js';
+import { auth, db, createUserWithEmailAndPassword, signInWithEmailAndPassword, doc, setDoc, updateProfile, signOut, setPersistence, browserLocalPersistence, browserSessionPersistence } from '../firebase-config.js';
 
 // Register Form Handler
 const registerForm = document.getElementById('register-form');
@@ -66,8 +66,11 @@ if (loginForm) {
             submitBtn.innerHTML = 'Logging In...';
             submitBtn.disabled = true;
 
-            // Ensure Local Persistence for login
-            await setPersistence(auth, browserLocalPersistence);
+            // 1. Determine Persistence (Session vs Local)
+            const rememberMe = document.getElementById('remember-me').checked;
+            const persistenceType = rememberMe ? browserLocalPersistence : browserSessionPersistence;
+
+            await setPersistence(auth, persistenceType);
 
             await signInWithEmailAndPassword(auth, email, password);
 
