@@ -432,8 +432,8 @@
                             date: document.getElementById('deliveryDate').value
                         },
                         driver: {
-                            name: document.getElementById('driverName').value,
-                            phone: document.getElementById('driverPhone').value
+                            name: document.getElementById('driverName') ? document.getElementById('driverName').value : '',
+                            phone: document.getElementById('driverPhone') ? document.getElementById('driverPhone').value : ''
                         },
                         instructions: document.getElementById('instructions').value,
                         status: 'Pending',

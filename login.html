@@ -8,19 +8,35 @@
     <link href="./css/style.css" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <script>
-        if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-            document.documentElement.classList.add('dark');
-        } else {
-            document.documentElement.classList.remove('dark');
-        }
+        // Anti-flicker script - Always start in DARK mode for Auth pages
+        document.documentElement.classList.add('dark');
+        // We do not check for 'light' preference here to ensure the requested "default" behavior.
+        // It can still be toggled manually.
     </script>
 </head>
 
 <body
-    class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-100 font-sans transition-colors duration-200 flex items-center justify-center h-screen">
+    class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-100 font-sans transition-colors duration-200 flex items-center justify-center h-screen relative overflow-hidden px-4">
 
+    <!-- Background Blobs -->
+    <div class="absolute top-0 left-0 w-full h-full overflow-hidden z-0 pointer-events-none">
+        <div
+            class="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-500/20 rounded-full blur-[100px] animate-pulse">
+        </div>
+        <div class="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-purple-500/20 rounded-full blur-[100px] animate-pulse"
+            style="animation-delay: 2s;"></div>
+    </div>
+
+    <!-- Theme Toggle Button - Forced Position -->
+    <!-- <button id="theme-toggle" style="position: fixed; top: 1.5rem; right: 1.5rem; z-index: 9999;"
+        class="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 focus:outline-none focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 shadow-lg border border-gray-200 dark:border-gray-700 transition-all">
+        <i data-lucide="moon" class="w-5 h-5 hidden dark:block"></i>
+        <i data-lucide="sun" class="w-5 h-5 block dark:hidden"></i>
+    </button> -->
+
+    <!-- Login Card -->
     <div
-        class="w-full max-w-md p-8 bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700">
+        class="w-full max-w-md p-6 sm:p-8 bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 relative z-10">
         <div class="text-center mb-8">
             <div
                 class="w-12 h-12 bg-gradient-to-tr from-blue-600 to-blue-400 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20 mx-auto mb-4">
@@ -64,6 +80,23 @@
     <script type="module" src="js/auth.js"></script>
     <script>
         lucide.createIcons();
+
+        // Theme Toggle Logic for Auth Pages
+        const themeToggleBtn = document.getElementById('theme-toggle');
+        const htmlElement = document.documentElement;
+
+        if (themeToggleBtn) {
+            themeToggleBtn.addEventListener('click', function () {
+                // Simple toggle based on current visual state
+                if (htmlElement.classList.contains('dark')) {
+                    htmlElement.classList.remove('dark');
+                    localStorage.setItem('color-theme', 'light');
+                } else {
+                    htmlElement.classList.add('dark');
+                    localStorage.setItem('color-theme', 'dark');
+                }
+            });
+        }
     </script>
 </body>
 
