@@ -36,16 +36,23 @@
     <div class="flex h-screen overflow-hidden">
         <!-- Sidebar -->
         <aside
-            class="w-72 bg-white/80 dark:bg-gray-900/90 backdrop-blur-xl border-r border-gray-200 dark:border-gray-800 hidden md:flex flex-col z-50 transition-all duration-300">
-            <div class="p-6 flex items-center gap-3 mb-2">
-                <div
-                    class="w-10 h-10 bg-gradient-to-tr from-purple-600 to-purple-400 rounded-xl flex items-center justify-center shadow-lg shadow-purple-500/20">
-                    <i data-lucide="truck" class="text-white w-6 h-6"></i>
+            class="md:w-72 bg-white md:bg-white/80 dark:bg-gray-900 md:dark:bg-gray-900/90 backdrop-blur-xl border-r border-gray-200 dark:border-gray-800 hidden md:flex flex-col z-50 transition-all duration-300">
+            <div class="p-6 flex items-center justify-between gap-3 mb-2">
+                <div class="flex items-center gap-3">
+                    <div
+                        class="w-10 h-10 bg-gradient-to-tr from-purple-600 to-purple-400 rounded-xl flex items-center justify-center shadow-lg shadow-purple-500/20">
+                        <i data-lucide="truck" class="text-white w-6 h-6"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold tracking-tight text-gray-900 dark:text-white leading-none">TukTuk
+                        </h1>
+                        <span class="text-xs font-bold text-purple-500 tracking-widest uppercase">Admin</span>
+                    </div>
                 </div>
-                <div>
-                    <h1 class="text-xl font-bold tracking-tight text-gray-900 dark:text-white leading-none">TukTuk</h1>
-                    <span class="text-xs font-bold text-purple-500 tracking-widest uppercase">Admin</span>
-                </div>
+                <button id="sidebar-close"
+                    class="md:hidden p-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors">
+                    <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
             </div>
 
             <nav class="flex-1 px-4 space-y-2">
@@ -80,6 +87,14 @@
                     class="flex items-center gap-3 px-4 py-3.5 bg-gradient-to-r from-purple-600 to-purple-500 text-white rounded-xl shadow-lg shadow-purple-500/20 transition-all group">
                     <i data-lucide="map" class="w-5 h-5"></i>
                     <span class="font-medium">Live Tracking</span>
+                </a>
+
+                <a href="admin-update-tracking.html"
+                    class="flex items-center gap-3 px-4 py-3.5 text-gray-600 dark:text-gray-400 hover:bg-white dark:hover:bg-gray-800 hover:shadow-md hover:shadow-gray-200/50 dark:hover:shadow-black/20 rounded-xl transition-all group">
+                    <i data-lucide="navigation" class="w-5 h-5 group-hover:text-purple-500 transition-colors"></i>
+                    <span
+                        class="font-medium group-hover:text-gray-900 dark:group-hover:text-white transition-colors">Update
+                        Tracking</span>
                 </a>
             </nav>
 
@@ -527,9 +542,29 @@
                 pathCoords.push([shipment.currentLocation.lat, shipment.currentLocation.lng]);
             }
 
-            // Draw Polyline
+            // Draw Route
             if (pathCoords.length > 1) {
-                L.polyline(pathCoords, { color: 'blue', weight: 4, opacity: 0.7, dashArray: '10, 10' }).addTo(currentPathLayer);
+                // simple fallback
+                const simpleLine = L.polyline(pathCoords, { color: 'purple', weight: 4, opacity: 0.3, dashArray: '10, 10' }).addTo(currentPathLayer);
+
+                // Prepare coordinates for OSRM (Lng,Lat format)
+                const osrmCoords = pathCoords.map(c => `${c[1]},${c[0]}`).join(';');
+
+                // Fetch Realistic Route
+                fetch(`https://router.project-osrm.org/route/v1/driving/${osrmCoords}?overview=full&geometries=geojson`)
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.code === 'Ok' && data.routes && data.routes.length > 0) {
+                            currentPathLayer.removeLayer(simpleLine);
+
+                            L.geoJSON(data.routes[0].geometry, {
+                                style: { color: 'purple', weight: 5, opacity: 0.8, lineJoin: 'round' }
+                            }).addTo(currentPathLayer);
+                        }
+                    })
+                    .catch(err => {
+                        console.error("OSRM Routing failed, keeping simple line:", err);
+                    });
 
                 // Add Markers
                 history.forEach((point) => {

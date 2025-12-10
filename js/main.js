@@ -52,18 +52,45 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // If showing sidebar on mobile
             if (!sidebar.classList.contains('hidden')) {
-                sidebar.classList.add('flex', 'fixed', 'inset-y-0', 'left-0', 'z-[60]', 'w-72', 'shadow-2xl');
+                sidebar.classList.add('flex', 'fixed', 'inset-0', 'z-[60]', 'shadow-2xl');
+                sidebar.style.width = '100vw';
+                sidebar.style.height = '100vh';
+                sidebar.style.margin = '0';
+                sidebar.style.borderRadius = '0';
+
                 if (sidebarBackdrop) {
                     sidebarBackdrop.classList.remove('hidden');
                     sidebarBackdrop.classList.remove('md:hidden'); // Ensure visible even if md:hidden class persists
                 }
             } else {
                 // Close Logic
-                sidebar.classList.remove('fixed', 'inset-y-0', 'left-0', 'z-[60]', 'w-72', 'shadow-2xl');
+                sidebar.classList.remove('fixed', 'inset-0', 'z-[60]', 'shadow-2xl');
+                sidebar.style.width = '';
+                sidebar.style.height = '';
+                sidebar.style.margin = '';
+                sidebar.style.borderRadius = '';
+
                 sidebar.classList.remove('flex'); // Go back to hidden state
                 if (sidebarBackdrop) {
                     sidebarBackdrop.classList.add('hidden');
                 }
+            }
+        });
+    }
+
+    // Close on X button click
+    const sidebarClose = document.getElementById('sidebar-close');
+    if (sidebarClose && sidebar) {
+        sidebarClose.addEventListener('click', () => {
+            sidebar.classList.add('hidden');
+            sidebar.classList.remove('flex', 'fixed', 'inset-0', 'z-[60]', 'shadow-2xl');
+            sidebar.style.width = '';
+            sidebar.style.height = '';
+            sidebar.style.margin = '';
+            sidebar.style.borderRadius = '';
+
+            if (sidebarBackdrop) {
+                sidebarBackdrop.classList.add('hidden');
             }
         });
     }
@@ -73,7 +100,11 @@ document.addEventListener('DOMContentLoaded', () => {
         sidebarBackdrop.addEventListener('click', () => {
             if (sidebar) {
                 sidebar.classList.add('hidden');
-                sidebar.classList.remove('flex', 'fixed', 'inset-y-0', 'left-0', 'z-[60]', 'w-72', 'shadow-2xl');
+                sidebar.classList.remove('flex', 'fixed', 'inset-0', 'z-[60]', 'shadow-2xl');
+                sidebar.style.width = '';
+                sidebar.style.height = '';
+                sidebar.style.margin = '';
+                sidebar.style.borderRadius = '';
             }
             sidebarBackdrop.classList.add('hidden');
         });
@@ -83,7 +114,11 @@ document.addEventListener('DOMContentLoaded', () => {
     window.addEventListener('resize', () => {
         if (window.innerWidth >= 768) {
             if (sidebar) {
-                sidebar.classList.remove('hidden', 'fixed', 'inset-y-0', 'left-0', 'z-[60]', 'shadow-2xl');
+                sidebar.classList.remove('hidden', 'fixed', 'inset-0', 'z-[60]', 'shadow-2xl');
+                sidebar.style.width = '';
+                sidebar.style.height = '';
+                sidebar.style.margin = '';
+                sidebar.style.borderRadius = '';
                 sidebar.classList.add('flex'); // Ensure it's visible as flex in sidebar mode
             }
             if (sidebarBackdrop) {
