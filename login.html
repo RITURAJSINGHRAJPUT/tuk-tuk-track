@@ -89,11 +89,33 @@
                 class="text-blue-600 dark:text-blue-400 font-bold hover:underline">Sign up</a>
         </p>
         <div class="mt-2 text-center">
-            <a href="#" class="text-sm text-blue-600 dark:text-blue-400 hover:underline">Forgot Password?</a>
+            <a href="#" id="forgot-password" class="text-sm text-blue-600 dark:text-blue-400 hover:underline">Forgot
+                Password?</a>
         </div>
     </div>
 
     <script type="module" src="js/auth.js"></script>
+    <script type="module">
+        import { auth, sendPasswordResetEmail } from './firebase-config.js';
+
+        document.getElementById('forgot-password').addEventListener('click', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+
+            if (!email) {
+                alert('Please enter your email address in the input field above first.');
+                return;
+            }
+
+            try {
+                await sendPasswordResetEmail(auth, email);
+                alert('Password reset email sent! check your inbox.');
+            } catch (error) {
+                console.error(error);
+                alert('Error: ' + error.message);
+            }
+        });
+    </script>
     <script>
         lucide.createIcons();
 

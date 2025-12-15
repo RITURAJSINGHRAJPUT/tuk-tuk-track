@@ -70,7 +70,7 @@
 
             <!-- User Profile -->
             <div class="p-4 border-t border-gray-200 dark:border-gray-800">
-                <div
+                <a href="profile.html"
                     class="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors group cursor-pointer">
                     <img src="https://ui-avatars.com/api/?name=User&background=3b82f6&color=fff" alt="User"
                         class="w-10 h-10 rounded-full ring-2 ring-white dark:ring-gray-800 sidebar-user-img">
@@ -81,7 +81,7 @@
                     </div>
                     <i data-lucide="chevron-right"
                         class="w-4 h-4 text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-300 transition-colors"></i>
-                </div>
+                </a>
             </div>
         </aside>
 
@@ -172,16 +172,10 @@
                                     </select>
                                 </div>
                                 <div class="space-y-2">
-                                    <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Shipment
-                                        Size</label>
-                                    <select id="shipmentSize"
+                                    <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Lot Size
+                                        (No. of Boxes)</label>
+                                    <input type="number" id="lotSize" placeholder="e.g. 50" min="1"
                                         class="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all">
-                                        <option value="">Select Size</option>
-                                        <option value="small">Small (< 5kg)</option>
-                                        <option value="medium">Medium (5-20kg)</option>
-                                        <option value="large">Large (20-100kg)</option>
-                                        <option value="bulk">Bulk (> 100kg)</option>
-                                    </select>
                                 </div>
                                 <div class="space-y-2">
                                     <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Weight
@@ -259,7 +253,9 @@
                                         <div class="space-y-2">
                                             <label
                                                 class="text-sm font-medium text-gray-700 dark:text-gray-300">Contact</label>
-                                            <input type="tel" id="pickupContact" placeholder="+91..."
+                                            <input type="tel" id="pickupContact" placeholder="10-digit number"
+                                                maxlength="10" pattern="[0-9]{10}"
+                                                oninput="this.value = this.value.replace(/[^0-9]/g, '')"
                                                 class="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all">
                                         </div>
                                     </div>
@@ -298,7 +294,9 @@
                                         <div class="space-y-2">
                                             <label
                                                 class="text-sm font-medium text-gray-700 dark:text-gray-300">Contact</label>
-                                            <input type="tel" id="deliveryContact" placeholder="+91..."
+                                            <input type="tel" id="deliveryContact" placeholder="10-digit number"
+                                                maxlength="10" pattern="[0-9]{10}"
+                                                oninput="this.value = this.value.replace(/[^0-9]/g, '')"
                                                 class="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all">
                                         </div>
                                     </div>
@@ -374,6 +372,13 @@
         initAuthUI();
         lucide.createIcons();
 
+        // Date Validation: Block past dates
+        const today = new Date().toISOString().split('T')[0];
+        const sDate = document.getElementById('shippingDate');
+        const dDate = document.getElementById('deliveryDate');
+        if (sDate) sDate.min = today;
+        if (dDate) dDate.min = today;
+
         const form = document.getElementById('shipment-form');
 
         // We need to get the current user to attach to the request
@@ -409,6 +414,14 @@
                     return;
                 }
 
+                // Strict Phone Validation
+                const pContact = document.getElementById('pickupContact').value;
+                const dContact = document.getElementById('deliveryContact').value;
+                if (pContact.length !== 10 || dContact.length !== 10) {
+                    alert('Please enter a valid 10-digit phone number for both Pickup and Delivery contacts.');
+                    return;
+                }
+
                 const btn = form.querySelector('button[type="submit"]');
                 const originalText = btn.innerHTML;
                 btn.innerHTML = '<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i> Processing...';
@@ -422,7 +435,7 @@
                         userEmail: currentUser.email,
                         userName: currentUser.displayName || 'User',
                         goodsType: document.getElementById('goodsType').value,
-                        shipmentSize: document.getElementById('shipmentSize').value,
+                        lotSize: document.getElementById('lotSize').value,
                         weight: document.getElementById('weight').value,
                         minTemp: document.getElementById('minTemp').value,
                         maxTemp: document.getElementById('maxTemp').value,

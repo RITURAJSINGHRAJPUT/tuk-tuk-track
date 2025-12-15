@@ -13,7 +13,13 @@ export function initAuthUI() {
 
             sidebarNames.forEach(el => el.textContent = user.displayName || 'User');
             sidebarRoles.forEach(el => el.textContent = user.email);
-            sidebarImgs.forEach(el => el.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(user.displayName || 'User')}&background=3b82f6&color=fff`);
+            sidebarImgs.forEach(el => {
+                if (user.photoURL) {
+                    el.src = user.photoURL;
+                } else {
+                    el.src = "https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/People/Man%20Technologist.png";
+                }
+            });
         }
     });
 
