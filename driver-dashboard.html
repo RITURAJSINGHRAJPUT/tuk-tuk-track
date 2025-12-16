@@ -42,13 +42,13 @@
             <div class="p-6 flex items-center justify-between gap-3 mb-2">
                 <div class="flex items-center gap-3">
                     <div
-                        class="w-10 h-10 bg-gradient-to-tr from-blue-600 to-blue-400 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20">
+                        class="w-10 h-10 bg-gradient-to-tr from-purple-600 to-purple-400 rounded-xl flex items-center justify-center shadow-lg shadow-purple-500/20">
                         <i data-lucide="truck" class="text-white w-6 h-6"></i>
                     </div>
                     <div>
                         <h1 class="text-xl font-bold tracking-tight text-gray-900 dark:text-white leading-none">TukTuk
                         </h1>
-                        <span class="text-xs font-bold text-blue-500 tracking-widest uppercase">Track</span>
+                        <span class="text-xs font-bold text-purple-500 tracking-widest uppercase">Driver</span>
                     </div>
                 </div>
                 <!-- Close Button (Mobile Only) -->
@@ -61,38 +61,22 @@
             <nav class="flex-1 px-4 space-y-2">
                 <p class="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2 mt-4">Menu</p>
 
-                <a href="dashboard.html"
-                    class="flex items-center gap-3 px-4 py-3.5 bg-gradient-to-r from-blue-600 to-blue-500 text-white rounded-xl shadow-lg shadow-blue-500/20 transition-all group">
+                <a href="driver-dashboard.html"
+                    class="flex items-center gap-3 px-4 py-3.5 bg-gradient-to-r from-purple-600 to-purple-500 text-white rounded-xl shadow-lg shadow-purple-500/20 transition-all group">
                     <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
-                    <span class="font-medium">Dashboard</span>
+                    <span class="font-medium">My Assignments</span>
                 </a>
-
-                <a href="track.html"
-                    class="flex items-center gap-3 px-4 py-3.5 text-gray-600 dark:text-gray-400 hover:bg-white dark:hover:bg-gray-800 hover:shadow-md hover:shadow-gray-200/50 dark:hover:shadow-black/20 rounded-xl transition-all group">
-                    <i data-lucide="map" class="w-5 h-5 group-hover:text-blue-500 transition-colors"></i>
-                    <span
-                        class="font-medium group-hover:text-gray-900 dark:group-hover:text-white transition-colors">Tracking</span>
-                </a>
-
-                <a href="request.html"
-                    class="flex items-center gap-3 px-4 py-3.5 text-gray-600 dark:text-gray-400 hover:bg-white dark:hover:bg-gray-800 hover:shadow-md hover:shadow-gray-200/50 dark:hover:shadow-black/20 rounded-xl transition-all group">
-                    <i data-lucide="package-plus" class="w-5 h-5 group-hover:text-blue-500 transition-colors"></i>
-                    <span
-                        class="font-medium group-hover:text-gray-900 dark:group-hover:text-white transition-colors">Request
-                        Shipment</span>
-                </a>
-
             </nav>
 
             <div class="p-4 border-t border-gray-200 dark:border-gray-800">
                 <a href="profile.html"
-                    class="flex items-center gap-3 p-3 rounded-xl bg-blue-50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-900/50 transition-colors group cursor-pointer hover:bg-blue-100 dark:hover:bg-blue-900/30">
-                    <img src="https://ui-avatars.com/api/?name=User&background=3b82f6&color=fff" alt="User"
+                    class="flex items-center gap-3 p-3 rounded-xl bg-purple-50 dark:bg-purple-900/10 border border-purple-100 dark:border-purple-900/50 transition-colors group cursor-pointer hover:bg-purple-100 dark:hover:bg-purple-900/30">
+                    <img src="https://ui-avatars.com/api/?name=Driver&background=9333ea&color=fff" alt="User"
                         class="w-10 h-10 rounded-xl shadow-sm sidebar-user-img">
                     <div class="overflow-hidden">
-                        <p class="text-sm font-bold text-gray-900 dark:text-white truncate sidebar-user-name">User
+                        <p class="text-sm font-bold text-gray-900 dark:text-white truncate sidebar-user-name">Driver</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 truncate sidebar-user-role">Verified Driver
                         </p>
-                        <p class="text-xs text-gray-500 dark:text-gray-400 truncate sidebar-user-role">Customer</p>
                     </div>
                 </a>
             </div>
@@ -109,13 +93,106 @@
                         <i data-lucide="menu" class="w-6 h-6"></i>
                     </button>
                     <div>
-                        <h1 class="text-xl md:text-2xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
-                        <p class="text-xs md:text-sm text-gray-500 dark:text-gray-400 hidden sm:block">Overview of your
-                            shipments</p>
+                        <h1 class="text-xl md:text-2xl font-bold text-gray-900 dark:text-white">Driver Dashboard</h1>
+                        <p class="text-xs md:text-sm text-gray-500 dark:text-gray-400 hidden sm:block">Manage your
+                            assigned shipments</p>
                     </div>
                 </div>
 
+                <style>
+                    /* Custom Toggle Styles for Text Inside */
+                    .toggle-checkbox {
+                        display: none;
+                    }
+
+                    .toggle-label {
+                        width: 70px;
+                        height: 34px;
+                        background-color: #e5e7eb;
+                        /* gray-200 */
+                        border-radius: 9999px;
+                        position: relative;
+                        cursor: pointer;
+                        transition: background-color 0.3s;
+                        box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06);
+                        display: flex;
+                        align-items: center;
+                        justify-content: space-between;
+                        padding: 0 4px;
+                        overflow: hidden;
+                    }
+
+                    .toggle-label:hover {
+                        transform: scale(1.05);
+                    }
+
+                    .toggle-checkbox:checked+.toggle-label {
+                        background: linear-gradient(to right, #9333ea, #2563eb);
+                        /* Purple Gradient */
+                    }
+
+                    /* The Knob */
+                    .toggle-knob {
+                        width: 26px;
+                        height: 26px;
+                        background-color: white;
+                        border-radius: 50%;
+                        position: absolute;
+                        top: 4px;
+                        left: 4px;
+                        transition: transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+                        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+                        z-index: 10;
+                    }
+
+                    .toggle-checkbox:checked+.toggle-label .toggle-knob {
+                        transform: translateX(36px);
+                    }
+
+                    /* Text Labels */
+                    .toggle-text-on,
+                    .toggle-text-off {
+                        color: white;
+                        font-family: sans-serif;
+                        font-weight: 800;
+                        font-size: 11px;
+                        position: absolute;
+                        top: 50%;
+                        transform: translateY(-50%);
+                        user-select: none;
+                        transition: opacity 0.3s;
+                    }
+
+                    .toggle-text-on {
+                        left: 8px;
+                        opacity: 0;
+                    }
+
+                    .toggle-text-off {
+                        right: 8px;
+                        color: #6b7280;
+                        /* gray-500 */
+                        opacity: 1;
+                    }
+
+                    .toggle-checkbox:checked+.toggle-label .toggle-text-on {
+                        opacity: 1;
+                    }
+
+                    .toggle-checkbox:checked+.toggle-label .toggle-text-off {
+                        opacity: 0;
+                    }
+                </style>
                 <div class="flex items-center gap-4">
+                    <!-- Activity Toggle -->
+                    <div class="relative inline-block">
+                        <input type="checkbox" id="activity-toggle" class="toggle-checkbox">
+                        <label for="activity-toggle" class="toggle-label border-2 border-transparent">
+                            <span class="toggle-text-on">ON</span>
+                            <span class="toggle-text-off">OFF</span>
+                            <div class="toggle-knob"></div>
+                        </label>
+                    </div>
                     <button id="theme-toggle"
                         class="p-2.5 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl transition-colors border border-transparent hover:border-gray-200 dark:hover:border-gray-700">
                         <i data-lucide="sun" class="w-5 h-5 dark:hidden"></i>
@@ -353,7 +430,7 @@
     <script src="js/main.js"></script>
     <script type="module">
         import { initAuthUI } from './js/auth-ui.js';
-        import { auth, db, collection, query, where, orderBy, onSnapshot, getDoc, doc } from './firebase-config.js';
+        import { auth, db, collection, query, where, orderBy, onSnapshot, getDoc, doc, updateDoc } from './firebase-config.js';
 
         initAuthUI();
         lucide.createIcons();
@@ -384,40 +461,97 @@
             if (user) {
                 currentUser = user;
 
-                // Guard: If driver, go to driver-dashboard
-                // We check basic email pattern first for speed, then doc if needed
-                if (user.email.endsWith('.driver@tuktuk.com')) {
-                    window.location.href = 'driver-dashboard.html';
+                // Guard: If NOT driver, go to dashboard
+                let isDriver = user.email.endsWith('.driver@tuktuk.com');
+
+                if (!isDriver) {
+                    // Check firestore to be sure (e.g. manually assigned role without email pattern)
+                    try {
+                        const userDoc = await getDoc(doc(db, "users", user.uid));
+                        if (userDoc.exists() && userDoc.data().role === 'driver') {
+                            isDriver = true;
+                        }
+                    } catch (e) {
+                        console.error("Auth Guard Error", e);
+                    }
+                }
+
+                if (!isDriver) {
+                    window.location.href = 'dashboard.html';
                     return;
                 }
 
-                // Double check with firestore if needed, but email pattern is strong signal per user
+                fetchShipments('driver', user);
+
+                // Initialize Activity Toggle
+                const activityToggle = document.getElementById('activity-toggle');
+                // Removed activityText and activityDot references
+
+
+                // 1. Get Initial Status
                 try {
-                    const userDoc = await getDoc(doc(db, "users", user.uid));
-                    if (userDoc.exists()) {
-                        const data = userDoc.data();
-                        if (data.role === 'driver') {
-                            window.location.href = 'driver-dashboard.html';
-                            return;
+                    const userRef = doc(db, "users", user.uid);
+                    // We might have fetched it in guard, but let's fetch fresh or set listener
+                    getDoc(userRef).then((snap) => {
+                        if (snap.exists()) {
+                            const data = snap.data();
+                            const isOnline = data.isOnline || false; // Default off
+
+                            activityToggle.checked = isOnline;
+                            updateActivityUI(isOnline);
                         }
+                    });
+                } catch (e) { console.error("Error fetching status", e); }
+
+                // 2. Handle Toggle Change
+                activityToggle.addEventListener('change', async (e) => {
+                    const isOnline = e.target.checked;
+                    updateActivityUI(isOnline); // Optimistic update
+
+                    try {
+                        const userRef = doc(db, "users", user.uid);
+                        await updateDoc(userRef, {
+                            isOnline: isOnline,
+                            lastActiveAt: new Date().toISOString()
+                        });
+                        console.log("Status updated:", isOnline);
+                    } catch (error) {
+                        console.error("Failed to update status:", error);
+                        // Revert UI on error
+                        activityToggle.checked = !isOnline;
+                        updateActivityUI(!isOnline);
+                        alert("Failed to update status. Please try again.");
                     }
-                } catch (e) {
-                    console.error("Auth Guard Error", e);
+                });
+
+                function updateActivityUI(isOnline) {
+                    // UI is handled by CSS (Toggle internal text)
+                    // We just keep this function as a placeholder if we want to add side effects later
+                    console.log("Activity UI Updated:", isOnline ? "Online" : "Offline");
                 }
 
-                fetchUserShipments(user.uid);
             } else {
                 window.location.href = 'login.html';
             }
         });
 
-        function fetchUserShipments(userId) {
-            // User sees their created shipments
-            const q = query(
-                collection(db, "shipments"),
-                where("userId", "==", userId),
-                orderBy("createdAt", "desc")
-            );
+        function fetchShipments(role, user) {
+            let q;
+            if (role === 'driver') {
+                // Driver sees assigned shipments
+                // Note: Removing orderBy to avoid "Missing Index" error for now. Sorting client-side.
+                q = query(
+                    collection(db, "shipments"),
+                    where("driver.email", "==", user.email)
+                );
+            } else {
+                // Regular user sees their created shipments
+                q = query(
+                    collection(db, "shipments"),
+                    where("userId", "==", user.uid),
+                    orderBy("createdAt", "desc")
+                );
+            }
 
             onSnapshot(q, (snapshot) => {
                 shipmentsData = [];
@@ -435,11 +569,8 @@
                                 <i data-lucide="package-open" class="w-8 h-8 text-gray-400"></i>
                             </div>
                             <h3 class="text-lg font-medium text-gray-900 dark:text-white">No shipments found</h3>
-                            <p class="text-gray-500 dark:text-gray-400 mt-1">Request a shipment to get started.</p>
-                            <a href="request.html"
-                                class="inline-flex items-center gap-2 mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-                                <i data-lucide="plus" class="w-4 h-4"></i> Request Shipment
-                            </a>
+                            <p class="text-gray-500 dark:text-gray-400 mt-1">${role === 'driver' ? 'You have no assigned shipments yet.' : 'Request a shipment to get started.'}</p>
+                            ${role === 'user' ? `<a href="request.html" class="inline-flex items-center gap-2 mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"><i data-lucide="plus" class="w-4 h-4"></i> Request Shipment</a>` : ''}
                         </div>
                     `;
                     lucide.createIcons();
@@ -451,10 +582,19 @@
                     const data = doc.data();
                     data.id = doc.id;
                     shipmentsData.push(data);
+                });
 
+                // Client-side sort (Descenting order by createdAt)
+                shipmentsData.sort((a, b) => {
+                    const dateA = new Date(a.createdAt || 0);
+                    const dateB = new Date(b.createdAt || 0);
+                    return dateB - dateA;
+                });
+
+                shipmentsData.forEach(data => {
                     // Stats
                     total++;
-                    if (data.status === 'In Transit') active++;
+                    if (data.status === 'In Transit' || data.status === 'Assigned') active++;
                     if (data.status === 'Pending') pending++;
                     if (data.status === 'Completed') completed++;
 
@@ -504,13 +644,6 @@
                         <span class="px-2.5 py-1 rounded-lg text-[10px] md:text-xs font-bold ${statusBg} ${statusColor} border border-opacity-20">${data.status}</span>
                     </div>
 
-                    ${(data.pickupStatus === 'arrived' && data.pickupOtp) ?
-                    `<div class="mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-900/50 rounded-xl text-center">
-                        <p class="text-[10px] font-bold text-red-500 uppercase tracking-wider mb-1">Give this OTP to Driver</p>
-                        <p class="text-xl md:text-2xl font-black text-red-600 dark:text-red-400 tracking-[0.2em] font-mono">${data.pickupOtp}</p>
-                    </div>` : ''
-                }
-
                     <div class="space-y-3 mb-5 relative">
                         <div class="flex items-start gap-3">
                             <div class="mt-1 min-w-[16px]"><i data-lucide="map-pin" class="w-4 h-4 text-gray-400"></i></div>
@@ -538,10 +671,31 @@
                                 <p class="text-[10px] text-gray-500">${data.weight} kg</p>
                             </div>
                         </div>
+                        
                         <button class="p-2 bg-gray-50 dark:bg-gray-700/50 rounded-lg text-gray-500 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
                             <i data-lucide="arrow-right" class="w-4 h-4"></i>
                         </button>
                     </div>
+
+                    ${(data.status && data.status.toLowerCase() === 'assigned' && (!data.pickupStatus || data.pickupStatus !== 'verified')) ?
+                    `<div class="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700">
+                            ${(data.pickupStatus !== 'arrived') ?
+                        `<button type="button" onclick="handleDriverArrival('${data.id}', event)" class="w-full py-2.5 bg-purple-600 text-white rounded-xl font-bold shadow-lg shadow-purple-500/20 hover:bg-purple-700 transition-all flex items-center justify-center gap-2" style="background-color: #7c3aed; color: white;">
+                                    <i data-lucide="map-pin" class="w-4 h-4"></i>
+                                    Reached Pickup Location
+                                </button>`
+                        :
+                        `<div class="bg-purple-50 dark:bg-purple-900/20 rounded-xl p-3 border border-purple-100 dark:border-purple-900/50">
+                                    <p class="text-[10px] items-center text-center text-gray-500 mb-2 font-medium uppercase tracking-wider">Pickup Verification OTP</p>
+                                    <div class="flex gap-2" onclick="event.stopPropagation()">
+                                        <input type="text" id="otp-input-${data.id}" class="flex-1 px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 text-center tracking-widest font-bold text-sm" placeholder="OTP" maxlength="6">
+                                        <button type="button" onclick="verifyPickupOtp('${data.id}', '${data.pickupOtp}', event)" class="px-4 py-2 bg-purple-600 text-white rounded-lg font-bold text-sm hover:bg-purple-700 transition-colors">Verify</button>
+                                    </div>
+                                </div>`
+                    }
+                        </div>`
+                    : ''
+                }
                 </div>
             `;
         }
@@ -549,6 +703,7 @@
         function getStatusColor(status) {
             switch (status) {
                 case 'Pending': return 'text-orange-700 dark:text-orange-400';
+                case 'Assigned': return 'text-purple-700 dark:text-purple-400';
                 case 'In Transit': return 'text-blue-700 dark:text-blue-400';
                 case 'Completed': return 'text-green-700 dark:text-green-400';
                 case 'Cancelled': return 'text-red-700 dark:text-red-400';
@@ -559,6 +714,7 @@
         function getStatusBg(status) {
             switch (status) {
                 case 'Pending': return 'bg-orange-100 dark:bg-orange-900/30';
+                case 'Assigned': return 'bg-purple-100 dark:bg-purple-900/30';
                 case 'In Transit': return 'bg-blue-100 dark:bg-blue-900/30';
                 case 'Completed': return 'bg-green-100 dark:bg-green-900/30';
                 case 'Cancelled': return 'bg-red-100 dark:bg-red-900/30';
@@ -610,6 +766,14 @@
 
 
 
+            // Driver Details
+            if (modalDriver) {
+                // ... (keep existing)
+            }
+
+            // Pickup Verification Logic has been moved to the shipment card directly.
+
+
             // Render Timeline
             renderTimeline(shipment);
 
@@ -617,6 +781,81 @@
             if (m) m.classList.remove('hidden');
             lucide.createIcons();
         }
+
+
+
+        // Action: Mark Arrived (Renamed to handleDriverArrival)
+        // Action: Mark Arrived (Renamed to handleDriverArrival)
+        window.handleDriverArrival = async (id, event) => {
+            console.log("handleDriverArrival called", id);
+            let btn = null;
+            if (event) {
+                event.preventDefault();
+                event.stopPropagation();
+                btn = event.currentTarget;
+            }
+
+            if (btn) {
+                const originalText = btn.innerHTML;
+                btn.innerHTML = '<i data-lucide="loader-2" class="animate-spin w-5 h-5"></i> Processing...';
+                btn.disabled = true;
+            }
+
+            const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+            try {
+                // Database Update
+                await updateDoc(doc(db, "shipments", id), {
+                    pickupStatus: 'arrived',
+                    pickupOtp: otp,
+                    pickupArrivedAt: new Date().toISOString()
+                });
+
+            } catch (e) {
+                console.error("Error marking arrived:", e);
+                alert("Failed to update status. Please try again.");
+                if (btn) {
+                    btn.innerHTML = 'Retry';
+                    btn.disabled = false;
+                }
+            }
+        };
+
+        // Alias for safety
+        window.markArrived = window.handleDriverArrival;
+
+        window.verifyPickupOtp = async (id, correctOtp, event) => {
+            if (event) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+
+            // Correctly select the unique input for this shipment card
+            const input = document.getElementById(`otp-input-${id}`);
+            if (!input) {
+                console.error("OTP Input not found");
+                return;
+            }
+
+            const entered = input.value.trim();
+
+            if (entered !== correctOtp) {
+                alert("Invalid OTP. Please ask admin for the correct code.");
+                return;
+            }
+
+            try {
+                await updateDoc(doc(db, "shipments", id), {
+                    status: 'In Transit',
+                    pickupStatus: 'verified',
+                    verifiedAt: new Date().toISOString()
+                });
+                // alert("Pickup Verified! Have a safe journey."); // Optional: remove alert for smoother flow
+            } catch (e) {
+                console.error("Error verifying:", e);
+                alert("Verification failed.");
+            }
+        };
 
         function renderTimeline(shipment) {
             if (!modalTimeline) return;

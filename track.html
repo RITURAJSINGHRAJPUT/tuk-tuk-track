@@ -172,7 +172,8 @@
                                     <i data-lucide="clock" class="w-5 h-5 text-blue-500"></i>
                                     Shipment Timeline
                                 </h3>
-                                <div class="relative pl-4 border-l-2 border-gray-100 dark:border-gray-700 space-y-8">
+                                <div
+                                    class="relative pl-4 border-l-2 border-gray-100 dark:border-gray-700 space-y-8 max-h-[350px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600">
                                     <!-- Timeline Items will be injected here -->
                                 </div>
                             </div>
@@ -463,78 +464,111 @@
                     }
 
                     // Update Location
+                    // Helper: Robust Reverse Geocoding
+                    const getReadableAddress = async (lat, lng) => {
+                        try {
+                            const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
+                            const data = await res.json();
+                            const addr = data.address;
+                            if (!addr) return "Unknown Location";
+
+                            // Try to find a specific local name
+                            const localName = addr.road || addr.neighbourhood || addr.suburb || addr.hamlet || addr.village;
+                            const cityRegion = addr.city || addr.town || addr.county || addr.state_district;
+                            const state = addr.state;
+
+                            let parts = [];
+                            if (localName) parts.push(localName);
+                            if (cityRegion && cityRegion !== localName) parts.push(cityRegion);
+                            if (state && !cityRegion) parts.push(state); // fallback to state if no city
+
+                            return parts.length > 0 ? parts.join(', ') : (data.name || "Unknown Location");
+                        } catch (e) {
+                            console.error("Geo error:", e);
+                            return `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+                        }
+                    };
+
+                    // Update Location Logic
                     const locationEl = document.getElementById('vehicle-location');
                     if (locationEl) {
-                        fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
-                            .then(res => res.json())
-                            .then(data => {
-                                const addr = data.address;
-                                const shortName = addr.neighbourhood || addr.suburb || addr.street || addr.city || data.name || 'Unknown Location';
-                                const city = addr.city || addr.town || addr.village || addr.state;
-                                const finalText = (city && !shortName.includes(city)) ? `${shortName}, ${city}` : shortName;
-
-                                locationEl.innerText = finalText;
-                                locationEl.title = data.display_name;
-                            })
-                            .catch(err => {
-                                locationEl.innerText = `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
-                            });
+                        getReadableAddress(lat, lng).then(addr => {
+                            locationEl.innerText = addr;
+                            locationEl.title = addr;
+                        });
                     }
 
-                    // Update Driver Info (New Interaction)
-                    const driverContainer = document.getElementById('driver-card-container');
-                    if (driverContainer) {
-                        if (shipmentData.driver) {
-                            driverContainer.classList.remove('hidden');
-                            driverContainer.innerHTML = `
-                            <h3 class="font-semibold mb-6 text-gray-900 dark:text-white flex items-center gap-2">
-                                <i data-lucide="user" class="w-5 h-5 text-blue-500"></i>
-                                Driver
-                            </h3>
-                            <div class="flex items-center gap-4">
-                                <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-lg">
-                                    ${shipmentData.driver.name.charAt(0).toUpperCase()}
-                                </div>
-                                <div>
-                                    <h4 class="font-medium text-gray-900 dark:text-white capitalize">${shipmentData.driver.name}</h4>
-                                    <div class="flex items-center gap-1 text-gray-500 text-sm">
-                                        <i data-lucide="phone" class="w-3 h-3"></i>
-                                        <span>${shipmentData.driver.phone}</span>
-                                    </div>
-                                </div>
-                                <a href="tel:${shipmentData.driver.phone}" 
-                                   class="ml-auto p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-full transition-colors" title="Call Driver">
-                                    <i data-lucide="phone" class="w-5 h-5"></i>
-                                </a>
-                            </div>
-                        `;
-                        } else {
-                            // Keep container but show "Pending" state or hide
-                            driverContainer.innerHTML = `
-                             <h3 class="font-semibold mb-6 text-gray-900 dark:text-white flex items-center gap-2">
-                                <i data-lucide="user" class="w-5 h-5 text-gray-400"></i>
-                                Driver
-                            </h3>
-                            <p class="text-sm text-gray-500 italic">No driver assigned yet.</p>
-                        `;
-                        }
-                    }
-
-                    // Update Timeline
+                    // Update Timeline Logic (Full History)
                     const timelineContainer = document.querySelector('.border-l-2');
-                    timelineContainer.innerHTML = `
-                    <div class="relative">
-                        <div class="absolute -left-[21px] top-0 w-4 h-4 bg-blue-500 rounded-full border-2 border-white dark:border-gray-800"></div>
+                    timelineContainer.innerHTML = ''; // Clear existing
+
+                    // 1. Add Current Status (Top)
+                    const currentItem = document.createElement('div');
+                    currentItem.className = 'relative mb-8';
+                    currentItem.innerHTML = `
+                        <div class="absolute -left-[21px] top-0 w-4 h-4 bg-green-500 rounded-full border-2 border-white dark:border-gray-800 shadow-sm"></div>
                         <div class="mb-1 flex justify-between items-start">
-                            <h4 class="font-medium text-gray-900 dark:text-white">Current Status: ${status}</h4>
-                            <span class="text-xs text-blue-600 bg-blue-100 dark:bg-blue-900/30 px-2 py-0.5 rounded-full">Active</span>
+                            <h4 class="font-bold text-gray-900 dark:text-white text-lg">${status}</h4>
+                            <span class="text-xs text-green-700 bg-green-100 dark:bg-green-900/30 px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">Latest</span>
                         </div>
-                        <p class="text-sm text-gray-500">
-                             Latest Update: Location [${lat.toFixed(4)}, ${lng.toFixed(4)}]
+                        <p class="text-sm text-gray-600 dark:text-gray-300 font-medium" id="current-timeline-loc">
+                             Locating...
                         </p>
-                        <span class="text-xs text-gray-400 mt-1 block">${new Date().toLocaleTimeString()}</span>
-                    </div>
-                `;
+                        <span class="text-xs text-gray-400 mt-1 block font-mono">${new Date().toLocaleTimeString()}</span>
+                    `;
+                    timelineContainer.appendChild(currentItem);
+                    // Fill address async
+                    getReadableAddress(lat, lng).then(addr => {
+                        currentItem.querySelector('#current-timeline-loc').innerText = addr;
+                    });
+
+                    // 2. Add History Items (Newest First)
+                    if (shipmentData.locationHistory && shipmentData.locationHistory.length > 0) {
+                        // Sort Newest -> Oldest
+                        const sortedHistory = [...shipmentData.locationHistory].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+                        sortedHistory.forEach((h, index) => {
+                            const isLast = index === sortedHistory.length - 1;
+                            const item = document.createElement('div');
+                            item.className = 'relative mb-8';
+
+                            const timeStr = new Date(h.timestamp).toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+
+                            item.innerHTML = `
+                                <div class="absolute -left-[21px] top-1.5 w-4 h-4 bg-gray-200 dark:bg-gray-700 rounded-full border-2 border-white dark:border-gray-800"></div>
+                                <div class="mb-1">
+                                    <h4 class="font-medium text-gray-900 dark:text-white text-sm">Location Update</h4>
+                                </div>
+                                <p class="text-xs text-gray-500 dark:text-gray-400 mb-1" id="hist-loc-${index}">
+                                     ${h.lat.toFixed(4)}, ${h.lng.toFixed(4)}
+                                </p>
+                                <span class="text-[10px] text-gray-400 font-mono">${timeStr}</span>
+                            `;
+                            timelineContainer.appendChild(item);
+
+                            // Lazy load old addresses to avoid rate limits
+                            setTimeout(() => {
+                                getReadableAddress(h.lat, h.lng).then(addr => {
+                                    const el = item.querySelector(`#hist-loc-${index}`);
+                                    if (el) el.innerText = addr;
+                                });
+                            }, index * 200); // Stagger requests
+                        });
+                    }
+
+                    // 3. Add Pickup Start (Bottom)
+                    const startItem = document.createElement('div');
+                    startItem.className = 'relative';
+                    startItem.innerHTML = `
+                         <div class="absolute -left-[21px] top-1.5 w-4 h-4 bg-blue-500 rounded-full border-2 border-white dark:border-gray-800"></div>
+                        <div class="mb-1">
+                            <h4 class="font-medium text-gray-900 dark:text-white text-sm">Shipment Started</h4>
+                        </div>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">${shipmentData.pickup.place}</p>
+                        <span class="text-[10px] text-gray-400 font-mono">${new Date(shipmentData.createdAt).toLocaleString()}</span>
+                    `;
+                    timelineContainer.appendChild(startItem);
+
 
                     // Initialize Map with LIVE location
                     if (map) {
@@ -548,7 +582,7 @@
                     let lastUpdateStr = new Date().toLocaleTimeString();
 
                     if (shipmentData.locationHistory && shipmentData.locationHistory.length > 0) {
-                        // Sort history by timestamp
+                        // Sort Oldest -> Newest for Path
                         history = shipmentData.locationHistory.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
                         pathCoords = history.map(h => [parseFloat(h.lat), parseFloat(h.lng)]);
 
@@ -566,125 +600,20 @@
 
                     // Draw Route (Realistic vs Simple)
                     if (pathCoords.length > 1) {
-                        // limit OSRM waypoints to avoid URL length issues (max ~25 for demo)
-                        // If too many points, sample them or just use start/end/current? 
-                        // ideally we pass all history to get the exact path taken.
-                        // For stability, let's use the simple line as a base layer or fallback
+                        // Simple Blue Line (Always reliable)
+                        L.polyline(pathCoords, { color: 'blue', weight: 4, opacity: 0.6, dashArray: '5, 10' }).addTo(map);
+                    }
 
-                        const simpleLine = L.polyline(pathCoords, { color: 'blue', weight: 4, opacity: 0.8 }).addTo(map);
-
-                        // -- SMART SAMPLING FOR OSRM --
-                        // OSRM Public Demo Server has strict URL length limits.
-                        // We need to sample the points if there are too many.
-
-                        let sampledCoords = [];
-                        const MAX_POINTS = 15; // Decreased to be safer
-
-                        // Filter duplicates first
-                        const uniqueCoords = pathCoords.filter((c, i, arr) => i === 0 || (c[0] !== arr[i - 1][0] || c[1] !== arr[i - 1][1]));
-
-                        if (uniqueCoords.length <= MAX_POINTS) {
-                            sampledCoords = uniqueCoords;
-                        } else {
-                            // Always include first
-                            sampledCoords.push(uniqueCoords[0]);
-
-                            // Calculate step size to pick intermediate points
-                            const step = (uniqueCoords.length - 2) / (MAX_POINTS - 2);
-
-                            for (let i = 1; i < MAX_POINTS - 1; i++) {
-                                const index = Math.floor(1 + (i - 1) * step);
-                                if (index < uniqueCoords.length - 1) {
-                                    sampledCoords.push(uniqueCoords[index]);
-                                }
-                            }
-
-                            // Always include last
-                            sampledCoords.push(uniqueCoords[uniqueCoords.length - 1]);
-                        }
-
-                        // Prepare coordinates for OSRM (Lng,Lat format)
-                        const osrmCoords = sampledCoords.map(c => `${c[1]},${c[0]}`).join(';');
-
-                        // Update: Use 'simplified' overview to save bandwidth, but 'full' is better for detailed turns.
-                        // The issue is likely the number of coordinates or duplicates.
-
-                        const osrmUrl = `https://router.project-osrm.org/route/v1/driving/${osrmCoords}?overview=full&geometries=geojson`;
-                        console.log("Requesting OSRM Route:", osrmUrl);
-
-                        fetch(osrmUrl)
-                            .then(res => res.json())
-                            .then(data => {
-                                if (data.code === 'Ok' && data.routes && data.routes.length > 0) {
-                                    // Remove simple line if we have a better one
-                                    map.removeLayer(simpleLine);
-
-                                    L.geoJSON(data.routes[0].geometry, {
-                                        style: { color: 'blue', weight: 5, opacity: 0.8, lineJoin: 'round' }
-                                    }).addTo(map);
-                                } else {
-                                    console.warn("OSRM returned no routes:", data);
-                                    // Enhance fallback: Make simple line solid if OSRM fails
-                                    simpleLine.setStyle({ dashArray: null, opacity: 0.8 });
-                                    // Notify user via console or UI
-                                    L.popup().setLatLng([lat, lng]).setContent("Road mapping unavailable. Showing direct path.").openOn(map);
-                                }
-                            })
-                            .catch(err => {
-                                console.error("OSRM Routing failed:", err);
-                                // Enhance fallback: Make simple line solid if OSRM fails
-                                simpleLine.setStyle({ dashArray: null, opacity: 0.8 });
-                            });
-
-                        // Add markers for history points
+                    // Add markers for history points (only if < 20 to avoid clutter)
+                    if (history.length < 20) {
                         history.forEach((point, index) => {
-                            let pointTemp = 'N/A';
-                            if (shipmentData.temperatureHistory) {
-                                const matching = shipmentData.temperatureHistory.find(t => t.timestamp === point.timestamp);
-                                if (matching) pointTemp = matching.temp;
-                            }
-
-                            const timeStr = point.timestamp ? new Date(point.timestamp).toLocaleTimeString() : 'Unknown';
-                            const uniqueId = `history-addr-${index}`;
-
-                            const marker = L.circleMarker([point.lat, point.lng], {
-                                radius: 5,
-                                color: 'blue',
+                            L.circleMarker([point.lat, point.lng], {
+                                radius: 4,
+                                color: 'gray',
                                 fillColor: 'white',
-                                fillOpacity: 1
-                            }).addTo(map);
-
-                            marker.bindPopup(`
-                            <div class="text-xs font-sans p-1">
-                                <strong id="${uniqueId}" class="text-blue-600">Loading Location...</strong><br>
-                                <span class="text-gray-500">Time:</span> ${timeStr}<br>
-                                <span class="text-gray-500">Temp:</span> ${pointTemp}°C
-                            </div>
-                        `);
-
-                            marker.on('popupopen', () => {
-                                const el = document.getElementById(uniqueId);
-                                if (el && el.innerText === 'Loading Location...') {
-                                    fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${point.lat}&lon=${point.lng}`)
-                                        .then(res => res.json())
-                                        .then(data => {
-                                            const addr = data.address;
-                                            // Construct a concise location name
-                                            const shortName = addr.neighbourhood || addr.suburb || addr.street || addr.city || addr.town || addr.village || data.name || 'Unknown Location';
-
-                                            // If we have a city/town and it's different from the short name, append it for context
-                                            const city = addr.city || addr.town || addr.village || addr.state;
-                                            const finalText = (city && !shortName.includes(city)) ? `${shortName}, ${city}` : shortName;
-
-                                            el.innerText = finalText;
-                                            el.title = data.display_name; // Full address on hover
-                                        })
-                                        .catch(err => {
-                                            console.error("Geo error:", err);
-                                            el.innerText = "Location Unavailable";
-                                        });
-                                }
-                            });
+                                fillOpacity: 1,
+                                weight: 1
+                            }).addTo(map).bindPopup(`History Point ${index + 1}<br>${new Date(point.timestamp).toLocaleTimeString()}`);
                         });
                     }
 

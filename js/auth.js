@@ -1,4 +1,4 @@
-import { auth, db, createUserWithEmailAndPassword, signInWithEmailAndPassword, doc, setDoc, updateProfile, signOut, setPersistence, browserLocalPersistence, browserSessionPersistence } from '../firebase-config.js';
+import { auth, db, createUserWithEmailAndPassword, signInWithEmailAndPassword, doc, setDoc, getDoc, updateProfile, signOut, setPersistence, browserLocalPersistence, browserSessionPersistence } from '../firebase-config.js';
 
 // Register Form Handler
 const registerForm = document.getElementById('register-form');
@@ -7,10 +7,18 @@ if (registerForm) {
         e.preventDefault();
 
         const name = document.getElementById('name').value;
-        const email = document.getElementById('email').value;
+        const email = document.getElementById('email').value.toLowerCase();
         const phone = document.getElementById('phone').value;
         const password = document.getElementById('password').value;
-        const role = 'user'; // Default role
+
+        let role = 'user';
+        let status = 'approved';
+
+        if (email.endsWith('.driver@tuktuk.com')) {
+            role = 'driver';
+            status = 'pending';
+        }
+
         const submitBtn = registerForm.querySelector('button[type="submit"]');
 
         try {
@@ -36,12 +44,20 @@ if (registerForm) {
                 email: email,
                 phone: phone,
                 role: role,
+                status: status, // pending or approved
                 createdAt: new Date().toISOString()
             });
 
-            await signOut(auth);
-            alert('Account created successfully! Please log in.');
-            window.location.href = 'login.html';
+            // If pending, sign out immediately
+            if (status === 'pending') {
+                await signOut(auth);
+                alert('Account created! Verification required. Please wait for admin approval.');
+                window.location.href = 'login.html';
+            } else {
+                await signOut(auth); // Force re-login or auto-login? Original code had signOut then login.html
+                alert('Account created successfully! Please log in.');
+                window.location.href = 'login.html';
+            }
 
         } catch (error) {
             console.error("Error registering user:", error);
@@ -72,14 +88,38 @@ if (loginForm) {
 
             await setPersistence(auth, persistenceType);
 
-            await signInWithEmailAndPassword(auth, email, password);
+            // 2. Sign In
+            const userCredential = await signInWithEmailAndPassword(auth, email, password);
+            const user = userCredential.user;
 
-            // Redirect based on role could be added here, for now go to dashboard
-            window.location.href = 'dashboard.html';
+            // 3. Check Firestore for Verification Status
+            const userDocSnap = await getDoc(doc(db, "users", user.uid));
+            if (userDocSnap.exists()) {
+                const userData = userDocSnap.data();
+
+                // Check if driver is pending
+                // We check role explicitly or assume restricted status applies to anyone labeled pending
+                if (userData.status === 'pending') {
+                    await signOut(auth);
+                    throw new Error("Your account is pending verification. Please contact admin.");
+                }
+
+                // Redirect based on role
+                const role = userData.role || (user.email.endsWith('.driver@tuktuk.com') ? 'driver' : 'user');
+
+                if (role === 'driver') {
+                    window.location.href = 'driver-dashboard.html';
+                } else {
+                    window.location.href = 'dashboard.html';
+                }
+            } else {
+                // Fallback if no doc
+                window.location.href = 'dashboard.html';
+            }
 
         } catch (error) {
             console.error("Error logging in:", error);
-            alert("Invalid email or password.");
+            alert(error.message || "Invalid email or password.");
             submitBtn.innerHTML = 'Log In';
             submitBtn.disabled = false;
         }
