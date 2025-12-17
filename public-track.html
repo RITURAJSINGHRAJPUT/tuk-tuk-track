@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Track Shipment - TukTukTrack</title>
+    <link href="./css/style.css" rel="stylesheet">
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    </script>
+</head>
+
+<body class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-100 font-sans transition-colors duration-200">
+
+    <div class="min-h-screen flex flex-col">
+        <!-- Header -->
+        <header
+            class="bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-800 sticky top-0 z-50">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex items-center justify-between h-16">
+                    <div class="flex items-center gap-3">
+                        <div
+                            class="w-10 h-10 bg-gradient-to-tr from-purple-600 to-purple-400 rounded-xl flex items-center justify-center shadow-lg shadow-purple-500/20">
+                            <i data-lucide="truck" class="text-white w-6 h-6"></i>
+                        </div>
+                        <h1 class="text-xl font-bold tracking-tight text-gray-900 dark:text-white">TukTuk<span
+                                class="text-purple-600">Track</span></h1>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="flex-1 p-4 md:p-8">
+            <div class="max-w-3xl mx-auto space-y-6">
+
+                <!-- Loading State -->
+                <div id="loading" class="flex flex-col items-center justify-center py-20">
+                    <i data-lucide="loader-2" class="w-10 h-10 animate-spin text-purple-500 mb-4"></i>
+                    <p class="text-gray-500">Loading shipment details...</p>
+                </div>
+
+                <!-- Error State -->
+                <div id="error-message" class="hidden flex-col items-center justify-center py-20 text-center">
+                    <div class="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mb-4">
+                        <i data-lucide="alert-triangle" class="w-8 h-8"></i>
+                    </div>
+                    <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Shipment Not Found</h2>
+                    <p class="text-gray-500 mb-6 max-w-md">We couldn't find a shipment with this ID. Please check the
+                        link and try again.</p>
+                    <a href="index.html"
+                        class="px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-xl transition-colors font-medium">Go
+                        Home</a>
+                </div>
+
+                <!-- Content (Initially Hidden) -->
+                <div id="tracking-content" class="hidden space-y-6">
+
+                    <!-- Status Card -->
+                    <div
+                        class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-8">
+                        <div class="flex items-center justify-between mb-8">
+                            <div>
+                                <h2 class="text-xl font-bold text-gray-900 dark:text-white">Shipment Status</h2>
+                                <p class="text-sm text-gray-500 font-mono mt-1" id="shipment-id-display">ID: Loading...
+                                </p>
+                            </div>
+                            <span id="status-badge"
+                                class="px-4 py-1.5 rounded-full text-sm font-bold bg-gray-100 text-gray-700 shadow-sm border border-gray-100 dark:border-gray-600">Loading...</span>
+                        </div>
+
+                        <!-- Stepper Progress Bar -->
+                        <div class="w-full px-0 md:px-2">
+                            <!-- DESKTOP: Horizontal Stepper (Hidden on Mobile) -->
+                            <div class="hidden md:block relative w-full">
+                                <!-- Connecting Line Background -->
+                                <div
+                                    class="absolute top-1/2 left-6 right-6 h-1 bg-gray-200 dark:bg-gray-700 -translate-y-1/2 rounded-full z-0">
+                                </div>
+                                <!-- Active Line (Gradient) -->
+                                <div id="progress-line"
+                                    class="absolute top-1/2 left-6 h-1 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 -translate-y-1/2 rounded-full z-0 transition-all duration-1000 ease-in-out shadow-md"
+                                    style="width: 0%"></div>
+
+                                <!-- Steps Container -->
+                                <div class="relative z-10 flex justify-between items-start w-full">
+                                    <!-- Step 1 -->
+                                    <div class="flex flex-col items-center gap-3 group cursor-default"
+                                        data-step="Pending">
+                                        <div
+                                            class="w-12 h-12 rounded-full bg-white dark:bg-gray-800 border-4 border-gray-200 dark:border-gray-600 flex items-center justify-center transition-all duration-500 shadow-sm group-[.active]:border-purple-600 group-[.active]:bg-purple-50 dark:group-[.active]:bg-purple-900/30 group-[.active]:scale-110 group-[.completed]:bg-gradient-to-br group-[.completed]:from-blue-600 group-[.completed]:to-purple-600 group-[.completed]:border-transparent group-[.completed]:scale-100 z-10 relative">
+                                            <i data-lucide="package"
+                                                class="w-5 h-5 text-gray-400 dark:text-gray-500 group-[.active]:text-purple-600 group-[.completed]:text-white transition-colors duration-300"></i>
+                                        </div>
+                                        <span
+                                            class="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest group-[.active]:text-purple-600 group-[.completed]:text-gray-800 dark:group-[.completed]:text-white transition-colors duration-300 transform group-[.active]:scale-105 text-center mt-1">Pending</span>
+                                    </div>
+                                    <!-- Step 2 -->
+                                    <div class="flex flex-col items-center gap-3 group cursor-default"
+                                        data-step="Assigned">
+                                        <div
+                                            class="w-12 h-12 rounded-full bg-white dark:bg-gray-800 border-4 border-gray-200 dark:border-gray-600 flex items-center justify-center transition-all duration-500 shadow-sm group-[.active]:border-purple-600 group-[.active]:bg-purple-50 dark:group-[.active]:bg-purple-900/30 group-[.active]:scale-110 group-[.completed]:bg-gradient-to-br group-[.completed]:from-purple-600 group-[.completed]:to-pink-600 group-[.completed]:border-transparent group-[.completed]:scale-100 z-10 relative">
+                                            <i data-lucide="user"
+                                                class="w-5 h-5 text-gray-400 dark:text-gray-500 group-[.active]:text-purple-600 group-[.completed]:text-white transition-colors duration-300"></i>
+                                        </div>
+                                        <span
+                                            class="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest group-[.active]:text-purple-600 group-[.completed]:text-gray-800 dark:group-[.completed]:text-white transition-colors duration-300 transform group-[.active]:scale-105 text-center mt-1">Assigned</span>
+                                    </div>
+                                    <!-- Step 3 -->
+                                    <div class="flex flex-col items-center gap-3 group cursor-default"
+                                        data-step="In Transit">
+                                        <div
+                                            class="w-12 h-12 rounded-full bg-white dark:bg-gray-800 border-4 border-gray-200 dark:border-gray-600 flex items-center justify-center transition-all duration-500 shadow-sm group-[.active]:border-purple-600 group-[.active]:bg-purple-50 dark:group-[.active]:bg-purple-900/30 group-[.active]:scale-110 group-[.completed]:bg-gradient-to-br group-[.completed]:from-pink-600 group-[.completed]:to-orange-600 group-[.completed]:border-transparent group-[.completed]:scale-100 z-10 relative">
+                                            <i data-lucide="truck"
+                                                class="w-5 h-5 text-gray-400 dark:text-gray-500 group-[.active]:text-purple-600 group-[.completed]:text-white transition-colors duration-300"></i>
+                                        </div>
+                                        <span
+                                            class="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest group-[.active]:text-purple-600 group-[.completed]:text-gray-800 dark:group-[.completed]:text-white transition-colors duration-300 transform group-[.active]:scale-105 text-center mt-1">In
+                                            Transit</span>
+                                    </div>
+                                    <!-- Step 4 -->
+                                    <div class="flex flex-col items-center gap-3 group cursor-default"
+                                        data-step="Completed">
+                                        <div
+                                            class="w-12 h-12 rounded-full bg-white dark:bg-gray-800 border-4 border-gray-200 dark:border-gray-600 flex items-center justify-center transition-all duration-500 shadow-sm group-[.active]:border-green-600 group-[.active]:bg-green-50 dark:group-[.active]:bg-green-900/30 group-[.active]:scale-110 group-[.completed]:bg-gradient-to-br group-[.completed]:from-orange-600 group-[.completed]:to-green-600 group-[.completed]:border-transparent group-[.completed]:scale-100 z-10 relative">
+                                            <i data-lucide="check"
+                                                class="w-5 h-5 text-gray-400 dark:text-gray-500 group-[.active]:text-green-600 group-[.completed]:text-white transition-colors duration-300"></i>
+                                        </div>
+                                        <span
+                                            class="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest group-[.active]:text-green-600 group-[.completed]:text-gray-800 dark:group-[.completed]:text-white transition-colors duration-300 transform group-[.active]:scale-105 text-center mt-1">Delivered</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- MOBILE: Vertical Timeline (Hidden on Desktop) -->
+                            <div class="md:hidden flex flex-col pl-2 mt-4 space-y-0">
+                                <!-- Step 1: Pending -->
+                                <div class="flex gap-4 relative pb-10 group" data-step="Pending">
+                                    <!-- Vertical Line -->
+                                    <div
+                                        class="absolute left-[15px] top-8 -bottom-2 w-0.5 bg-gray-300 dark:bg-gray-600 group-[.completed]:bg-blue-600 transition-colors duration-500">
+                                    </div>
+                                    <!-- Icon -->
+                                    <div
+                                        class="relative z-10 shrink-0 w-8 h-8 rounded-full bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-600 flex items-center justify-center group-[.active]:bg-blue-600 group-[.active]:border-blue-600 group-[.active]:text-white group-[.completed]:bg-blue-600 group-[.completed]:border-blue-600 group-[.completed]:text-white transition-all shadow-sm">
+                                        <i data-lucide="package"
+                                            class="w-4 h-4 text-gray-400 dark:text-gray-500 group-[.active]:text-white group-[.completed]:text-white"></i>
+                                    </div>
+                                    <!-- Text -->
+                                    <div class="pt-1">
+                                        <p
+                                            class="font-bold text-gray-900 dark:text-white text-sm group-[.active]:text-blue-600">
+                                            Order Placed</p>
+                                        <p class="text-xs text-gray-500">We have received your order.</p>
+                                    </div>
+                                </div>
+
+                                <!-- Step 2: Assigned -->
+                                <div class="flex gap-4 relative pb-10 group" data-step="Assigned">
+                                    <div
+                                        class="absolute left-[15px] top-8 -bottom-2 w-0.5 bg-gray-300 dark:bg-gray-600 group-[.completed]:bg-blue-600 transition-colors duration-500">
+                                    </div>
+                                    <div
+                                        class="relative z-10 shrink-0 w-8 h-8 rounded-full bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-600 flex items-center justify-center group-[.active]:bg-blue-600 group-[.active]:border-blue-600 group-[.active]:text-white group-[.completed]:bg-blue-600 group-[.completed]:border-blue-600 group-[.completed]:text-white transition-all shadow-sm">
+                                        <i data-lucide="truck"
+                                            class="w-4 h-4 text-gray-400 dark:text-gray-500 group-[.active]:text-white group-[.completed]:text-white"></i>
+                                    </div>
+                                    <div class="pt-1">
+                                        <p
+                                            class="font-bold text-gray-900 dark:text-white text-sm group-[.active]:text-blue-600">
+                                            Driver Assigned</p>
+                                        <p class="text-xs text-gray-500">A driver is on the way.</p>
+                                    </div>
+                                </div>
+
+                                <!-- Step 3: In Transit -->
+                                <div class="flex gap-4 relative pb-10 group" data-step="In Transit">
+                                    <div
+                                        class="absolute left-[15px] top-8 -bottom-2 w-0.5 bg-gray-300 dark:bg-gray-600 group-[.completed]:bg-blue-600 transition-colors duration-500">
+                                    </div>
+                                    <div
+                                        class="relative z-10 shrink-0 w-8 h-8 rounded-full bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-600 flex items-center justify-center group-[.active]:bg-blue-600 group-[.active]:border-blue-600 group-[.active]:text-white group-[.completed]:bg-blue-600 group-[.completed]:border-blue-600 group-[.completed]:text-white transition-all shadow-sm">
+                                        <i data-lucide="truck"
+                                            class="w-4 h-4 text-gray-400 dark:text-gray-500 group-[.active]:text-white group-[.completed]:text-white"></i>
+                                    </div>
+                                    <div class="pt-1">
+                                        <p
+                                            class="font-bold text-gray-900 dark:text-white text-sm group-[.active]:text-blue-600">
+                                            In Transit</p>
+                                        <p class="text-xs text-gray-500">Your shipment is moving.</p>
+                                    </div>
+                                </div>
+
+                                <!-- Step 4: Completed -->
+                                <div class="flex gap-4 relative pb-0 group" data-step="Completed">
+                                    <div
+                                        class="relative z-10 shrink-0 w-8 h-8 rounded-full bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-600 flex items-center justify-center group-[.active]:bg-green-600 group-[.active]:border-green-600 group-[.active]:text-white group-[.completed]:bg-green-600 group-[.completed]:border-green-600 group-[.completed]:text-white transition-all shadow-sm">
+                                        <i data-lucide="check"
+                                            class="w-4 h-4 text-gray-400 dark:text-gray-500 group-[.active]:text-white group-[.completed]:text-white"></i>
+                                    </div>
+                                    <div class="pt-1">
+                                        <p
+                                            class="font-bold text-gray-900 dark:text-white text-sm group-[.active]:text-green-600">
+                                            Delivered</p>
+                                        <p class="text-xs text-gray-500">Package arrived safely.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Details Grid -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Origin/Dest -->
+                        <!-- Origin/Dest & Current Location -->
+                        <div
+                            class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+                            <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-6">Shipment Route
+                            </h3>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <!-- Timeline (Left) -->
+                                <div class="relative ml-2 my-2 mt-4">
+                                    <!-- Connecting Line -->
+                                    <div class="absolute left-[19px] top-5 bottom-5 w-0.5 bg-gray-300 dark:bg-gray-600">
+                                    </div>
+
+                                    <div class="space-y-10">
+                                        <!-- Pickup Item -->
+                                        <div class="flex gap-5 relative">
+                                            <div
+                                                class="shrink-0 relative z-10 w-10 h-10 rounded-full bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center border-4 border-white dark:border-gray-800 shadow-sm">
+                                                <i data-lucide="circle-dot"
+                                                    class="w-5 h-5 text-blue-600 dark:text-blue-400"></i>
+                                            </div>
+                                            <div class="pt-1">
+                                                <p
+                                                    class="text-xs font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wide mb-1">
+                                                    Pickup Location</p>
+                                                <p class="font-medium text-gray-900 dark:text-white text-base leading-relaxed"
+                                                    id="pickup-place">Loading address...</p>
+                                            </div>
+                                        </div>
+
+                                        <!-- Dropoff Item -->
+                                        <div class="flex gap-5 relative">
+                                            <div
+                                                class="shrink-0 relative z-10 w-10 h-10 rounded-full bg-red-50 dark:bg-red-900/20 flex items-center justify-center border-4 border-white dark:border-gray-800 shadow-sm">
+                                                <i data-lucide="map-pin"
+                                                    class="w-5 h-5 text-red-600 dark:text-red-400"></i>
+                                            </div>
+                                            <div class="pt-1">
+                                                <p
+                                                    class="text-xs font-bold text-red-600 dark:text-red-400 uppercase tracking-wide mb-1">
+                                                    Dropoff Location</p>
+                                                <p class="font-medium text-gray-900 dark:text-white text-base leading-relaxed"
+                                                    id="dropoff-place">Loading address...</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Current Location (Right) -->
+                                <div
+                                    class="flex flex-col justify-center space-y-4 border-l border-gray-100 dark:border-gray-700 pl-6">
+                                    <div>
+                                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wide mb-1">
+                                            Current Location</p>
+                                        <div class="flex items-start gap-3">
+                                            <div
+                                                class="shrink-0 w-8 h-8 rounded-full bg-purple-50 dark:bg-purple-900/20 flex items-center justify-center border-2 border-white dark:border-gray-800 shadow-sm">
+                                                <i data-lucide="map-pin-check"
+                                                    class="w-4 h-4 text-purple-600 dark:text-purple-400"></i>
+                                            </div>
+                                            <div>
+                                                <p class="font-medium text-gray-900 dark:text-white text-sm leading-relaxed"
+                                                    id="current-location-display">Tracking shipment...</p>
+                                                <p class="text-xs text-gray-500 mt-1" id="last-updated-display">Last
+                                                    updated: Just now</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Info -->
+                        <div
+                            class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 flex flex-col justify-center">
+                            <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-6">Shipment Details
+                            </h3>
+                            <div class="space-y-6">
+                                <div class="flex items-center gap-4 p-4 bg-gray-50 dark:bg-gray-700/30 rounded-xl">
+                                    <div
+                                        class="w-10 h-10 rounded-lg bg-white dark:bg-gray-800 flex items-center justify-center shadow-sm text-purple-500">
+                                        <i data-lucide="package" class="w-5 h-5"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-xs text-gray-500 uppercase tracking-wide">Goods Type</p>
+                                        <p class="font-bold text-gray-900 dark:text-white capitalize" id="goods-type">
+                                            ...</p>
+                                    </div>
+                                </div>
+
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div class="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-700/30 rounded-xl">
+                                        <div
+                                            class="w-8 h-8 rounded-lg bg-white dark:bg-gray-800 flex items-center justify-center shadow-sm text-blue-500">
+                                            <i data-lucide="scale" class="w-4 h-4"></i>
+                                        </div>
+                                        <div>
+                                            <p class="text-[10px] text-gray-500 uppercase tracking-wide">Weight</p>
+                                            <p class="font-bold text-gray-900 dark:text-white text-sm" id="weight">...
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-700/30 rounded-xl">
+                                        <div
+                                            class="w-8 h-8 rounded-lg bg-white dark:bg-gray-800 flex items-center justify-center shadow-sm text-green-500">
+                                            <i data-lucide="user-circle" class="w-4 h-4"></i>
+                                        </div>
+                                        <div>
+                                            <p class="text-[10px] text-gray-500 uppercase tracking-wide">Driver</p>
+                                            <p class="font-bold text-gray-900 dark:text-white text-sm" id="driver-name">
+                                                Assigning...</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Map -->
+                    <div id="map-container" class="hidden">
+                        <div
+                            class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+                            <div
+                                class="p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
+                                <h3 class="font-bold text-gray-900 dark:text-white">Live Location</h3>
+                                <span class="flex h-2 w-2 relative">
+                                    <span
+                                        class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                                    <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                                </span>
+                            </div>
+                            <div id="map" class="h-80 w-full bg-gray-100 dark:bg-gray-900"></div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script type="module">
+        import { db, doc, onSnapshot } from './firebase-config.js';
+
+        lucide.createIcons();
+
+        // Get ID from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const shipmentId = urlParams.get('id');
+
+        const loadingEl = document.getElementById('loading');
+        const errorEl = document.getElementById('error-message');
+        const contentEl = document.getElementById('tracking-content');
+        const mapContainer = document.getElementById('map-container');
+
+        // Elements to update
+        const idDisplay = document.getElementById('shipment-id-display');
+        const statusBadge = document.getElementById('status-badge');
+        const pickupPlace = document.getElementById('pickup-place');
+        const dropoffPlace = document.getElementById('dropoff-place');
+        const goodsType = document.getElementById('goods-type');
+        const weight = document.getElementById('weight');
+        const driverName = document.getElementById('driver-name');
+        const currentLocationDisplay = document.getElementById('current-location-display');
+        const lastUpdatedDisplay = document.getElementById('last-updated-display');
+
+        // Stepper elements
+        const progressLine = document.getElementById('progress-line');
+        const steps = document.querySelectorAll('[data-step]');
+
+        let map, marker;
+        let initMapDone = false;
+
+        if (!shipmentId) {
+            loadingEl.classList.add('hidden');
+            errorEl.classList.remove('hidden');
+            errorEl.querySelector('p').textContent = "No shipment ID provided in URL.";
+        } else {
+            // Listen to shipment
+            const unsub = onSnapshot(doc(db, "shipments", shipmentId), (docSnap) => {
+                loadingEl.classList.add('hidden');
+
+                if (!docSnap.exists()) {
+                    contentEl.classList.add('hidden');
+                    errorEl.classList.remove('hidden');
+                    return;
+                }
+
+                errorEl.classList.add('hidden');
+                contentEl.classList.remove('hidden');
+
+                const data = docSnap.data();
+                updateUI(data, docSnap.id);
+
+            }, (error) => {
+                console.error("Error:", error);
+                loadingEl.classList.add('hidden');
+                errorEl.classList.remove('hidden');
+                errorEl.querySelector('p').textContent = "Error loading shipment updates.";
+            });
+        }
+
+        function updateUI(data, id) {
+            idDisplay.textContent = `ID: ${data.trackingId || '#' + id.slice(0, 6)}`;
+
+            // Status Logic & Stepper
+            let status = data.status || 'Pending';
+            let statusColorClass = 'bg-gray-100 text-gray-700';
+
+            // Define Step Order
+            const statusOrder = ['Pending', 'Assigned', 'In Transit', 'Completed'];
+            let currentIndex = statusOrder.indexOf(status);
+            if (currentIndex === -1) currentIndex = 0; // Default
+
+            // Set Progress Bar Width
+            let progressPercentage = 0;
+            if (currentIndex > 0) {
+                progressPercentage = (currentIndex / (statusOrder.length - 1)) * 100;
+            }
+            if (progressLine) progressLine.style.width = `${progressPercentage}%`;
+
+            // Update Steps (Mobile & Desktop)
+            const allSteps = document.querySelectorAll('[data-step]');
+            allSteps.forEach((step) => {
+                const stepName = step.getAttribute('data-step');
+                const stepIndex = statusOrder.indexOf(stepName);
+
+                // Reset
+                step.classList.remove('active', 'completed');
+                const iconContainer = step.querySelector('div.rounded-full');
+                if (iconContainer) iconContainer.classList.remove('animate-pulse');
+
+                if (stepIndex < currentIndex) {
+                    step.classList.add('completed');
+                } else if (stepIndex === currentIndex) {
+                    step.classList.add('active');
+                    if (iconContainer) iconContainer.classList.add('animate-pulse');
+                }
+            });
+
+            // Status Badge Color
+            if (status === 'Pending') {
+                statusColorClass = 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400 border-orange-200 dark:border-orange-900';
+            }
+            else if (status === 'Assigned') {
+                statusColorClass = 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400 border-purple-200 dark:border-purple-900';
+            }
+            else if (status === 'In Transit') {
+                statusColorClass = 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 border-blue-200 dark:border-blue-900';
+            }
+            else if (status === 'Completed') {
+                statusColorClass = 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 border-green-200 dark:border-green-900';
+            }
+
+            statusBadge.className = `px-4 py-1.5 rounded-full text-sm font-bold border ${statusColorClass} shadow-sm`;
+            statusBadge.textContent = status === 'Completed' ? 'Delivered' : status;
+
+            pickupPlace.textContent = data.pickup ? (data.pickup.address || data.pickup.place) : 'N/A';
+            dropoffPlace.textContent = data.delivery ? (data.delivery.address || data.delivery.place) : 'N/A';
+            goodsType.textContent = data.goodsType || 'Package';
+            weight.textContent = data.weight ? `${data.weight} kg` : '--';
+            driverName.textContent = data.driver ? data.driver.name : 'Not Assigned Yet';
+
+            // Map Logic & Current Location Update
+            if (data.status === 'In Transit' && data.currentLocation && data.currentLocation.lat) {
+                mapContainer.classList.remove('hidden');
+
+                // Update Text Display
+                if (currentLocationDisplay) {
+                    if (data.currentLocation.address) {
+                        currentLocationDisplay.textContent = data.currentLocation.address;
+                    } else {
+                        // Show coordinates while fetching
+                        currentLocationDisplay.textContent = `${data.currentLocation.lat.toFixed(4)}, ${data.currentLocation.lng.toFixed(4)}`;
+
+                        // Simple reverse geocoding (Nominatim)
+                        // Note: Using a unique session ID or similar to avoid spamming if frequent updates
+                        // Ideally store this in a variable to avoid re-fetching same coords
+                        fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${data.currentLocation.lat}&lon=${data.currentLocation.lng}`)
+                            .then(response => response.json())
+                            .then(geoData => {
+                                if (geoData && geoData.display_name) {
+                                    // Use first 3 parts for brevity
+                                    let address = geoData.display_name.split(',').slice(0, 3).join(',');
+                                    currentLocationDisplay.textContent = address;
+                                }
+                            })
+                            .catch(err => console.log('Geocoding skipped', err));
+                    }
+                }
+
+                if (!initMapDone) {
+                    initMap(data.currentLocation.lat, data.currentLocation.lng);
+                    initMapDone = true;
+                } else {
+                    updateMap(data.currentLocation.lat, data.currentLocation.lng);
+                }
+            } else {
+                mapContainer.classList.add('hidden');
+                if (currentLocationDisplay) {
+                    currentLocationDisplay.textContent = data.status === 'Completed' ? 'Delivered successfully.' : 'Tracking not active yet.';
+                }
+            }
+        }
+
+        function initMap(lat, lng) {
+            map = L.map('map').setView([lat, lng], 13);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(map);
+
+            const truckIcon = L.icon({
+                iconUrl: 'https://cdn-icons-png.flaticon.com/512/2769/2769339.png', // Delivery Truck Icon
+                iconSize: [40, 40],
+                iconAnchor: [20, 20],
+                popupAnchor: [0, -20]
+            });
+
+            marker = L.marker([lat, lng], { icon: truckIcon }).addTo(map)
+                .bindPopup('Current Location')
+                .openPopup();
+        }
+
+        function updateMap(lat, lng) {
+            if (map && marker) {
+                const newLatLng = new L.LatLng(lat, lng);
+                marker.setLatLng(newLatLng);
+                map.panTo(newLatLng);
+            }
+        }
+
+    </script>
+</body>
+
+</html>
