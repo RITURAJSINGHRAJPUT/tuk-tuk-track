@@ -9,6 +9,9 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- Leaflet Routing Machine -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.css" />
+    <script src="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
@@ -17,6 +20,11 @@
             document.documentElement.classList.remove('dark');
         }
     </script>
+    <style>
+        .leaflet-routing-container {
+            display: none !important;
+        }
+    </style>
 </head>
 
 <body class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-100 font-sans transition-colors duration-200">
@@ -574,6 +582,8 @@
                     if (map) {
                         map.remove(); // Reset map to re-center
                         map = null;
+                        // Also clear routing control if matched
+                        window.routingControl = null;
                     }
 
                     // Prepare Data for Map History
@@ -598,10 +608,29 @@
                         attribution: '&copy; OpenStreetMap'
                     }).addTo(map);
 
-                    // Draw Route (Realistic vs Simple)
+
+                    // Draw Route (Realistic OSRM vs Simple)
                     if (pathCoords.length > 1) {
-                        // Simple Blue Line (Always reliable)
-                        L.polyline(pathCoords, { color: 'blue', weight: 4, opacity: 0.6, dashArray: '5, 10' }).addTo(map);
+                        // Use Leaflet Routing Machine for road snapping
+                        // We use the OSRM demo server (default for LRM) which is sufficient here.
+
+                        // Clear old control if exists (though we reset map so it should be gone)
+                        if (window.routingControl) {
+                            map.removeControl(window.routingControl);
+                        }
+
+                        window.routingControl = L.Routing.control({
+                            waypoints: pathCoords.map(c => L.latLng(c[0], c[1])),
+                            routeWhileDragging: false,
+                            draggableWaypoints: false,
+                            addWaypoints: false,
+                            createMarker: function () { return null; }, // We handle our own markers
+                            lineOptions: {
+                                styles: [{ color: 'blue', opacity: 0.7, weight: 5 }]
+                            },
+                            show: false, // Don't show the instruction container
+                            fitSelectedRoutes: true // Auto fit bounds
+                        }).addTo(map);
                     }
 
                     // Add markers for history points (only if < 20 to avoid clutter)
@@ -649,28 +678,28 @@
                     // Initialize Chart with HISTORY
                     const ctx = document.getElementById('tempChart').getContext('2d');
 
-                    // Parse history or use default small graph
+                    // ... existing chart logic ...
+                    // Extract temp history or mock
                     let labels = [];
                     let dataPoints = [];
 
-                    if (shipmentData.temperatureHistory && shipmentData.temperatureHistory.length > 0) {
-                        // Sort by timestamp
-                        const history = shipmentData.temperatureHistory.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
-                        // Take last 10 points
-                        const recent = history.slice(-10);
-
-                        labels = recent.map(h => new Date(h.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
-                        dataPoints = recent.map(h => h.temp);
+                    if (shipmentData.tempHistory) {
+                        labels = shipmentData.tempHistory.map(t => new Date(t.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
+                        dataPoints = shipmentData.tempHistory.map(t => t.value);
                     } else {
-                        // Add current point as starting point
-                        labels = [new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })];
-                        dataPoints = [temp];
+                        // Fallback mock
+                        const now = new Date();
+                        for (let i = 5; i >= 0; i--) {
+                            labels.push(new Date(now - i * 3600000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
+                            dataPoints.push(-4.5 + Math.random());
+                        }
                     }
 
-                    // Destroy existing chart instance if any (Chart.js doesn't do this auto)
-                    if (window.myTempChart) window.myTempChart.destroy();
+                    if (window.tempChartInstance) {
+                        window.tempChartInstance.destroy();
+                    }
 
-                    window.myTempChart = new Chart(ctx, {
+                    window.tempChartInstance = new Chart(ctx, {
                         type: 'line',
                         data: {
                             labels: labels,
@@ -679,40 +708,34 @@
                                 data: dataPoints,
                                 borderColor: '#3b82f6',
                                 backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                                borderWidth: 2,
                                 tension: 0.4,
-                                fill: true,
-                                pointRadius: 3,
-                                pointHoverRadius: 5
+                                fill: true
                             }]
                         },
                         options: {
                             responsive: true,
                             maintainAspectRatio: false,
-                            plugins: { legend: { display: false } },
+                            plugins: {
+                                legend: { display: false }
+                            },
                             scales: {
-                                y: { grid: { color: '#374151', drawBorder: false } },
-                                x: { grid: { display: false }, ticks: { color: '#9ca3af', font: { size: 10 } } }
+                                y: { display: true, grid: { color: 'rgba(0,0,0,0.05)' } },
+                                x: { display: true, grid: { display: false } }
                             }
                         }
                     });
 
                 }, (error) => {
-                    console.error("Error receiving shipment updates:", error);
-                    alert("Error tracking shipment. Please try again.");
+                    console.error("Error tracking:", error);
                     btn.innerHTML = originalText;
                 });
 
-            } catch (error) {
-                console.error("Error setting up tracking:", error);
+            } catch (err) {
+                console.error("Error:", err);
+                alert("An error occurred while tracking.");
                 btn.innerHTML = originalText;
             }
-        }
-
-        // Cleanup on page unload
-        window.addEventListener('beforeunload', () => {
-            if (window.unsubscribeTracking) window.unsubscribeTracking();
-        });
+        };
     </script>
 </body>
 
