@@ -9,6 +9,7 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
     <script>
         // On page load or when changing themes, best to add inline in `head` to avoid FOUC
@@ -350,6 +351,36 @@
         </div>
     </div>
 
+    <!-- QR Code Modal -->
+    <div id="qr-modal" class="fixed inset-0 z-[100] hidden">
+        <div class="absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity" onclick="closeQrModal()">
+        </div>
+        <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full max-w-sm bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-6 transition-all scale-95 opacity-0"
+            id="qr-modal-content">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold text-gray-900 dark:text-white">Shipment QR Code</h3>
+                <button onclick="closeQrModal()" class="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <div class="flex flex-col items-center justify-center space-y-4 mb-6">
+                <div id="qrcode-container" class="p-4 bg-white rounded-xl shadow-inner border border-gray-100"></div>
+                <p class="text-sm text-gray-500 text-center">Scan to track shipment #<span id="qr-shipment-id"
+                        class="font-mono font-bold text-gray-700 dark:text-gray-300"></span></p>
+            </div>
+
+            <div class="flex justify-end gap-3">
+                <button onclick="downloadQrCode()"
+                    class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl transition-colors shadow-lg shadow-blue-500/30 flex items-center justify-center gap-2 font-medium"
+                    style="background-color: #2563eb;">
+                    <i data-lucide="download" class="w-5 h-5"></i>
+                    Download QR Code
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script src="js/main.js"></script>
     <script type="module">
         import { initAuthUI } from './js/auth-ui.js';
@@ -538,9 +569,15 @@
                                 <p class="text-[10px] text-gray-500">${data.weight} kg</p>
                             </div>
                         </div>
-                        <button class="p-2 bg-gray-50 dark:bg-gray-700/50 rounded-lg text-gray-500 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
-                            <i data-lucide="arrow-right" class="w-4 h-4"></i>
-                        </button>
+                        <div class="flex items-center gap-2">
+                            <button onclick="event.stopPropagation(); window.generateQrCode('${data.id}', '${data.trackingId}')" 
+                                class="p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/40 transition-colors" title="Get QR Code">
+                                <i data-lucide="qr-code" class="w-4 h-4"></i>
+                            </button>
+                            <button class="p-2 bg-gray-50 dark:bg-gray-700/50 rounded-lg text-gray-500 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+                                <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                            </button>
+                        </div>
                     </div>
                 </div>
             `;
@@ -711,6 +748,64 @@
         if (closeTop) closeTop.addEventListener('click', window.closeOrderModal);
         if (closeBottom) closeBottom.addEventListener('click', window.closeOrderModal);
         if (modalBackdrop) modalBackdrop.onclick = window.closeOrderModal; // Keep simple onclick for backdrop as it's inline in HTML too, but let's override to be safe or rely on HTML
+
+        // --- QR Code Logic ---
+        const qrModal = document.getElementById('qr-modal');
+        const qrModalContent = document.getElementById('qr-modal-content');
+        const qrContainer = document.getElementById('qrcode-container');
+        const qrShipmentIdDisplay = document.getElementById('qr-shipment-id');
+
+        window.generateQrCode = (id, trackingId) => {
+            const displayId = trackingId || id;
+            const fullId = id;
+
+            // Clear previous QR
+            qrContainer.innerHTML = '';
+            qrShipmentIdDisplay.textContent = displayId;
+
+            // URL to public tracking page
+            // Assuming the file is named public-track.html and is in the same directory root
+            const baseUrl = window.location.origin + window.location.pathname.replace('dashboard.html', 'public-track.html');
+            const trackingUrl = `${baseUrl}?id=${fullId}`;
+
+            console.log("Generating QR for:", trackingUrl);
+
+            new QRCode(qrContainer, {
+                text: trackingUrl,
+                width: 200,
+                height: 200,
+                colorDark: "#000000",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.H
+            });
+
+            // Show Modal
+            qrModal.classList.remove('hidden');
+            setTimeout(() => {
+                qrModalContent.classList.remove('scale-95', 'opacity-0');
+                qrModalContent.classList.add('scale-100', 'opacity-100');
+            }, 10);
+        };
+
+        window.closeQrModal = () => {
+            qrModalContent.classList.remove('scale-100', 'opacity-100');
+            qrModalContent.classList.add('scale-95', 'opacity-0');
+            setTimeout(() => {
+                qrModal.classList.add('hidden');
+            }, 200);
+        };
+
+        window.downloadQrCode = () => {
+            const img = qrContainer.querySelector('img');
+            if (img) {
+                const link = document.createElement('a');
+                link.href = img.src;
+                link.download = `shipment-qr-${qrShipmentIdDisplay.textContent}.png`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+        };
 
     </script>
 </body>
