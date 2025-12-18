@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Update Tracking - TukTukTrack</title>
+    <title>Assign Device - TukTukTrack Admin</title>
     <link href="./css/style.css" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <script>
@@ -19,7 +19,7 @@
 <body class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-100 font-sans transition-colors duration-200">
 
     <div class="flex h-screen overflow-hidden">
-        <!-- Sidebar (Copied from admin-shipments.html for consistency) -->
+        <!-- Sidebar -->
         <aside
             class="w-72 bg-white/80 dark:bg-gray-900/90 backdrop-blur-xl border-r border-gray-200 dark:border-gray-800 hidden md:flex flex-col z-50 transition-all duration-300">
             <div class="p-6 flex items-center gap-3 mb-2">
@@ -77,17 +77,17 @@
                 </a>
 
                 <a href="admin-update-tracking.html"
-                    class="flex items-center gap-3 px-4 py-3.5 bg-gradient-to-r from-purple-600 to-purple-500 text-white rounded-xl shadow-lg shadow-purple-500/20 transition-all group">
-                    <i data-lucide="navigation" class="w-5 h-5 transition-colors"></i>
-                    <span class="font-medium transition-colors">Update Tracking</span>
+                    class="flex items-center gap-3 px-4 py-3.5 text-gray-600 dark:text-gray-400 hover:bg-white dark:hover:bg-gray-800 hover:shadow-md hover:shadow-gray-200/50 dark:hover:shadow-black/20 rounded-xl transition-all group">
+                    <i data-lucide="navigation" class="w-5 h-5 group-hover:text-purple-500 transition-colors"></i>
+                    <span
+                        class="font-medium group-hover:text-gray-900 dark:group-hover:text-white transition-colors">Update
+                        Tracking</span>
                 </a>
 
                 <a href="admin-assign-device.html"
-                    class="flex items-center gap-3 px-4 py-3.5 text-gray-600 dark:text-gray-400 hover:bg-white dark:hover:bg-gray-800 hover:shadow-md hover:shadow-gray-200/50 dark:hover:shadow-black/20 rounded-xl transition-all group">
-                    <i data-lucide="link" class="w-5 h-5 group-hover:text-purple-500 transition-colors"></i>
-                    <span
-                        class="font-medium group-hover:text-gray-900 dark:group-hover:text-white transition-colors">Assign
-                        Device</span>
+                    class="flex items-center gap-3 px-4 py-3.5 bg-gradient-to-r from-purple-600 to-purple-500 text-white rounded-xl shadow-lg shadow-purple-500/20 transition-all group">
+                    <i data-lucide="link" class="w-5 h-5"></i>
+                    <span class="font-medium">Assign Device</span>
                 </a>
             </nav>
 
@@ -115,8 +115,9 @@
                         <i data-lucide="menu" class="w-6 h-6"></i>
                     </button>
                     <div>
-                        <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Manual Sensor Input</h1>
-                        <p class="text-sm text-gray-500 dark:text-gray-400">Simulate GPS and Temperature updates</p>
+                        <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Assign Tracking Device</h1>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">Pair a physical tracking device to a
+                            shipment</p>
                     </div>
                 </div>
                 <div class="flex items-center gap-4">
@@ -145,59 +146,43 @@
                             class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-purple-500 outline-none transition-all text-gray-900 dark:text-white">
                             <option value="">Loading shipments...</option>
                         </select>
-                        <p class="text-xs text-gray-500 mt-2">Only displaying shipments marked as 'In Transit'</p>
+                        <p class="text-xs text-gray-500 mt-2">Displaying 'Pending' and 'In Transit' shipments</p>
                     </div>
 
-                    <!-- Updates Form -->
+                    <!-- Assignment Form -->
                     <div
                         class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700">
-                        <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-6">Update Sensor Data</h3>
+                        <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-6">Device Configuration</h3>
 
                         <div class="space-y-6">
-                            <div class="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label
-                                        class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Latitude</label>
-                                    <input type="number" step="any" id="lat"
-                                        class="w-full px-4 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-purple-500 outline-none"
-                                        placeholder="28.6139">
-                                </div>
-                                <div>
-                                    <label
-                                        class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Longitude</label>
-                                    <input type="number" step="any" id="lng"
-                                        class="w-full px-4 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-purple-500 outline-none"
-                                        placeholder="77.2090">
-                                </div>
-                            </div>
-
                             <div>
-                                <label
-                                    class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Temperature
-                                    (°C)</label>
-                                <input type="number" step="0.1" id="temp"
-                                    class="w-full px-4 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-purple-500 outline-none"
-                                    placeholder="-4.5">
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Select
+                                    Device</label>
+                                <select id="deviceId"
+                                    class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none transition-all">
+                                    <option value="" disabled selected>Choose a device...</option>
+                                    <option value="esp32_live">TUK-GPS-01 (Active)</option>
+                                    <option value="esp32_live">TUK-GPS-02 (Active)</option>
+                                    <option value="esp32_live">TUK-GPS-03 (Active)</option>
+                                    <option value="esp32_live">TUK-GPS-04 (Active)</option>
+                                    <option value="esp32_live">TUK-GPS-05 (Active)</option>
+                                </select>
+                                <p class="text-xs text-gray-500 mt-1">Found on the back of the GPS tracker unit.</p>
                             </div>
 
-                            <button onclick="updateTrackingData()"
+                            <!-- Current Assignment Status -->
+                            <div id="current-assignment-info"
+                                class="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl hidden">
+                                <p class="text-sm text-gray-500 dark:text-gray-400">Currently Assigned Device:</p>
+                                <p class="text-base font-semibold text-purple-600 dark:text-purple-400"
+                                    id="current-device-id">None</p>
+                            </div>
+
+                            <button onclick="assignDevice()"
                                 class="w-full py-3 bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-700 hover:to-purple-600 text-white font-bold rounded-xl shadow-lg shadow-purple-500/30 transition-all transform hover:scale-[1.02]">
-                                Update Live Data
+                                Assign Device
                             </button>
                         </div>
-                    </div>
-
-                    <!-- Quick Presets -->
-                    <div class="grid grid-cols-3 gap-4">
-                        <button onclick="setPreset(28.7041, 77.1025)"
-                            class="p-3 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-purple-500 text-sm font-medium text-gray-600 dark:text-gray-400">New
-                            Delhi Set</button>
-                        <button onclick="setPreset(19.0760, 72.8777)"
-                            class="p-3 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-purple-500 text-sm font-medium text-gray-600 dark:text-gray-400">Mumbai
-                            Set</button>
-                        <button onclick="setPreset(12.9716, 77.5946)"
-                            class="p-3 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-purple-500 text-sm font-medium text-gray-600 dark:text-gray-400">Bangalore
-                            Set</button>
                     </div>
 
                 </div>
@@ -208,104 +193,105 @@
     <script src="js/main.js"></script>
     <script type="module">
         import { initAdminGuard } from './js/admin-guard.js';
-        import { db, collection, query, where, getDocs, onSnapshot, doc, updateDoc, arrayUnion, Timestamp } from './firebase-config.js';
+        import { db, collection, query, where, getDocs, doc, updateDoc, onSnapshot } from './firebase-config.js';
 
         initAdminGuard();
         lucide.createIcons();
 
         const shipmentSelect = document.getElementById('shipment-select');
-        const latInput = document.getElementById('lat');
-        const lngInput = document.getElementById('lng');
-        const tempInput = document.getElementById('temp');
+        const deviceIdInput = document.getElementById('deviceId');
+        const currentAssignmentInfo = document.getElementById('current-assignment-info');
+        const currentDeviceIdDisplay = document.getElementById('current-device-id');
 
-        // Load Shipments (Real-time)
+        // Load Shipments
         const q = query(collection(db, "shipments"));
+        // Ideally filter by status, but for now we fetch all and filter in UI or let user see all
 
-        const unsubscribe = onSnapshot(q, (snapshot) => {
+        onSnapshot(q, (snapshot) => {
+            const currentVal = shipmentSelect.value;
             shipmentSelect.innerHTML = '<option value="">Select a shipment...</option>';
 
             if (snapshot.empty) {
-                shipmentSelect.innerHTML += '<option value="" disabled>No shipments found (Create one in Dashboard)</option>';
+                shipmentSelect.innerHTML += '<option value="" disabled>No shipments found</option>';
                 return;
             }
 
-            snapshot.forEach(doc => {
-                const data = doc.data();
-                const label = `${data.trackingId || doc.id} - ${data.userName || 'Unknown'} (${data.status})`;
-                const option = document.createElement('option');
-                option.value = doc.id;
-                option.textContent = label;
-
-                // Store current values if available
-                if (data.currentLocation) {
-                    option.dataset.lat = data.currentLocation.lat;
-                    option.dataset.lng = data.currentLocation.lng;
+            snapshot.forEach(docSnapshot => {
+                const data = docSnapshot.data();
+                // We want shipments that are active enough to be tracked.
+                if (data.status === 'Pending' || data.status === 'In Transit' || data.status === 'Accepted') {
+                    const label = `${data.trackingId || docSnapshot.id} - ${data.userName || 'Unknown'} (${data.status})`;
+                    const option = document.createElement('option');
+                    option.value = docSnapshot.id;
+                    option.textContent = label;
+                    option.dataset.deviceId = data.deviceId || '';
+                    shipmentSelect.appendChild(option);
                 }
-                if (data.currentTemperature) {
-                    option.dataset.temp = data.currentTemperature;
-                }
-                shipmentSelect.appendChild(option);
             });
-        }, (error) => {
-            console.error("Error loading shipments:", error);
-            alert("Error fetching shipments: " + error.message);
-            shipmentSelect.innerHTML = '<option value="">Error loading data</option>';
+
+            if (currentVal) {
+                shipmentSelect.value = currentVal;
+            }
         });
 
-        // loadActiveShipments(); // Removed static fetch
-
-        // On Select Change, pre-fill inputs
+        // Handle Selection Change
         shipmentSelect.addEventListener('change', (e) => {
             const selectedOption = e.target.options[e.target.selectedIndex];
-            if (selectedOption.dataset.lat) latInput.value = selectedOption.dataset.lat;
-            if (selectedOption.dataset.lng) lngInput.value = selectedOption.dataset.lng;
-            if (selectedOption.dataset.temp) tempInput.value = selectedOption.dataset.temp;
+            if (!selectedOption.value) {
+                deviceIdInput.value = '';
+                currentAssignmentInfo.classList.add('hidden');
+                return;
+            }
+
+            const existingDeviceId = selectedOption.dataset.deviceId;
+            if (existingDeviceId) {
+                deviceIdInput.value = existingDeviceId;
+                currentDeviceIdDisplay.textContent = existingDeviceId;
+                currentAssignmentInfo.classList.remove('hidden');
+            } else {
+                deviceIdInput.value = '';
+                currentDeviceIdDisplay.textContent = 'None';
+                currentAssignmentInfo.classList.add('hidden'); // Or show 'None'
+            }
         });
 
-        // Update Data
-        window.updateTrackingData = async () => {
+        // Assign Device Function
+        window.assignDevice = async () => {
             const shipmentId = shipmentSelect.value;
-            const lat = parseFloat(latInput.value);
-            const lng = parseFloat(lngInput.value);
-            const temp = parseFloat(tempInput.value);
+            const deviceId = deviceIdInput.value.trim();
 
-            if (!shipmentId) return alert("Please select a shipment.");
-            if (isNaN(lat) || isNaN(lng) || isNaN(temp)) return alert("Please enter valid numbers.");
+            if (!shipmentId) {
+                alert("Please select a shipment first.");
+                return;
+            }
 
-            const btn = document.querySelector('button[onclick="updateTrackingData()"]');
+            if (!deviceId) {
+                if (!confirm("Are you sure you want to clear the device assignment?")) return;
+            }
+
+            const btn = document.querySelector('button[onclick="assignDevice()"]');
             const originalText = btn.innerHTML;
-            btn.innerHTML = 'Updating...';
+            btn.innerHTML = 'Assigning...';
             btn.disabled = true;
 
             try {
                 const shipmentRef = doc(db, "shipments", shipmentId);
-                const timestamp = new Date().toISOString(); // Use string for standard JSON compatibility
-
                 await updateDoc(shipmentRef, {
-                    currentLocation: { lat, lng },
-                    currentTemperature: temp,
-                    // Append to history
-                    locationHistory: arrayUnion({ lat, lng, timestamp }),
-                    temperatureHistory: arrayUnion({ temp, timestamp })
+                    deviceId: deviceId
                 });
 
-                alert("Shipment updated successfully!");
+                alert("Device assigned successfully!");
+                // The onSnapshot will update the local data attributes automatically
 
             } catch (error) {
-                console.error("Error updating:", error);
-                alert("Failed to update: " + error.message);
+                console.error("Error assigning device:", error);
+                alert("Failed to assign device: " + error.message);
             } finally {
                 btn.innerHTML = originalText;
                 btn.disabled = false;
             }
         };
 
-        window.setPreset = (lat, lng) => {
-            latInput.value = lat;
-            lngInput.value = lng;
-        };
-
-        // loadActiveShipments(); // replaced by onSnapshot
     </script>
 </body>
 

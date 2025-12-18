@@ -83,7 +83,7 @@
 
                 <a href="admin-drivers.html"
                     class="flex items-center gap-3 px-4 py-3.5 text-gray-600 dark:text-gray-400 hover:bg-white dark:hover:bg-gray-800 hover:shadow-md hover:shadow-gray-200/50 dark:hover:shadow-black/20 rounded-xl transition-all group">
-                    <i data-lucide="steering-wheel" class="w-5 h-5 group-hover:text-purple-500 transition-colors"></i>
+                    <i data-lucide="id-card" class="w-5 h-5 group-hover:text-purple-500 transition-colors"></i>
                     <span
                         class="font-medium group-hover:text-gray-900 dark:group-hover:text-white transition-colors">Drivers</span>
                 </a>
@@ -102,6 +102,14 @@
                     <span
                         class="font-medium group-hover:text-gray-900 dark:group-hover:text-white transition-colors">Update
                         Tracking</span>
+                </a>
+
+                <a href="admin-assign-device.html"
+                    class="flex items-center gap-3 px-4 py-3.5 text-gray-600 dark:text-gray-400 hover:bg-white dark:hover:bg-gray-800 hover:shadow-md hover:shadow-gray-200/50 dark:hover:shadow-black/20 rounded-xl transition-all group">
+                    <i data-lucide="link" class="w-5 h-5 group-hover:text-purple-500 transition-colors"></i>
+                    <span
+                        class="font-medium group-hover:text-gray-900 dark:group-hover:text-white transition-colors">Assign
+                        Device</span>
                 </a>
             </nav>
 
@@ -244,7 +252,7 @@
     <script src="js/main.js"></script>
     <script type="module">
         import { initAdminGuard } from './js/admin-guard.js';
-        import { db, collection, query, where, onSnapshot } from './firebase-config.js';
+        import { db, collection, query, where, onSnapshot, rtdb, ref, onValue, doc, updateDoc } from './firebase-config.js';
 
         initAdminGuard();
         lucide.createIcons();
@@ -356,6 +364,9 @@
                 }
             }
 
+            // Manage Realtime Listeners
+            updateRealtimeSubscriptions();
+
             // Check for Query Param
             const urlParams = new URLSearchParams(window.location.search);
             const trackingId = urlParams.get('id');
@@ -366,6 +377,103 @@
                 }
             }
         });
+
+        const rtdbUnsubscribes = {};
+
+        function updateRealtimeSubscriptions() {
+            console.log("updateRealtimeSubscriptions called. Active Shipments:", activeShipments.length);
+
+            // 1. Unsubscribe removed shipments
+            const activeIds = new Set(activeShipments.map(s => s.id));
+            Object.keys(rtdbUnsubscribes).forEach(id => {
+                if (!activeIds.has(id)) {
+                    if (rtdbUnsubscribes[id]) rtdbUnsubscribes[id]();
+                    delete rtdbUnsubscribes[id];
+                }
+            });
+
+            // 2. Subscribe new shipments with deviceId
+            activeShipments.forEach(shipment => {
+                if (shipment.deviceId && !rtdbUnsubscribes[shipment.id]) {
+                    console.log(`Subscribing to RTDB for shipment ${shipment.id} with deviceId: ${shipment.deviceId}`);
+                    const deviceRef = ref(rtdb, shipment.deviceId); // Listen to root of device ID (e.g. esp32_live)
+
+                    const unsub = onValue(deviceRef, (snapshot) => {
+                        const data = snapshot.val();
+                        console.log(`RTDB Data Received for ${shipment.deviceId}:`, data);
+                        if (data) {
+                            // Extract GPS
+                            let lat, lng;
+                            if (data.gps) {
+                                lat = data.gps.latitude;
+                                lng = data.gps.longitude;
+                            } else if (data.latitude && data.longitude) {
+                                // Fallback flat structure
+                                lat = data.latitude;
+                                lng = data.longitude;
+                            }
+
+                            // Update Map Marker
+                            if (lat !== undefined && lng !== undefined) {
+                                if (markers[shipment.id]) {
+                                    const newLatLng = new L.LatLng(lat, lng);
+                                    markers[shipment.id].setLatLng(newLatLng);
+
+                                    // Optional: Pan map if selected
+                                    if (selectedShipmentId === shipment.id) {
+                                        // Don't flyTo on every update, maybe just keep in view?
+                                        // map.panTo(newLatLng); 
+                                    }
+                                }
+
+                                // Update Popup Content (Sensor Data)
+                                const temp = data.sensor ? data.sensor.temperature : 'N/A';
+                                const humidity = data.sensor ? data.sensor.humidity : 'N/A';
+
+                                // Sync to Firestore (Throttle could be added here, but direct is fine for demo)
+                                // We update: currentLocation, currentTemperature, lastUpdated
+                                const shipmentRef = doc(db, "shipments", shipment.id);
+
+                                // Only update if data changed significantly or strictly every time? 
+                                // Let's update every time to ensure "real data" is seen everywhere.
+                                updateDoc(shipmentRef, {
+                                    currentLocation: { lat, lng },
+                                    currentTemperature: temp,
+                                    currentHumidity: humidity,
+                                    lastUpdated: new Date().toISOString()
+                                }).catch(err => console.error("Error syncing to Firestore:", err));
+
+                                // Find popup element if open
+                                if (markers[shipment.id]) {
+                                    const popup = markers[shipment.id].getPopup();
+                                    if (popup && popup.isOpen()) {
+                                        // Update sensor text directly if ID exists, or rebuild content
+                                        // We'll try to find the specific element IDs we created in updateMapMarkers
+                                        // But updateMapMarkers creates IDs like `addr-${shipment.id}`.
+                                        // Let's rely on rebuilding or finding generic classes?
+                                        // Better: Update the 'shipment' object in memory so if popup is re-opened it's fresh
+                                        shipment.currentTemperature = temp;
+                                        shipment.currentHumidity = humidity;
+                                        shipment.currentLocation = { lat, lng };
+
+                                        // Direct DOM manipulation for open popup??
+                                        // Let's just update the specific fields if we can find them.
+                                        const content = popup.getContent();
+                                        // It's a string. We can setContent again.
+                                        // But that might flicker.
+                                    }
+                                }
+
+                                // Update Stats on dashboard if this is the selected vehicle?
+                                // (Optional improvement)
+                            }
+                        }
+                    });
+
+                    rtdbUnsubscribes[shipment.id] = unsub;
+                }
+            });
+        }
 
         // --- UI Functions ---
 

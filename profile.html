@@ -24,6 +24,14 @@
 
 <body class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-100 font-sans transition-colors duration-200">
 
+    <!-- Page Loader (FOUC Fix) -->
+    <div id="page-loader"
+        class="fixed inset-0 z-[100] bg-white dark:bg-gray-900 flex flex-col items-center justify-center transition-opacity duration-500">
+        <div class="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-4"
+            id="loader-spinner"></div>
+        <p class="text-gray-500 dark:text-gray-400 font-medium animate-pulse">Loading Profile...</p>
+    </div>
+
     <div class="flex h-screen overflow-hidden relative">
         <!-- Sidebar Backdrop (Mobile) -->
         <div id="sidebar-backdrop"
@@ -34,14 +42,15 @@
             class="md:w-72 bg-white md:bg-white/80 dark:bg-gray-900 md:dark:bg-gray-900/90 backdrop-blur-xl border-r border-gray-200 dark:border-gray-800 hidden md:flex flex-col z-50 transition-all duration-300">
             <div class="p-6 flex items-center justify-between gap-3 mb-2">
                 <div class="flex items-center gap-3">
-                    <div
+                    <div id="sidebar-logo-icon"
                         class="w-10 h-10 bg-gradient-to-tr from-blue-600 to-blue-400 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20">
                         <i data-lucide="truck" class="text-white w-6 h-6"></i>
                     </div>
                     <div>
                         <h1 class="text-xl font-bold tracking-tight text-gray-900 dark:text-white leading-none">TukTuk
                         </h1>
-                        <span class="text-xs font-bold text-blue-500 tracking-widest uppercase">Track</span>
+                        <span id="sidebar-logo-subtext"
+                            class="text-xs font-bold text-blue-500 tracking-widest uppercase">Track</span>
                     </div>
                 </div>
                 <button id="sidebar-close"
@@ -53,21 +62,21 @@
             <nav class="flex-1 px-4 space-y-2">
                 <p class="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2 mt-4">Menu</p>
 
-                <a href="dashboard.html"
+                <a href="dashboard.html" id="link-dashboard"
                     class="flex items-center gap-3 px-4 py-3.5 text-gray-600 dark:text-gray-400 hover:bg-white dark:hover:bg-gray-800 hover:shadow-md hover:shadow-gray-200/50 dark:hover:shadow-black/20 rounded-xl transition-all group">
                     <i data-lucide="layout-dashboard" class="w-5 h-5 group-hover:text-blue-500 transition-colors"></i>
-                    <span
+                    <span id="text-dashboard"
                         class="font-medium group-hover:text-gray-900 dark:group-hover:text-white transition-colors">Dashboard</span>
                 </a>
 
-                <a href="track.html"
+                <a href="track.html" id="link-tracking"
                     class="flex items-center gap-3 px-4 py-3.5 text-gray-600 dark:text-gray-400 hover:bg-white dark:hover:bg-gray-800 hover:shadow-md hover:shadow-gray-200/50 dark:hover:shadow-black/20 rounded-xl transition-all group">
                     <i data-lucide="map" class="w-5 h-5 group-hover:text-blue-500 transition-colors"></i>
                     <span
                         class="font-medium group-hover:text-gray-900 dark:group-hover:text-white transition-colors">Tracking</span>
                 </a>
 
-                <a href="request.html"
+                <a href="request.html" id="link-request-shipment"
                     class="flex items-center gap-3 px-4 py-3.5 text-gray-600 dark:text-gray-400 hover:bg-white dark:hover:bg-gray-800 hover:shadow-md hover:shadow-gray-200/50 dark:hover:shadow-black/20 rounded-xl transition-all group">
                     <i data-lucide="package-plus" class="w-5 h-5 group-hover:text-blue-500 transition-colors"></i>
                     <span
@@ -95,19 +104,111 @@
         <div class="flex-1 flex flex-col h-screen overflow-hidden relative">
             <!-- Header -->
             <header
-                class="h-16 md:h-20 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-800 flex items-center justify-between px-4 md:px-8 z-40">
+                class="h-16 md:h-20 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-800 flex items-center justify-between gap-4 px-4 md:px-8 z-40">
                 <div class="flex items-center gap-4">
                     <button id="sidebar-toggle"
                         class="md:hidden p-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors">
                         <i data-lucide="menu" class="w-6 h-6"></i>
                     </button>
                     <div>
-                        <h1 class="text-xl md:text-2xl font-bold text-gray-900 dark:text-white">Account Settings</h1>
+                        <h1 class="text-xl font-bold text-gray-900 dark:text-white md:hidden">Account</h1>
+                        <h1 class="hidden md:block text-2xl font-bold text-gray-900 dark:text-white">Account Settings
+                        </h1>
                         <p class="text-xs md:text-sm text-gray-500 dark:text-gray-400 hidden sm:block">Manage your
                             profile and preferences</p>
                     </div>
                 </div>
+
+                <style>
+                    /* Custom Toggle Styles for Text Inside */
+                    .toggle-checkbox {
+                        display: none;
+                    }
+
+                    .toggle-label {
+                        width: 70px;
+                        height: 34px;
+                        background-color: #e5e7eb;
+                        /* gray-200 */
+                        border-radius: 9999px;
+                        position: relative;
+                        cursor: pointer;
+                        transition: background-color 0.3s;
+                        box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06);
+                        display: flex;
+                        align-items: center;
+                        justify-content: space-between;
+                        padding: 0 4px;
+                        overflow: hidden;
+                    }
+
+                    .toggle-label:hover {
+                        transform: scale(1.05);
+                    }
+
+                    .toggle-checkbox:checked+.toggle-label {
+                        background: linear-gradient(to right, #9333ea, #2563eb);
+                    }
+
+                    .toggle-knob {
+                        width: 26px;
+                        height: 26px;
+                        background-color: white;
+                        border-radius: 50%;
+                        position: absolute;
+                        top: 4px;
+                        left: 4px;
+                        transition: transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+                        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+                        z-index: 10;
+                    }
+
+                    .toggle-checkbox:checked+.toggle-label .toggle-knob {
+                        transform: translateX(36px);
+                    }
+
+                    .toggle-text-on,
+                    .toggle-text-off {
+                        color: white;
+                        font-family: sans-serif;
+                        font-weight: 800;
+                        font-size: 11px;
+                        position: absolute;
+                        top: 50%;
+                        transform: translateY(-50%);
+                        user-select: none;
+                        transition: opacity 0.3s;
+                    }
+
+                    .toggle-text-on {
+                        left: 8px;
+                        opacity: 0;
+                    }
+
+                    .toggle-text-off {
+                        right: 8px;
+                        color: #6b7280;
+                        opacity: 1;
+                    }
+
+                    .toggle-checkbox:checked+.toggle-label .toggle-text-on {
+                        opacity: 1;
+                    }
+
+                    .toggle-checkbox:checked+.toggle-label .toggle-text-off {
+                        opacity: 0;
+                    }
+                </style>
                 <div class="flex items-center gap-4">
+                    <!-- Activity Toggle Container -->
+                    <div id="driver-toggle-container" class="relative inline-block hidden">
+                        <input type="checkbox" id="activity-toggle" class="toggle-checkbox">
+                        <label for="activity-toggle" class="toggle-label border-2 border-transparent">
+                            <span class="toggle-text-on">ON</span>
+                            <span class="toggle-text-off">OFF</span>
+                            <div class="toggle-knob"></div>
+                        </label>
+                    </div>
                     <button id="theme-toggle"
                         class="p-2.5 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl transition-colors border border-transparent hover:border-gray-200 dark:hover:border-gray-700">
                         <i data-lucide="sun" class="w-5 h-5 dark:hidden"></i>
@@ -337,6 +438,18 @@
         // Populate Profile
         auth.onAuthStateChanged(async (user) => {
             console.log("Auth State Changed:", user ? user.uid : "No User");
+
+            const loader = document.getElementById('page-loader');
+            const hideLoader = () => {
+                if (loader && !loader.classList.contains('opacity-0')) {
+                    loader.classList.add('opacity-0', 'pointer-events-none');
+                    setTimeout(() => loader.style.display = 'none', 500);
+                }
+            };
+
+            // Safety timeout to ensure loader doesn't get stuck
+            setTimeout(hideLoader, 3000);
+
             if (user) {
                 currentUser = user;
 
@@ -360,6 +473,102 @@
                 if (sidebarName) sidebarName.innerText = displayName;
 
                 const userRef = doc(db, "users", user.uid);
+
+                // Check Role and Adjust Sidebar
+                let role = 'user';
+                let roleSnap = null;
+
+                try {
+                    roleSnap = await getDoc(userRef);
+                    if (roleSnap.exists()) {
+                        role = roleSnap.data().role || 'user';
+                    }
+                    // Fallback to email check if not in db yet for some reason
+                    if (user.email.endsWith('.driver@tuktuk.com')) role = 'driver';
+
+                    if (role === 'driver') {
+                        // 1. UI Theme: Blue -> Purple
+                        // Logo Icon
+                        const logoIcon = document.getElementById('sidebar-logo-icon');
+                        if (logoIcon) {
+                            logoIcon.classList.remove('from-blue-600', 'to-blue-400', 'shadow-blue-500/20');
+                            logoIcon.classList.add('from-purple-600', 'to-purple-400', 'shadow-purple-500/20');
+                        }
+                        // Logo Text
+                        const logoSub = document.getElementById('sidebar-logo-subtext');
+                        if (logoSub) {
+                            logoSub.innerText = "DRIVER";
+                            logoSub.classList.remove('text-blue-500');
+                            logoSub.classList.add('text-purple-500');
+                        }
+
+                        // 2. Navigation
+                        // Hide Request Shipment
+                        const reqLink = document.getElementById('link-request-shipment');
+                        if (reqLink) reqLink.classList.add('hidden');
+
+                        // Hide Tracking
+                        const trackLink = document.getElementById('link-tracking');
+                        if (trackLink) trackLink.classList.add('hidden');
+
+                        // Update Dashboard Link
+                        const dashLink = document.getElementById('link-dashboard');
+                        const dashText = document.getElementById('text-dashboard');
+                        if (dashLink) {
+                            dashLink.href = 'driver-dashboard.html';
+                            // Update gradient/colors of the active link if needed
+                            dashLink.classList.remove('hover:shadow-gray-200/50');
+
+                            if (dashText) {
+                                dashText.innerText = "My Assignments";
+                            }
+                        }
+
+                        // 3. Activity Toggle Logic
+                        const toggleContainer = document.getElementById('driver-toggle-container');
+                        const activityToggle = document.getElementById('activity-toggle');
+
+                        if (toggleContainer && activityToggle) {
+                            toggleContainer.classList.remove('hidden');
+
+                            // Initial State from Firestore
+                            try {
+                                const isOnline = (roleSnap && roleSnap.exists()) ? (roleSnap.data().isOnline || false) : false;
+                                activityToggle.checked = isOnline;
+                            } catch (e) { console.error("Error reading online status", e); }
+
+                            // Listener
+                            activityToggle.addEventListener('change', async (e) => {
+                                const isOnline = e.target.checked;
+                                try {
+                                    await updateDoc(userRef, {
+                                        isOnline: isOnline,
+                                        lastActiveAt: new Date().toISOString()
+                                    });
+                                    console.log("Status updated:", isOnline);
+                                } catch (error) {
+                                    console.error("Failed to update status:", error);
+                                    activityToggle.checked = !isOnline; // Revert
+                                    alert("Failed to update status.");
+                                }
+                            });
+                        }
+
+                        // Update Loader Spinner Color if Driver (Nested inside role check)
+                        const spinner = document.getElementById('loader-spinner');
+                        if (spinner) {
+                            spinner.classList.remove('border-blue-500');
+                            spinner.classList.add('border-purple-600');
+                        }
+                    }
+
+                } catch (e) {
+                    console.error("Error checking role", e);
+                } finally {
+                    // Hide loader after role check is done (whether successful or failed)
+                    // This ensures the theme swap happens BEHIND the loader
+                    hideLoader();
+                }
 
                 // 2. Fetch Extended Profile from Firestore
                 try {
