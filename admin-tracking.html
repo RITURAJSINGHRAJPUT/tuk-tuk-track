@@ -396,7 +396,13 @@
             activeShipments.forEach(shipment => {
                 if (shipment.deviceId && !rtdbUnsubscribes[shipment.id]) {
                     console.log(`Subscribing to RTDB for shipment ${shipment.id} with deviceId: ${shipment.deviceId}`);
-                    const deviceRef = ref(rtdb, shipment.deviceId); // Listen to root of device ID (e.g. esp32_live)
+
+                    let path = shipment.deviceId;
+                    if (path.toLowerCase() === 'root') {
+                        path = '/';
+                    }
+
+                    const deviceRef = ref(rtdb, path);
 
                     const unsub = onValue(deviceRef, (snapshot) => {
                         const data = snapshot.val();

@@ -307,11 +307,24 @@
     </script>
     <script src="js/main.js"></script>
     <script type="module">
-        import { initAuthUI } from './js/auth-ui.js';
-        import { auth, db, doc, getDoc, updateDoc, collection, query, where, getCountFromServer } from './firebase-config.js';
+        import { adminAuth as auth, adminDb as db, signOut, doc, getDoc, updateDoc, collection, query, where, getCountFromServer } from './firebase-config.js';
 
         console.log("Profile Module Script Started");
-        initAuthUI();
+        // initAuthUI(); // Removed: This was using user-auth, causing redirects.
+
+        // Logout Logic
+        const logoutBtn = document.getElementById('logout-btn');
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', async () => {
+                try {
+                    await signOut(auth);
+                    window.location.href = 'admin-login.html';
+                } catch (error) {
+                    console.error("Error signing out:", error);
+                    alert("Error signing out: " + error.message);
+                }
+            });
+        }
 
         // Random Quotes & Dynamic Banner Logic
         const quotes = [
