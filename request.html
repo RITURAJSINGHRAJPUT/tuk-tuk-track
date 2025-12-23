@@ -377,7 +377,17 @@
         const today = new Date().toISOString().split('T')[0];
         const sDate = document.getElementById('shippingDate');
         const dDate = document.getElementById('deliveryDate');
-        if (sDate) sDate.min = today;
+        if (sDate) {
+            sDate.min = today;
+            sDate.addEventListener('change', function () {
+                if (dDate) {
+                    dDate.min = this.value;
+                    if (dDate.value && dDate.value < this.value) {
+                        dDate.value = '';
+                    }
+                }
+            });
+        }
         if (dDate) dDate.min = today;
 
         const form = document.getElementById('shipment-form');
