@@ -249,7 +249,8 @@
                                             <i data-lucide="thermometer" class="w-4 h-4"></i>
                                             <span class="text-xs font-medium uppercase">Temp</span>
                                         </div>
-                                        <p class="text-xl font-bold text-gray-900 dark:text-white">-4.5°C</p>
+                                        <p id="vehicle-temp" class="text-xl font-bold text-gray-900 dark:text-white">
+                                            -4.5°C</p>
                                     </div>
                                     <div class="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
                                         <div class="flex items-center gap-2 mb-2 text-gray-500 dark:text-gray-400">
@@ -300,6 +301,7 @@
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="js/main.js"></script>
     <script type="module">
         import { initAuthUI } from './js/auth-ui.js';
@@ -309,6 +311,7 @@
         lucide.createIcons();
 
         let map = null;
+        let tempChart = null; // Chart instance
         let currentUser = null;
 
         // Auto-track if ID is in URL (Immediate Input Fill)
@@ -548,6 +551,9 @@
 
             // Update Driver Info
             updateDriverInfo(shipmentData);
+
+            // Update Temperature Chart
+            updateTempChart(shipmentData);
 
             // Update Distance & ETA
             calcDistanceAndEta(shipmentData);
@@ -796,12 +802,140 @@
 
                         // Update Stats Text
                         if (newTemp !== undefined) {
-                            const statsCols = document.querySelectorAll('.bg-gray-50 p.text-xl');
-                            if (statsCols.length >= 1) statsCols[0].textContent = `${newTemp}°C`;
+                            const tempEl = document.getElementById('vehicle-temp');
+                            if (tempEl) tempEl.textContent = `${newTemp}°C`;
+
+                            // LIVE CHART UPDATE
+                            if (tempChart && tempChart.data) {
+                                const newLabel = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                                const newVal = parseFloat(newTemp);
+
+                                // Add new data
+                                tempChart.data.labels.push(newLabel);
+                                tempChart.data.datasets[0].data.push(isNaN(newVal) ? 0 : newVal);
+
+                                // Keep size limited to 20
+                                if (tempChart.data.labels.length > 20) {
+                                    tempChart.data.labels.shift();
+                                    tempChart.data.datasets[0].data.shift();
+                                }
+                                tempChart.update();
+                            }
                         }
                     }
                 });
             }
+        }
+
+
+
+        function updateTempChart(shipment) {
+            const ctx = document.getElementById('tempChart');
+            if (!ctx) return;
+
+            // Prepare Data
+            const labels = [];
+            const dataPoints = [];
+
+            if (shipment.temperatureHistory && Array.isArray(shipment.temperatureHistory)) {
+                // Use last 20 points
+                const history = shipment.temperatureHistory.slice(-20);
+                history.forEach(entry => {
+                    // entry = { timestamp, temperature, humidity }
+                    if (entry.timestamp && entry.temperature !== undefined) {
+                        const timeLabel = new Date(entry.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                        labels.push(timeLabel);
+
+                        let val = parseFloat(entry.temperature);
+                        if (isNaN(val)) val = 0; // Safe fallback
+                        dataPoints.push(val);
+                    }
+                });
+            } else {
+                // If no history, show single point from current
+                if (shipment.currentTemperature !== undefined) {
+                    labels.push(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
+                    let val = parseFloat(shipment.currentTemperature);
+                    if (isNaN(val)) val = -4.5;
+                    dataPoints.push(val);
+                }
+            }
+
+            // Destroy existing to re-render (simplest way to handle resizing/updates without complex logic)
+            if (tempChart) {
+                tempChart.destroy();
+            }
+
+            tempChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Temperature (°C)',
+                        data: dataPoints,
+                        borderColor: '#3b82f6', // Blue-500
+                        backgroundColor: (context) => {
+                            const ctx = context.chart.ctx;
+                            const gradient = ctx.createLinearGradient(0, 0, 0, 200);
+                            gradient.addColorStop(0, 'rgba(59, 130, 246, 0.2)');
+                            gradient.addColorStop(1, 'rgba(59, 130, 246, 0)');
+                            return gradient;
+                        },
+                        borderWidth: 2,
+                        tension: 0.4,
+                        pointRadius: 3,
+                        pointHoverRadius: 5,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                            backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                            titleColor: '#1f2937',
+                            bodyColor: '#1f2937',
+                            borderColor: '#e5e7eb',
+                            borderWidth: 1,
+                            padding: 10,
+                            displayColors: false,
+                            callbacks: {
+                                label: function (context) {
+                                    return context.parsed.y + ' °C';
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            display: true,
+                            grid: { display: false },
+                            ticks: {
+                                maxTicksLimit: 6,
+                                font: { size: 10 },
+                                color: '#9ca3af'
+                            }
+                        },
+                        y: {
+                            display: true,
+                            grid: { color: 'rgba(0, 0, 0, 0.05)' },
+                            ticks: {
+                                font: { size: 10 },
+                                color: '#9ca3af'
+                            }
+                        }
+                    },
+                    interaction: {
+                        mode: 'nearest',
+                        axis: 'x',
+                        intersect: false
+                    }
+                }
+            });
         }
 
         async function calcDistanceAndEta(shipment) {
@@ -893,6 +1027,8 @@
             }
         }
     </script>
+    </script>
+    <script type="module" src="js/chatbot.js"></script>
 </body>
 
 </html>

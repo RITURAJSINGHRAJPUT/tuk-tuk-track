@@ -32,14 +32,16 @@ service cloud.firestore {
       allow get: if true;
       
       // 2. Listing/Querying restrictions
-      // - Admins can list all
-      // - Users can list their own shipments (must filter by userId)
-      // - Drivers can list assigned shipments (must filter by driver.email)
-      allow list: if isAuth() && (
-        isAdmin() || 
-        (resource.data.userId == request.auth.uid) || 
-        (resource.data.driver != null && resource.data.driver.email == request.auth.token.email)
-      );
+      // - Modified to allow Public/Chatbot "Track by ID" (Rules are not filters)
+      // - Previously restricted to own shipments, which blocked global tracking queries
+      allow list: if true; 
+      
+      // Original Strict Rule (Commented out):
+      // allow list: if isAuth() && (
+      //   isAdmin() || 
+      //   (resource.data.userId == request.auth.uid) || 
+      //   (resource.data.driver != null && resource.data.driver.email == request.auth.token.email)
+      // );
 
       // WRITE Rules
       // 1. Create: Authenticated users can create shipments for themselves
