@@ -1,4 +1,4 @@
-import { adminAuth as auth, db, onAuthStateChanged, doc, getDoc, signOut } from '../firebase-config.js';
+import { adminAuth as auth, adminDb as db, onAuthStateChanged, doc, getDoc, signOut } from '../firebase-config.js';
 
 export function initAdminGuard() {
     // Check Auth State

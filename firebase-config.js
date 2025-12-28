@@ -25,6 +25,7 @@ const rtdb = getDatabase(app);
 const adminApp = initializeApp(firebaseConfig, "AdminApp");
 const adminAuth = getAuth(adminApp);
 const adminDb = getFirestore(adminApp); // Optional, but keeps things consistent
+const adminRtdb = getDatabase(adminApp);
 
 export {
   app,
@@ -32,6 +33,7 @@ export {
   adminAuth,
   db,
   adminDb,
+  adminRtdb,
   RecaptchaVerifier,
   signInWithPhoneNumber,
   createUserWithEmailAndPassword,

@@ -232,17 +232,33 @@
                                     Pickup Details
                                 </h3>
                                 <div class="space-y-4">
-                                    <div class="space-y-2">
+                                    <div class="space-y-2 relative group">
                                         <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Pickup
                                             Location</label>
                                         <input type="text" id="pickupPlace" placeholder="City or Area"
+                                            autocomplete="off"
                                             class="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all">
+                                        <!-- Suggestions List -->
+                                        <div id="pickup-suggestions"
+                                            class="hidden absolute z-10 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg max-h-60 overflow-y-auto">
+                                        </div>
                                     </div>
-                                    <div class="space-y-2">
+                                    <div class="space-y-2 relative group">
                                         <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Full
                                             Address</label>
                                         <textarea id="pickupAddress" rows="3" placeholder="Street address, landmark..."
+                                            autocomplete="off"
                                             class="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all resize-none"></textarea>
+                                        <!-- Address Suggestions List -->
+                                        <div id="pickup-addr-suggestions"
+                                            class="hidden absolute z-10 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg max-h-60 overflow-y-auto">
+                                        </div>
+                                    </div>
+                                    <div class="space-y-2">
+                                        <label
+                                            class="text-sm font-medium text-gray-700 dark:text-gray-300">Pincode</label>
+                                        <input type="number" id="pickupPincode" placeholder="6-digit pincode"
+                                            class="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all">
                                     </div>
                                     <div class="grid grid-cols-2 gap-4">
                                         <div class="space-y-2">
@@ -272,18 +288,33 @@
                                     Delivery Details
                                 </h3>
                                 <div class="space-y-4">
-                                    <div class="space-y-2">
+                                    <div class="space-y-2 relative group">
                                         <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Delivery
                                             Location</label>
                                         <input type="text" id="deliveryPlace" placeholder="City or Area"
+                                            autocomplete="off"
                                             class="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all">
+                                        <!-- Suggestions List -->
+                                        <div id="delivery-suggestions"
+                                            class="hidden absolute z-10 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg max-h-60 overflow-y-auto">
+                                        </div>
                                     </div>
-                                    <div class="space-y-2">
+                                    <div class="space-y-2 relative group">
                                         <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Full
                                             Address</label>
                                         <textarea id="deliveryAddress" rows="3"
-                                            placeholder="Street address, landmark..."
+                                            placeholder="Street address, landmark..." autocomplete="off"
                                             class="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all resize-none"></textarea>
+                                        <!-- Address Suggestions List -->
+                                        <div id="delivery-addr-suggestions"
+                                            class="hidden absolute z-10 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg max-h-60 overflow-y-auto">
+                                        </div>
+                                    </div>
+                                    <div class="space-y-2">
+                                        <label
+                                            class="text-sm font-medium text-gray-700 dark:text-gray-300">Pincode</label>
+                                        <input type="number" id="deliveryPincode" placeholder="6-digit pincode"
+                                            class="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all">
                                     </div>
                                     <div class="grid grid-cols-2 gap-4">
                                         <div class="space-y-2">
@@ -301,6 +332,28 @@
                                                 class="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all">
                                         </div>
                                     </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Route Estimates (Auto-Calculated) -->
+                        <div id="route-estimate-card"
+                            class="hidden bg-blue-50 dark:bg-blue-900/20 p-6 rounded-2xl border border-blue-100 dark:border-blue-800 transition-all">
+                            <h4
+                                class="text-sm font-medium text-blue-800 dark:text-blue-300 uppercase tracking-wider mb-4 flex items-center gap-2">
+                                <i data-lucide="route" class="w-4 h-4"></i>
+                                Estimated Route
+                            </h4>
+                            <div class="grid grid-cols-2 gap-8">
+                                <div>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Total Distance</p>
+                                    <p id="est-distance" class="text-2xl font-bold text-gray-900 dark:text-white">-- km
+                                    </p>
+                                </div>
+                                <div>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Est. Duration</p>
+                                    <p id="est-duration" class="text-2xl font-bold text-gray-900 dark:text-white">-- min
+                                    </p>
                                 </div>
                             </div>
                         </div>
@@ -514,6 +567,203 @@
                     alert("Error submitting request: " + error.message);
                     btn.innerHTML = originalText;
                     btn.disabled = false;
+                }
+            });
+        }
+
+        // --- Route Estimation Logic ---
+        const pickupInput = document.getElementById('pickupPlace');
+        const pickupPinInput = document.getElementById('pickupPincode');
+        const deliveryInput = document.getElementById('deliveryPlace');
+        const deliveryPinInput = document.getElementById('deliveryPincode');
+        const estimateCard = document.getElementById('route-estimate-card');
+        const distEl = document.getElementById('est-distance');
+        const durEl = document.getElementById('est-duration');
+
+        async function calculateRouteEstimate() {
+            const pVal = pickupInput.value.trim();
+            const pPin = pickupPinInput ? pickupPinInput.value.trim() : '';
+            const pAddr = document.getElementById('pickupAddress').value.trim();
+            const dVal = deliveryInput.value.trim();
+            const dPin = deliveryPinInput ? deliveryPinInput.value.trim() : '';
+            const dAddr = document.getElementById('deliveryAddress').value.trim();
+
+            // Need at least one valid location indicator for both sides
+            if ((!pVal && !pPin && !pAddr) || (!dVal && !dPin && !dAddr)) {
+                estimateCard.classList.add('hidden');
+                return;
+            }
+
+            // Helper to geocode with fallback
+            async function geocodeWithFallback(addr, place, pin) {
+                const queries = [];
+
+                // 1. Full specificity
+                const parts1 = [];
+                if (addr) parts1.push(addr);
+                if (place) parts1.push(place);
+                if (pin) parts1.push(pin);
+                if (parts1.length > 0) queries.push(parts1.join(', '));
+
+                // 2. Medium specificity (Place + Pin)
+                const parts2 = [];
+                if (place) parts2.push(place);
+                if (pin) parts2.push(pin);
+                if (parts2.length > 0) queries.push(parts2.join(', '));
+
+                // 3. Low specificity (Just Pin or Just Place)
+                if (pin) queries.push(pin);
+                if (place) queries.push(place);
+
+                // Try each unique query until valid response
+                const uniqueQueries = [...new Set(queries)];
+
+                for (const q of uniqueQueries) {
+                    try {
+                        const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&limit=1`);
+                        const data = await res.json();
+                        if (data && data.length > 0) {
+                            return data[0]; // Return first match
+                        }
+                    } catch (e) {
+                        console.warn("Geocode try failed:", q, e);
+                    }
+                }
+                return null;
+            }
+
+            try {
+                console.log("Starting Route Estimate...");
+                // 1. Geocode Pickup & Delivery in parallel
+                const [pData, dData] = await Promise.all([
+                    geocodeWithFallback(pAddr, pVal, pPin),
+                    geocodeWithFallback(dAddr, dVal, dPin)
+                ]);
+
+                console.log("Geocode Results:", { pData, dData });
+
+                if (!pData || !dData) {
+                    console.warn("Geocoding failed for one or both locations.");
+                    return;
+                }
+
+                const pLat = pData.lat;
+                const pLon = pData.lon;
+                const dLat = dData.lat;
+                const dLon = dData.lon;
+
+                // 3. Get Route from OSRM
+                const url = `https://router.project-osrm.org/route/v1/driving/${pLon},${pLat};${dLon},${dLat}?overview=false`;
+                const rRes = await fetch(url);
+                const rData = await rRes.json();
+
+                if (rData.code === 'Ok' && rData.routes && rData.routes.length > 0) {
+                    const route = rData.routes[0];
+                    const distKm = (route.distance / 1000).toFixed(1);
+                    const durationMin = Math.round(route.duration / 60);
+
+                    // Visualize
+                    estimateCard.classList.remove('hidden');
+                    distEl.innerText = `${distKm} km`;
+
+                    let timeStr = `${durationMin} min`;
+                    if (durationMin > 60) {
+                        const h = Math.floor(durationMin / 60);
+                        const m = durationMin % 60;
+                        timeStr = `${h}h ${m}m`;
+                    }
+                    durEl.innerText = timeStr;
+                }
+
+            } catch (err) {
+                console.error("Route estimate failed:", err);
+            }
+        }
+
+        if (pickupInput && deliveryInput) {
+            // Set up Autocomplete (City/Area)
+            setupAutocomplete(pickupInput, document.getElementById('pickup-suggestions'), pickupPinInput);
+            setupAutocomplete(deliveryInput, document.getElementById('delivery-suggestions'), deliveryPinInput);
+
+            // Set up Scoped Autocomplete (Full Address depends on City)
+            const pickupAddrInput = document.getElementById('pickupAddress');
+            const deliveryAddrInput = document.getElementById('deliveryAddress');
+
+            if (pickupAddrInput) setupAutocomplete(pickupAddrInput, document.getElementById('pickup-addr-suggestions'), null, pickupInput);
+            if (deliveryAddrInput) setupAutocomplete(deliveryAddrInput, document.getElementById('delivery-addr-suggestions'), null, deliveryInput);
+
+            // Keep Route Calc listeners
+            pickupInput.addEventListener('blur', calculateRouteEstimate);
+            deliveryInput.addEventListener('blur', calculateRouteEstimate);
+            if (pickupPinInput) pickupPinInput.addEventListener('blur', calculateRouteEstimate);
+            if (deliveryPinInput) deliveryPinInput.addEventListener('blur', calculateRouteEstimate);
+            if (pickupAddrInput) pickupAddrInput.addEventListener('blur', calculateRouteEstimate);
+            if (deliveryAddrInput) deliveryAddrInput.addEventListener('blur', calculateRouteEstimate);
+        }
+
+        // --- Autocomplete Logic ---
+        function setupAutocomplete(input, listEl, pincodeInput, contextInput = null) {
+            let debounceTimer;
+
+            input.addEventListener('input', (e) => {
+                const query = e.target.value.trim();
+                clearTimeout(debounceTimer);
+
+                if (query.length < 3) {
+                    listEl.classList.add('hidden');
+                    return;
+                }
+
+                debounceTimer = setTimeout(async () => {
+                    try {
+                        let searchQuery = query;
+                        // Append context if available (e.g. "Bandra, Mumbai")
+                        if (contextInput && contextInput.value.trim()) {
+                            searchQuery = `${query}, ${contextInput.value.trim()}`;
+                        }
+
+                        const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchQuery)}&addressdetails=1&limit=5`);
+                        const data = await res.json();
+
+                        listEl.innerHTML = '';
+                        if (data && data.length > 0) {
+                            listEl.classList.remove('hidden');
+                            data.forEach(item => {
+                                const div = document.createElement('div');
+                                div.className = 'px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer text-sm text-gray-700 dark:text-gray-300';
+                                // Show display_name by default
+                                div.textContent = item.display_name;
+                                div.onclick = () => {
+                                    // If using context, maybe we just want the specific part? 
+                                    // For now, let's just put the full name so it's clear
+                                    input.value = item.display_name;
+                                    listEl.classList.add('hidden');
+
+                                    // Auto-fill Pincode if available AND if this is a primary location field
+                                    if (pincodeInput && item.address && item.address.postcode) {
+                                        pincodeInput.value = item.address.postcode;
+                                    }
+
+                                    // Trigger Route Calc if it's a primary input, or if address affects it (usually address doesn't affect OSRM unless we geocode it specifically, but here we only calculate on Place/Pincode blur)
+                                    // But if we autocompleted the Place, we definitely want to calc.
+                                    // Trigger Route Calc
+                                    calculateRouteEstimate();
+                                };
+                                listEl.appendChild(div);
+                            });
+                        } else {
+                            listEl.classList.add('hidden');
+                        }
+                    } catch (err) {
+                        console.error("Autocomplete error:", err);
+                    }
+                }, 400); // 400ms debounce
+            });
+
+            // Hide on click outside
+            document.addEventListener('click', (e) => {
+                if (!input.contains(e.target) && !listEl.contains(e.target)) {
+                    listEl.classList.add('hidden');
                 }
             });
         }

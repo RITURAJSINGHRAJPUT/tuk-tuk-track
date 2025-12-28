@@ -1,4 +1,4 @@
-import { adminAuth as auth, db, signInWithEmailAndPassword, doc, getDoc, signOut, setPersistence, browserSessionPersistence, browserLocalPersistence } from '../firebase-config.js';
+import { adminAuth as auth, adminDb as db, signInWithEmailAndPassword, doc, getDoc, signOut, setPersistence, browserSessionPersistence, browserLocalPersistence } from '../firebase-config.js';
 
 const loginForm = document.getElementById('admin-login-form');
 

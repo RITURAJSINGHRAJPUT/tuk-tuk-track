@@ -116,12 +116,12 @@
                         <i data-lucide="sun" class="w-5 h-5 dark:hidden"></i>
                         <i data-lucide="moon" class="w-5 h-5 hidden dark:block"></i>
                     </button>
-                    <button
+                    <!-- <button
                         class="p-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors relative">
                         <i data-lucide="bell" class="w-5 h-5"></i>
                         <span
                             class="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white dark:border-gray-900"></span>
-                    </button>
+                    </button> -->
                     <button id="logout-btn"
                         class="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-full transition-colors"
                         title="Logout">
@@ -209,6 +209,30 @@
                                     <div class="w-full bg-blue-800/50 rounded-full h-1.5">
                                         <div class="bg-white h-1.5 rounded-full" style="width: 75%"></div>
                                     </div>
+                                </div>
+                            </div>
+
+                            <!-- Distance & ETA -->
+                            <div class="grid grid-cols-2 gap-4">
+                                <div
+                                    class="bg-white dark:bg-gray-800 p-4 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700">
+                                    <div class="flex items-center gap-2 mb-2 text-gray-500 dark:text-gray-400">
+                                        <i data-lucide="chevrons-right" class="w-4 h-4"></i>
+                                        <span class="text-xs font-medium uppercase">Distance</span>
+                                    </div>
+                                    <p id="distance-display" class="text-xl font-bold text-gray-900 dark:text-white">--
+                                        km</p>
+                                </div>
+                                <div
+                                    class="bg-white dark:bg-gray-800 p-4 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700">
+                                    <div class="flex items-center gap-2 mb-2 text-gray-500 dark:text-gray-400">
+                                        <i data-lucide="clock" class="w-4 h-4"></i>
+                                        <span class="text-xs font-medium uppercase">Est. Time</span>
+                                    </div>
+                                    <p id="eta-display" class="text-xl font-bold text-gray-900 dark:text-white">-- min
+                                    </p>
+                                    <p class="text-xs text-gray-400 mt-1">Agency: <span id="agency-eta-display"
+                                            class="font-medium text-gray-900 dark:text-white">--</span></p>
                                 </div>
                             </div>
 
@@ -524,6 +548,9 @@
 
             // Update Driver Info
             updateDriverInfo(shipmentData);
+
+            // Update Distance & ETA
+            calcDistanceAndEta(shipmentData);
         }
 
         // --- Helper Functions Extracted for Clarity ---
@@ -774,6 +801,95 @@
                         }
                     }
                 });
+            }
+        }
+
+        async function calcDistanceAndEta(shipment) {
+            const distEl = document.getElementById('distance-display');
+            const etaEl = document.getElementById('eta-display');
+
+            if (!distEl || !etaEl) return;
+
+            distEl.innerText = '-- km';
+            etaEl.innerText = '-- min';
+
+            // --- Agency ETA (Scheduled + 2 Days) ---
+            const agencyEtaEl = document.getElementById('agency-eta-display');
+            if (agencyEtaEl) agencyEtaEl.innerText = '--';
+
+            const baseDateStr = (shipment.delivery && shipment.delivery.date) ? shipment.delivery.date : shipment.createdAt;
+
+            if (agencyEtaEl && baseDateStr) {
+                try {
+                    const scheduledDate = new Date(baseDateStr);
+                    // Add 2 Days buffer
+                    scheduledDate.setDate(scheduledDate.getDate() + 2);
+
+                    // Format: "Jan 02, 2026"
+                    const options = { month: 'short', day: '2-digit', year: 'numeric' };
+                    agencyEtaEl.innerText = scheduledDate.toLocaleDateString('en-US', options);
+                } catch (e) {
+                    console.error("Date parse error:", e);
+                    agencyEtaEl.innerText = '--';
+                }
+            } else if (agencyEtaEl) {
+                agencyEtaEl.innerText = '--';
+            }
+
+            // 1. Get Current Location
+            let currentLat, currentLng;
+            if (shipment.currentLocation) {
+                currentLat = shipment.currentLocation.lat;
+                currentLng = shipment.currentLocation.lng;
+            } else {
+                return; // No current location
+            }
+
+            // 2. Get Delivery Location
+            let destLat, destLng;
+            if (shipment.delivery && shipment.delivery.lat && shipment.delivery.lng) {
+                destLat = shipment.delivery.lat;
+                destLng = shipment.delivery.lng;
+            } else if (shipment.delivery && shipment.delivery.place) {
+                // Geocode if missing
+                try {
+                    const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(shipment.delivery.place)}`);
+                    const data = await res.json();
+                    if (data && data.length > 0) {
+                        destLat = parseFloat(data[0].lat);
+                        destLng = parseFloat(data[0].lon);
+                    }
+                } catch (e) {
+                    console.error("Geocoding failed for ETA:", e);
+                }
+            }
+
+            if (!destLat || !destLng) return;
+
+            // 3. OSRM API Call
+            try {
+                const url = `https://router.project-osrm.org/route/v1/driving/${currentLng},${currentLat};${destLng},${destLat}?overview=false`;
+                const res = await fetch(url);
+                const data = await res.json();
+
+                if (data.code === 'Ok' && data.routes && data.routes.length > 0) {
+                    const route = data.routes[0];
+                    const distKm = (route.distance / 1000).toFixed(1);
+                    const durationMin = Math.round(route.duration / 60);
+
+                    // Format Duration nicely
+                    let timeStr = `${durationMin} min`;
+                    if (durationMin > 60) {
+                        const h = Math.floor(durationMin / 60);
+                        const m = durationMin % 60;
+                        timeStr = `${h}h ${m}m`;
+                    }
+
+                    distEl.innerText = `${distKm} km`;
+                    etaEl.innerText = timeStr;
+                }
+            } catch (err) {
+                console.error("OSRM error:", err);
             }
         }
     </script>

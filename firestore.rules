@@ -1,0 +1,72 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper function to check if user is admin
+    function isAdmin() {
+      // Check if the user document exists and has role 'admin'
+      return request.auth != null && 
+             exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+    
+    // Helper to check if user is authenticated
+    function isAuth() {
+      return request.auth != null;
+    }
+
+    // Users Collection
+    match /users/{userId} {
+      // authenticated users can read/write their own profile
+      // admins can read/write all profiles
+      allow read: if isAuth() && (request.auth.uid == userId || isAdmin());
+      allow create: if isAuth() && request.auth.uid == userId;
+      allow update: if isAuth() && (request.auth.uid == userId || isAdmin());
+      allow delete: if isAdmin();
+    }
+
+    // Shipments Collection
+    match /shipments/{shipmentId} {
+      // READ Rules
+      // 1. Public can GET a single document by ID (for public tracking)
+      allow get: if true;
+      
+      // 2. Listing/Querying restrictions
+      // - Admins can list all
+      // - Users can list their own shipments (must filter by userId)
+      // - Drivers can list assigned shipments (must filter by driver.email)
+      allow list: if isAuth() && (
+        isAdmin() || 
+        (resource.data.userId == request.auth.uid) || 
+        (resource.data.driver != null && resource.data.driver.email == request.auth.token.email)
+      );
+
+      // WRITE Rules
+      // 1. Create: Authenticated users can create shipments for themselves
+      allow create: if isAuth() && request.resource.data.userId == request.auth.uid;
+      
+      // 2. Update:
+      // - Admins
+      // - Drivers (status updates, OTP verification)
+      // - Owners (e.g. cancellations)
+      allow update: if isAuth() && (
+        isAdmin() ||
+        (resource.data.userId == request.auth.uid) ||
+        (resource.data.driver != null && resource.data.driver.email == request.auth.token.email)
+      );
+      
+      // 3. Delete: Admins only
+      allow delete: if isAdmin();
+    }
+    // Counters Collection (for generating sequential IDs)
+    match /counters/{counterId} {
+      allow get: if isAuth();
+      allow update: if isAuth() && (
+        // Only allow incrementing the count
+        request.resource.data.count == resource.data.count + 1
+      );
+      // Allow create if it doesn't exist yet (for first ever run)
+      allow create: if isAuth(); 
+    }
+  }
+}

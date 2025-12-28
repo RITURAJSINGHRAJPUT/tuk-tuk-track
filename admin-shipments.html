@@ -295,7 +295,7 @@
     <script src="js/main.js"></script>
     <script type="module">
         import { initAdminGuard } from './js/admin-guard.js';
-        import { auth, db, collection, query, orderBy, onSnapshot, doc, updateDoc, deleteDoc, getDocs, where } from './firebase-config.js';
+        import { adminAuth as auth, adminDb as db, collection, query, orderBy, onSnapshot, doc, updateDoc, deleteDoc, getDocs, where } from './firebase-config.js';
 
         initAdminGuard();
         lucide.createIcons();

@@ -208,7 +208,7 @@
     <script src="js/main.js"></script>
     <script type="module">
         import { initAdminGuard } from './js/admin-guard.js';
-        import { db, collection, query, where, getDocs, onSnapshot, doc, updateDoc, arrayUnion, Timestamp } from './firebase-config.js';
+        import { adminDb as db, collection, query, where, getDocs, onSnapshot, doc, updateDoc, arrayUnion, Timestamp } from './firebase-config.js';
 
         initAdminGuard();
         lucide.createIcons();

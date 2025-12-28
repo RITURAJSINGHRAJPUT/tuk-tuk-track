@@ -158,11 +158,11 @@
             </header>
 
             <!-- Scrollable Content -->
-            <main class="flex-1 overflow-hidden p-6">
-                <div class="max-w-[1600px] mx-auto h-full flex flex-col gap-6">
+            <main class="flex-1 overflow-y-auto p-6">
+                <div class="max-w-[1600px] mx-auto min-h-full flex flex-col gap-6">
 
                     <!-- Top Stats Row -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 shrink-0">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 shrink-0">
                         <!-- Active Vehicles -->
                         <div
                             class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 flex items-center gap-4">
@@ -185,7 +185,39 @@
                             </div>
                             <div>
                                 <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Current Temperature</p>
-                                <h3 class="text-2xl font-bold text-gray-900 dark:text-white">-2.4°C</h3>
+                                <h3 id="current-temp-display" class="text-2xl font-bold text-gray-900 dark:text-white">
+                                    --°C</h3>
+                            </div>
+                        </div>
+
+                        <!-- Distance Remaining -->
+                        <div
+                            class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 flex items-center gap-4">
+                            <div
+                                class="p-4 bg-purple-100 dark:bg-purple-900/30 rounded-xl text-purple-600 dark:text-purple-400">
+                                <i data-lucide="navigation" class="w-8 h-8"></i>
+                            </div>
+                            <div>
+                                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Distance Remaining
+                                </p>
+                                <h3 id="distance-display" class="text-2xl font-bold text-gray-900 dark:text-white">
+                                    -- km</h3>
+                            </div>
+                        </div>
+
+                        <!-- Estimated Time -->
+                        <div
+                            class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 flex items-center gap-4">
+                            <div
+                                class="p-4 bg-orange-100 dark:bg-orange-900/30 rounded-xl text-orange-600 dark:text-orange-400">
+                                <i data-lucide="clock" class="w-8 h-8"></i>
+                            </div>
+                            <div>
+                                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Estimated Time</p>
+                                <h3 id="eta-display" class="text-2xl font-bold text-gray-900 dark:text-white">-- min
+                                </h3>
+                                <p class="text-xs text-gray-400 mt-1">Agency: <span id="agency-eta-display"
+                                        class="font-medium text-gray-900 dark:text-white">--</span></p>
                             </div>
                         </div>
                     </div>
@@ -198,7 +230,7 @@
 
                             <!-- Active Fleet List -->
                             <div
-                                class="flex-1 bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 flex flex-col overflow-hidden min-h-0">
+                                class="flex-1 bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 flex flex-col overflow-hidden min-h-[400px]">
                                 <div class="p-5 border-b border-gray-200 dark:border-gray-700 shrink-0">
                                     <h2 class="text-lg font-bold text-gray-900 dark:text-white">Active Fleet</h2>
                                     <p class="text-sm text-gray-500 dark:text-gray-400">Select a vehicle to track</p>
@@ -252,7 +284,7 @@
     <script src="js/main.js"></script>
     <script type="module">
         import { initAdminGuard } from './js/admin-guard.js';
-        import { db, collection, query, where, onSnapshot, rtdb, ref, onValue, doc, updateDoc } from './firebase-config.js';
+        import { adminDb as db, collection, query, where, onSnapshot, adminRtdb as rtdb, ref, onValue, doc, updateDoc, arrayUnion } from './firebase-config.js';
 
         initAdminGuard();
         lucide.createIcons();
@@ -271,10 +303,10 @@
         const mainTempChart = new Chart(ctx, {
             type: 'line',
             data: {
-                labels: ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00'],
+                labels: [],
                 datasets: [{
                     label: 'Temp (°C)',
-                    data: [-2, -3, -1, -2, -4, -2],
+                    data: [],
                     borderColor: '#3b82f6', // Blue for cold/temp
                     backgroundColor: (context) => {
                         const ctx = context.chart.ctx;
@@ -321,8 +353,7 @@
                             color: '#9ca3af',
                             font: { size: 10 }
                         },
-                        suggestedMin: -5,
-                        suggestedMax: 0
+                        // Remove hardcoded suggestions to allow auto-scale
                     }
                 },
                 interaction: {
@@ -361,6 +392,8 @@
                 const updatedShipment = activeShipments.find(s => s.id === selectedShipmentId);
                 if (updatedShipment) {
                     drawShipmentPath(updatedShipment);
+                    // Also update stats/chart if open
+                    updateStatsAndChart(updatedShipment);
                 }
             }
 
@@ -424,29 +457,48 @@
                                 if (markers[shipment.id]) {
                                     const newLatLng = new L.LatLng(lat, lng);
                                     markers[shipment.id].setLatLng(newLatLng);
-
-                                    // Optional: Pan map if selected
-                                    if (selectedShipmentId === shipment.id) {
-                                        // Don't flyTo on every update, maybe just keep in view?
-                                        // map.panTo(newLatLng); 
-                                    }
                                 }
 
                                 // Update Popup Content (Sensor Data)
                                 const temp = data.sensor ? data.sensor.temperature : 'N/A';
                                 const humidity = data.sensor ? data.sensor.humidity : 'N/A';
 
-                                // Sync to Firestore (Throttle could be added here, but direct is fine for demo)
-                                // We update: currentLocation, currentTemperature, lastUpdated
-                                const shipmentRef = doc(db, "shipments", shipment.id);
+                                // Record History Entry
+                                const newEntry = {
+                                    timestamp: new Date().toISOString(),
+                                    temp: parseFloat(temp) || 0,
+                                    humidity: parseFloat(humidity) || 0
+                                };
 
-                                // Only update if data changed significantly or strictly every time? 
-                                // Let's update every time to ensure "real data" is seen everywhere.
+                                // 1. Update Local State (Immediate Feedback)
+                                if (!shipment.temperatureHistory) shipment.temperatureHistory = [];
+                                shipment.temperatureHistory.push(newEntry);
+
+                                // Keep only last 20 locally to prevent bloat
+                                if (shipment.temperatureHistory.length > 20) {
+                                    shipment.temperatureHistory = shipment.temperatureHistory.slice(-20);
+                                }
+
+                                // Sync fields
+                                shipment.currentTemperature = temp;
+                                shipment.currentHumidity = humidity;
+                                shipment.currentLocation = { lat, lng };
+
+                                // 2. Update UI
+                                if (selectedShipmentId === shipment.id) {
+                                    updateStatsAndChart(shipment);
+                                    calcDistanceAndEta(shipment);
+                                }
+
+                                // 3. Sync to Firestore (Persist History)
+                                const shipmentRef = doc(db, "shipments", shipment.id);
                                 updateDoc(shipmentRef, {
                                     currentLocation: { lat, lng },
                                     currentTemperature: temp,
                                     currentHumidity: humidity,
-                                    lastUpdated: new Date().toISOString()
+                                    lastUpdated: newEntry.timestamp,
+                                    // Append to history array in Firestore
+                                    temperatureHistory: arrayUnion(newEntry)
                                 }).catch(err => console.error("Error syncing to Firestore:", err));
 
                                 // Find popup element if open
@@ -470,8 +522,11 @@
                                     }
                                 }
 
-                                // Update Stats on dashboard if this is the selected vehicle?
-                                // (Optional improvement)
+                                // Update Stats on dashboard if this is the selected vehicle
+                                if (selectedShipmentId === shipment.id) {
+                                    updateStatsAndChart(shipment);
+                                    calcDistanceAndEta(shipment);
+                                }
                             }
                         }
                     });
@@ -645,6 +700,200 @@
             }
 
             drawShipmentPath(shipment);
+
+            updateStatsAndChart(shipment);
+            calcDistanceAndEta(shipment);
+        }
+
+        /* async function calcDistanceAndEta(shipment) {
+            const distEl = document.getElementById('distance-display');
+            const etaEl = document.getElementById('eta-display');
+
+            if (!distEl || !etaEl) return;
+
+            distEl.innerText = '-- km';
+            etaEl.innerText = '-- min';
+
+            // 1. Get Current Location
+            let currentLat, currentLng;
+            if (shipment.currentLocation) {
+                currentLat = shipment.currentLocation.lat;
+                currentLng = shipment.currentLocation.lng;
+            } else {
+                return; // No current location implies not started or unknown
+            }
+
+            // 2. Get Delivery Location
+            let destLat, destLng;
+            if (shipment.delivery && shipment.delivery.lat && shipment.delivery.lng) {
+                destLat = shipment.delivery.lat;
+                destLng = shipment.delivery.lng;
+            } else if (shipment.delivery && shipment.delivery.place) {
+                // Geocode if missing
+                try {
+                    const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(shipment.delivery.place)}`);
+                    const data = await res.json();
+                    if (data && data.length > 0) {
+                        destLat = parseFloat(data[0].lat);
+                        destLng = parseFloat(data[0].lon);
+                    }
+                } catch (e) {
+                    console.error("Geocoding failed for ETA:", e);
+                }
+            }
+
+            if (!destLat || !destLng) return;
+
+            // 3. OSRM API Call
+            try {
+                const url = `https://router.project-osrm.org/route/v1/driving/${currentLng},${currentLat};${destLng},${destLat}?overview=false`;
+                const res = await fetch(url);
+                const data = await res.json();
+
+                if (data.code === 'Ok' && data.routes && data.routes.length > 0) {
+                    const route = data.routes[0];
+                    const distKm = (route.distance / 1000).toFixed(1);
+                    const durationMin = Math.round(route.duration / 60);
+
+                    // Format Duration nicely
+                    let timeStr = `${durationMin} min`;
+                    if (durationMin > 60) {
+                        const h = Math.floor(durationMin / 60);
+                        const m = durationMin % 60;
+                        timeStr = `${h}h ${m}m`;
+                    }
+
+                    distEl.innerText = `${distKm} km`;
+                    etaEl.innerText = timeStr;
+                }
+            } catch (err) {
+            }
+        } */
+
+        function updateStatsAndChart(shipment) {
+            // Update Temp Display
+            const tempEl = document.getElementById('current-temp-display');
+            if (tempEl) {
+                const temp = shipment.currentTemperature !== undefined ? shipment.currentTemperature : '--';
+                tempEl.innerText = `${temp}°C`;
+
+                // Color coding
+                tempEl.classList.remove('text-red-500', 'text-blue-500', 'text-gray-900', 'dark:text-white');
+                if (temp !== '--') {
+                    if (parseFloat(temp) > 30) tempEl.classList.add('text-red-500');
+                    else if (parseFloat(temp) < 10) tempEl.classList.add('text-blue-500');
+                    else tempEl.classList.add('text-gray-900', 'dark:text-white');
+                } else {
+                    tempEl.classList.add('text-gray-900', 'dark:text-white');
+                }
+            }
+
+            // Update Chart
+            if (shipment.temperatureHistory && shipment.temperatureHistory.length > 0) {
+                const history = [...shipment.temperatureHistory].sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+                // Take last 10 points or so
+                const recent = history.slice(-10);
+
+                mainTempChart.data.labels = recent.map(h => {
+                    const d = new Date(h.timestamp);
+                    return `${d.getHours()}:${d.getMinutes().toString().padStart(2, '0')}`;
+                });
+                mainTempChart.data.datasets[0].data = recent.map(h => h.temp);
+                mainTempChart.update();
+            } else {
+                // Reset chart if no history
+                mainTempChart.data.labels = [];
+                mainTempChart.data.datasets[0].data = [];
+                mainTempChart.update();
+            }
+        }
+
+        async function calcDistanceAndEta(shipment) {
+            const distEl = document.getElementById('distance-display');
+            const etaEl = document.getElementById('eta-display');
+            const agencyEtaEl = document.getElementById('agency-eta-display'); // New element
+
+            if (!distEl || !etaEl) return;
+
+            distEl.innerText = '-- km';
+            etaEl.innerText = '-- min';
+            if (agencyEtaEl) agencyEtaEl.innerText = '--';
+
+            // --- Agency ETA (Scheduled + 2 Days) ---
+            const baseDateStr = (shipment.delivery && shipment.delivery.date) ? shipment.delivery.date : shipment.createdAt;
+
+            if (agencyEtaEl && baseDateStr) {
+                try {
+                    const scheduledDate = new Date(baseDateStr);
+                    // Add 2 Days buffer
+                    scheduledDate.setDate(scheduledDate.getDate() + 2);
+
+                    // Format: "Jan 02, 2026"
+                    const options = { month: 'short', day: '2-digit', year: 'numeric' };
+                    agencyEtaEl.innerText = scheduledDate.toLocaleDateString('en-US', options);
+                } catch (e) {
+                    console.error("Date parse error:", e);
+                    agencyEtaEl.innerText = '--';
+                }
+            } else if (agencyEtaEl) {
+                agencyEtaEl.innerText = '--';
+            }
+
+            // 1. Get Current Location
+            let currentLat, currentLng;
+            if (shipment.currentLocation) {
+                currentLat = shipment.currentLocation.lat;
+                currentLng = shipment.currentLocation.lng;
+            } else {
+                return; // No current location
+            }
+
+            // 2. Get Delivery Location
+            let destLat, destLng;
+            if (shipment.delivery && shipment.delivery.lat && shipment.delivery.lng) {
+                destLat = shipment.delivery.lat;
+                destLng = shipment.delivery.lng;
+            } else if (shipment.delivery && shipment.delivery.place) {
+                // Geocode if missing
+                try {
+                    const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(shipment.delivery.place)}`);
+                    const data = await res.json();
+                    if (data && data.length > 0) {
+                        destLat = parseFloat(data[0].lat);
+                        destLng = parseFloat(data[0].lon);
+                    }
+                } catch (e) {
+                    console.error("Geocoding failed for ETA:", e);
+                }
+            }
+
+            if (!destLat || !destLng) return;
+
+            // 3. OSRM API Call
+            try {
+                const url = `https://router.project-osrm.org/route/v1/driving/${currentLng},${currentLat};${destLng},${destLat}?overview=false`;
+                const res = await fetch(url);
+                const data = await res.json();
+
+                if (data.code === 'Ok' && data.routes && data.routes.length > 0) {
+                    const route = data.routes[0];
+                    const distKm = (route.distance / 1000).toFixed(1);
+                    const durationMin = Math.round(route.duration / 60);
+
+                    // Format Duration nicely
+                    let timeStr = `${durationMin} min`;
+                    if (durationMin > 60) {
+                        const h = Math.floor(durationMin / 60);
+                        const m = durationMin % 60;
+                        timeStr = `${h}h ${m}m`;
+                    }
+
+                    distEl.innerText = `${distKm} km`;
+                    etaEl.innerText = timeStr;
+                }
+            } catch (err) {
+                console.error("OSRM error:", err);
+            }
         }
 
         function drawShipmentPath(shipment) {
