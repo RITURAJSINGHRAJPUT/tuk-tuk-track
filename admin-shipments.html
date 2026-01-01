@@ -8,6 +8,8 @@
     <link href="./css/style.css" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
     <script>
         if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
             document.documentElement.classList.add('dark');
@@ -418,6 +420,12 @@
                                 <button onclick="generateQrCode('${data.id}', '${data.trackingId}')" class="p-1.5 text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors" title="Generate QR">
                                     <i data-lucide="qr-code" class="w-4 h-4"></i>
                                 </button>
+                                <button onclick="downloadCsv('${data.id}')" class="p-1.5 text-green-500 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg transition-colors" title="Download CSV">
+                                    <i data-lucide="file-spreadsheet" class="w-4 h-4"></i>
+                                </button>
+                                <button onclick="downloadPdf('${data.id}')" class="p-1.5 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors" title="Download PDF">
+                                    <i data-lucide="file-text" class="w-4 h-4"></i>
+                                </button>
                             </div>
                         </td>
                     </tr>
@@ -615,6 +623,132 @@
                 console.error("Error deleting shipment:", error);
                 alert("Failed to delete shipment");
             }
+        };
+
+        // --- Report Generation Logic ---
+
+        function getShipmentHistory(shipment) {
+            let events = [];
+
+            if (shipment.locationHistory) {
+                shipment.locationHistory.forEach(h => {
+                    events.push({
+                        timestamp: new Date(h.timestamp).getTime(),
+                        dateStr: h.timestamp,
+                        type: 'location',
+                        lat: h.lat,
+                        lng: h.lng
+                    });
+                });
+            }
+
+            if (shipment.temperatureHistory) {
+                shipment.temperatureHistory.forEach(h => {
+                    // Check if we already have an event at this approx timestamp (within 1 sec)
+                    // Because updates usually happen together
+                    const existing = events.find(e => Math.abs(e.timestamp - new Date(h.timestamp).getTime()) < 1000);
+                    if (existing) {
+                        existing.temp = h.temp;
+                    } else {
+                        events.push({
+                            timestamp: new Date(h.timestamp).getTime(),
+                            dateStr: h.timestamp,
+                            type: 'temp',
+                            temp: h.temp
+                        });
+                    }
+                });
+            }
+
+            // Sort by time
+            events.sort((a, b) => a.timestamp - b.timestamp);
+            return events;
+        }
+
+        window.downloadCsv = async (id) => {
+            const shipment = allShipments.find(s => s.id === id);
+            if (!shipment) return alert("Shipment data not found");
+
+            let csvContent = "data:text/csv;charset=utf-8,";
+            csvContent += "Timestamp,Date,Time,Latitude,Longitude,Temperature (C),Location Name\n";
+
+            const events = getShipmentHistory(shipment);
+
+            if (events.length === 0) {
+                const now = new Date();
+                const currentLat = shipment.currentLocation ? shipment.currentLocation.lat : '';
+                const currentLng = shipment.currentLocation ? shipment.currentLocation.lng : '';
+                const currentTemp = shipment.currentTemperature || '';
+                csvContent += `${now.toISOString()},${now.toLocaleDateString()},${now.toLocaleTimeString()},${currentLat},${currentLng},${currentTemp},Current State (No History)\n`;
+            } else {
+                events.forEach(e => {
+                    const d = new Date(e.timestamp);
+                    const date = d.toLocaleDateString();
+                    const time = d.toLocaleTimeString();
+                    const lat = e.lat !== undefined ? e.lat : '';
+                    const lng = e.lng !== undefined ? e.lng : '';
+                    const temp = e.temp !== undefined ? e.temp : '';
+                    csvContent += `${e.dateStr},${date},${time},${lat},${lng},${temp},\n`;
+                });
+            }
+
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `shipment_report_${shipment.trackingId || id}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        };
+
+        window.downloadPdf = async (id) => {
+            const shipment = allShipments.find(s => s.id === id);
+            if (!shipment) return alert("Shipment data not found");
+
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            // Header
+            doc.setFontSize(20);
+            doc.text("Shipment Report", 14, 22);
+
+            doc.setFontSize(11);
+            doc.text(`Tracking ID: ${shipment.trackingId || id}`, 14, 32);
+            doc.text(`User: ${shipment.userName || 'N/A'}`, 14, 38);
+            doc.text(`Driver: ${shipment.driver ? shipment.driver.name : 'Unassigned'}`, 14, 44);
+            doc.text(`Status: ${shipment.status}`, 14, 50);
+            doc.text(`Generated: ${new Date().toLocaleString()}`, 14, 56);
+
+            // Table Data
+            const events = getShipmentHistory(shipment);
+            const tableData = events.map(e => {
+                const d = new Date(e.timestamp);
+                return [
+                    d.toLocaleDateString() + ' ' + d.toLocaleTimeString(),
+                    e.lat !== undefined ? e.lat.toFixed(6) : '-',
+                    e.lng !== undefined ? e.lng.toFixed(6) : '-',
+                    e.temp !== undefined ? e.temp + ' C' : '-'
+                ];
+            });
+
+            if (tableData.length === 0) {
+                const now = new Date();
+                const currentLat = shipment.currentLocation ? shipment.currentLocation.lat.toFixed(6) : '-';
+                const currentLng = shipment.currentLocation ? shipment.currentLocation.lng.toFixed(6) : '-';
+                const currentTemp = shipment.currentTemperature ? shipment.currentTemperature + ' C' : '-';
+                tableData.push([now.toLocaleDateString() + ' ' + now.toLocaleTimeString(), currentLat, currentLng, currentTemp]);
+            }
+
+            doc.autoTable({
+                head: [['Timestamp', 'Latitude', 'Longitude', 'Temperature']],
+                body: tableData,
+                startY: 65,
+                theme: 'grid',
+                styles: { fontSize: 8 },
+                headStyles: { fillColor: [147, 51, 234] } // Purple header to match theme
+            });
+
+            doc.save(`shipment_report_${shipment.trackingId || id}.pdf`);
         };
 
         // --- QR Code Logic ---
