@@ -665,6 +665,7 @@
             }).addTo(map);
 
             // Path Logic
+            // Path Logic
             let pathCoords = [];
             if (shipmentData.locationHistory && shipmentData.locationHistory.length > 0) {
                 const history = shipmentData.locationHistory.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
@@ -673,17 +674,33 @@
             pathCoords.push([parseFloat(lat), parseFloat(lng)]);
 
             if (pathCoords.length > 1) {
-                if (window.routingControl) map.removeControl(window.routingControl);
-                window.routingControl = L.Routing.control({
-                    waypoints: pathCoords.map(c => L.latLng(c[0], c[1])),
-                    routeWhileDragging: false,
-                    draggableWaypoints: false,
-                    addWaypoints: false,
-                    createMarker: function () { return null; },
-                    lineOptions: { styles: [{ color: 'blue', opacity: 0.7, weight: 5 }] },
-                    show: false,
-                    fitSelectedRoutes: true
+                // Remove existing controls/layers handled by manual Routing Control
+                if (window.routingControl) {
+                    map.removeControl(window.routingControl);
+                    window.routingControl = null;
+                }
+
+                // Use simple Polyline for robust history tracking
+                L.polyline(pathCoords, {
+                    color: '#3b82f6', // Blue-500
+                    weight: 5,
+                    opacity: 0.8,
+                    lineJoin: 'round'
                 }).addTo(map);
+
+                // Add simple circle markers for history points
+                pathCoords.slice(0, -1).forEach(coord => {
+                    L.circleMarker(coord, {
+                        radius: 3,
+                        color: '#3b82f6',
+                        fillColor: 'white',
+                        fillOpacity: 1,
+                        weight: 1
+                    }).addTo(map);
+                });
+
+                // Fit bounds to show entire path
+                map.fitBounds(L.latLngBounds(pathCoords), { padding: [50, 50] });
             }
 
             // Vehicle Marker

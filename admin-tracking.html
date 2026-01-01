@@ -33,9 +33,12 @@
 
 <body class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-100 font-sans transition-colors duration-200">
 
-    <div class="flex h-screen overflow-hidden">
+    <div class="flex h-screen overflow-hidden relative">
+        <!-- Sidebar Backdrop -->
+        <div id="sidebar-backdrop"
+            class="fixed inset-0 bg-black/50 z-[55] hidden md:hidden backdrop-blur-sm transition-opacity"></div>
         <!-- Sidebar -->
-        <aside
+        <aside id="sidebar"
             class="md:w-72 bg-white md:bg-white/80 dark:bg-gray-900 md:dark:bg-gray-900/90 backdrop-blur-xl border-r border-gray-200 dark:border-gray-800 hidden md:flex flex-col z-50 transition-all duration-300">
             <div class="p-6 flex items-center justify-between gap-3 mb-2">
                 <div class="flex items-center gap-3">
@@ -133,7 +136,7 @@
             <header
                 class="h-20 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-800 flex items-center justify-between px-8 z-40">
                 <div class="flex items-center gap-4">
-                    <button
+                    <button id="sidebar-toggle"
                         class="md:hidden p-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors">
                         <i data-lucide="menu" class="w-6 h-6"></i>
                     </button>
@@ -226,7 +229,7 @@
                     <div class="flex-1 grid grid-cols-1 lg:grid-cols-3 gap-6 min-h-0">
 
                         <!-- Left Column: List + Graph -->
-                        <div class="flex flex-col gap-6 h-full min-h-0">
+                        <div class="flex flex-col gap-6 h-auto lg:h-full min-h-0">
 
                             <!-- Active Fleet List -->
                             <div
@@ -261,7 +264,7 @@
 
                         <!-- Map Area -->
                         <div
-                            class="lg:col-span-2 bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden relative h-full">
+                            class="lg:col-span-2 bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden relative h-[500px] lg:h-full">
                             <div id="map" class="w-full h-full z-0"></div>
 
                             <!-- Map Controls -->
@@ -464,20 +467,29 @@
                                 const humidity = data.sensor ? data.sensor.humidity : 'N/A';
 
                                 // Record History Entry
-                                const newEntry = {
-                                    timestamp: new Date().toISOString(),
+                                const timestamp = new Date().toISOString();
+                                const newTempEntry = {
+                                    timestamp: timestamp,
                                     temp: parseFloat(temp) || 0,
                                     humidity: parseFloat(humidity) || 0
+                                };
+                                const newLocationEntry = {
+                                    timestamp: timestamp,
+                                    lat: parseFloat(lat),
+                                    lng: parseFloat(lng)
                                 };
 
                                 // 1. Update Local State (Immediate Feedback)
                                 if (!shipment.temperatureHistory) shipment.temperatureHistory = [];
-                                shipment.temperatureHistory.push(newEntry);
-
-                                // Keep only last 20 locally to prevent bloat
-                                if (shipment.temperatureHistory.length > 20) {
-                                    shipment.temperatureHistory = shipment.temperatureHistory.slice(-20);
+                                shipment.temperatureHistory.push(newTempEntry);
+                                if (shipment.temperatureHistory.length > 50) {
+                                    shipment.temperatureHistory = shipment.temperatureHistory.slice(-50);
                                 }
+
+                                if (!shipment.locationHistory) shipment.locationHistory = [];
+                                shipment.locationHistory.push(newLocationEntry);
+                                // Optional: Cap location history locally if needed, but for path we usually want all
+                                // If it gets too huge, we might need a separate collection, but for now:
 
                                 // Sync fields
                                 shipment.currentTemperature = temp;
@@ -488,6 +500,8 @@
                                 if (selectedShipmentId === shipment.id) {
                                     updateStatsAndChart(shipment);
                                     calcDistanceAndEta(shipment);
+                                    // FORCE redraw of path
+                                    drawShipmentPath(shipment);
                                 }
 
                                 // 3. Sync to Firestore (Persist History)
@@ -496,9 +510,10 @@
                                     currentLocation: { lat, lng },
                                     currentTemperature: temp,
                                     currentHumidity: humidity,
-                                    lastUpdated: newEntry.timestamp,
+                                    lastUpdated: timestamp,
                                     // Append to history array in Firestore
-                                    temperatureHistory: arrayUnion(newEntry)
+                                    temperatureHistory: arrayUnion(newTempEntry),
+                                    locationHistory: arrayUnion(newLocationEntry)
                                 }).catch(err => console.error("Error syncing to Firestore:", err));
 
                                 // Find popup element if open
@@ -905,40 +920,25 @@
             const history = shipment.locationHistory.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
             const pathCoords = history.map(h => [h.lat, h.lng]);
 
-            // Add current location if available (from local computed or data)
-            // The marker is at 'shipment.currentLocation' usually.
+            // Add current location if available
             if (shipment.currentLocation) {
                 pathCoords.push([shipment.currentLocation.lat, shipment.currentLocation.lng]);
             }
 
-            // Draw Route
+            // Draw Route using simple Polyline (Robust for History)
             if (pathCoords.length > 1) {
-                // simple fallback
-                const simpleLine = L.polyline(pathCoords, { color: 'purple', weight: 4, opacity: 0.3, dashArray: '10, 10' }).addTo(currentPathLayer);
+                // Draw effective path
+                L.polyline(pathCoords, {
+                    color: '#9333ea', // Purple-600
+                    weight: 4,
+                    opacity: 0.8,
+                    lineJoin: 'round',
+                    lineCap: 'round'
+                }).addTo(currentPathLayer);
 
-                // Prepare coordinates for OSRM (Lng,Lat format)
-                const osrmCoords = pathCoords.map(c => `${c[1]},${c[0]}`).join(';');
-
-                // Fetch Realistic Route
-                fetch(`https://router.project-osrm.org/route/v1/driving/${osrmCoords}?overview=full&geometries=geojson`)
-                    .then(res => res.json())
-                    .then(data => {
-                        if (data.code === 'Ok' && data.routes && data.routes.length > 0) {
-                            currentPathLayer.removeLayer(simpleLine);
-
-                            L.geoJSON(data.routes[0].geometry, {
-                                style: { color: 'purple', weight: 5, opacity: 0.8, lineJoin: 'round' }
-                            }).addTo(currentPathLayer);
-                        }
-                    })
-                    .catch(err => {
-                        console.error("OSRM Routing failed, keeping simple line:", err);
-                    });
-
-                // Add Markers
+                // Add Markers for history points
                 history.forEach((point) => {
                     let pointTemp = 'N/A';
-                    // Fuzzy match temperature if available
                     if (shipment.temperatureHistory) {
                         const matching = shipment.temperatureHistory.find(t => t.timestamp === point.timestamp);
                         if (matching) pointTemp = matching.temp;
@@ -946,16 +946,17 @@
 
                     const timeStr = point.timestamp ? new Date(point.timestamp).toLocaleTimeString() : 'Unknown';
 
-                    const marker = L.circleMarker([point.lat, point.lng], {
-                        radius: 5,
-                        color: 'blue',
+                    const circle = L.circleMarker([point.lat, point.lng], {
+                        radius: 4,
+                        color: '#9333ea',
                         fillColor: 'white',
-                        fillOpacity: 1
+                        fillOpacity: 1,
+                        weight: 2
                     }).addTo(currentPathLayer);
 
-                    marker.bindPopup(`
+                    circle.bindPopup(`
                         <div class="text-xs font-sans p-1">
-                            <strong class="text-blue-600">History Point</strong><br>
+                            <strong class="text-purple-600">History Point</strong><br>
                             <span class="text-gray-500">Time:</span> ${timeStr}<br>
                             <span class="text-gray-500">Temp:</span> ${pointTemp}°C
                         </div>
