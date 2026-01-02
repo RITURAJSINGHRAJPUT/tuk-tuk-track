@@ -51,17 +51,17 @@ if (registerForm) {
             // If pending, sign out immediately
             if (status === 'pending') {
                 await signOut(auth);
-                alert('Account created! Verification required. Please wait for admin approval.');
+                showNotification('info', 'Verification Required', 'Account created! Please wait for admin approval.');
                 window.location.href = 'login.html';
             } else {
                 await signOut(auth); // Force re-login or auto-login? Original code had signOut then login.html
-                alert('Account created successfully! Please log in.');
+                showNotification('success', 'Account Created', 'Registration successful! Please log in.');
                 window.location.href = 'login.html';
             }
 
         } catch (error) {
             console.error("Error registering user:", error);
-            alert(error.message);
+            showNotification('error', 'Registration Failed', error.message);
             submitBtn.innerHTML = 'Sign Up';
             submitBtn.disabled = false;
         }
@@ -119,7 +119,7 @@ if (loginForm) {
 
         } catch (error) {
             console.error("Error logging in:", error);
-            alert(error.message || "Invalid email or password.");
+            showNotification('error', 'Login Failed', error.message || "Invalid email or password.");
             submitBtn.innerHTML = 'Log In';
             submitBtn.disabled = false;
         }

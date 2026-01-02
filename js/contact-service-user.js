@@ -57,11 +57,11 @@ function setupForm(user) {
                 createdAt: serverTimestamp(),
                 targetRole: 'user' // useful metadata
             });
-            showToast("Message Sent", "We'll get back to you shortly.");
+            showNotification('success', 'Message Sent', "We'll get back to you shortly.");
             contactForm.reset();
         } catch (error) {
             console.error("Error sending message:", error);
-            showToast("Error", "Failed to send message. Please try again.");
+            showNotification('error', 'Error', "Failed to send message. Please try again.");
         } finally {
             submitBtn.disabled = false;
             submitBtn.innerHTML = originalBtnText;
@@ -146,13 +146,4 @@ function createTicketCard(data) {
     `;
 }
 
-function showToast(title, message) {
-    const toast = document.getElementById('toast');
-    document.getElementById('toast-title').innerText = title;
-    document.getElementById('toast-message').innerText = message;
 
-    toast.classList.remove('translate-y-24');
-    setTimeout(() => {
-        toast.classList.add('translate-y-24');
-    }, 3000);
-}

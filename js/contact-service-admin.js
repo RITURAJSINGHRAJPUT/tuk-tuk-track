@@ -122,20 +122,11 @@ window.sendReply = async (id) => {
             status: 'resolved',
             repliedAt: serverTimestamp()
         });
-        showToast("Ticket Resolved", "Reply sent and ticket marked as resolved.");
+        showNotification('success', "Ticket Resolved", "Reply sent and ticket marked as resolved.");
     } catch (e) {
         console.error("Reply Error", e);
-        alert("Failed to send reply: " + e.message);
+        showNotification('error', "Reply Failed", e.message);
     }
 };
 
-function showToast(title, message) {
-    const toast = document.getElementById('toast');
-    document.getElementById('toast-title').innerText = title;
-    document.getElementById('toast-message').innerText = message;
 
-    toast.classList.remove('translate-y-24');
-    setTimeout(() => {
-        toast.classList.add('translate-y-24');
-    }, 3000);
-}

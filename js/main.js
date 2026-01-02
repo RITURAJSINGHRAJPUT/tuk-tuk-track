@@ -134,3 +134,82 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
 });
+
+// -------------------------------------------------------------------------
+// Global Notification System
+// -------------------------------------------------------------------------
+window.showNotification = function (type, title, message) {
+    // Remove existing notifications to prevent stacking (optional, but cleaner for top-center)
+    const existingNotifications = document.querySelectorAll('.notification-toast');
+    existingNotifications.forEach(n => n.remove());
+
+    // Create Notification Container
+    const notification = document.createElement('div');
+    notification.className = `notification-toast fixed top-4 left-1/2 transform -translate-x-1/2 z-[100] flex items-center gap-3 px-4 py-3 rounded-xl shadow-lg shadow-gray-200/50 dark:shadow-black/20 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 transition-all duration-300 opacity-0 min-w-[300px] max-w-md`;
+
+    // Define Icons and Colors based on Type
+    let icon = '';
+    let iconColor = '';
+    let iconBg = '';
+
+    switch (type) {
+        case 'success':
+            icon = '<i data-lucide="check-circle-2" class="w-5 h-5 text-green-500"></i>';
+            iconBg = 'bg-green-50 dark:bg-green-900/20';
+            break;
+        case 'error':
+            icon = '<i data-lucide="x-circle" class="w-5 h-5 text-red-500"></i>';
+            iconBg = 'bg-red-50 dark:bg-red-900/20';
+            break;
+        case 'info':
+            icon = '<i data-lucide="info" class="w-5 h-5 text-blue-500"></i>';
+            iconBg = 'bg-blue-50 dark:bg-blue-900/20';
+            break;
+        case 'warning':
+            icon = '<i data-lucide="alert-triangle" class="w-5 h-5 text-orange-500"></i>';
+            iconBg = 'bg-orange-50 dark:bg-orange-900/20';
+            break;
+        default:
+            icon = '<i data-lucide="bell" class="w-5 h-5 text-purple-500"></i>';
+            iconBg = 'bg-purple-50 dark:bg-purple-900/20';
+    }
+
+    // Inner HTML
+    notification.innerHTML = `
+        <div class="p-2 rounded-lg ${iconBg} shrink-0">
+            ${icon}
+        </div>
+        <div class="flex-1 min-w-0">
+            <h4 class="text-sm font-bold text-gray-900 dark:text-white leading-tight">${title}</h4>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">${message}</p>
+        </div>
+        <button onclick="this.parentElement.remove()" class="p-1 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 transition-colors">
+            <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+    `;
+
+    // Append to Body
+    document.body.appendChild(notification);
+
+    // Initialize Icons
+    if (window.lucide) {
+        window.lucide.createIcons();
+    }
+
+    // Animate In via CSS classes
+    requestAnimationFrame(() => {
+        notification.classList.remove('opacity-0', '-translate-y-4');
+        notification.classList.add('translate-y-0', 'opacity-100');
+    });
+
+    // Auto Dismiss after 3 seconds
+    setTimeout(() => {
+        if (notification.parentElement) {
+            notification.classList.add('opacity-0', '-translate-y-4');
+            notification.classList.remove('translate-y-0', 'opacity-100');
+            setTimeout(() => {
+                if (notification.parentElement) notification.remove();
+            }, 300); // Wait for transition
+        }
+    }, 3000);
+};

@@ -51,7 +51,7 @@ if (loginForm) {
                 await signOut(auth);
             }
 
-            alert(error.message || "Invalid email or password.");
+            showNotification('error', "Login Failed", error.message || "Invalid email or password.");
             submitBtn.innerHTML = originalBtnText;
             submitBtn.disabled = false;
         }
