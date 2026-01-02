@@ -101,12 +101,12 @@ window.setFilter = (type) => {
 
     // Reset all
     Object.values(buttons).forEach(btn => {
-        btn.className = "px-4 py-2 bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 border border-gray-100 dark:border-gray-600 rounded-lg text-sm font-bold whitespace-nowrap transition-colors cursor-pointer";
+        btn.classList.remove('active');
     });
 
     // Set Active
     if (buttons[type]) {
-        buttons[type].className = "px-4 py-2 bg-purple-600 text-white rounded-lg text-sm font-bold whitespace-nowrap shadow-md shadow-purple-500/20 transition-all cursor-pointer transform scale-105";
+        buttons[type].classList.add('active');
     }
 
     renderTickets();
@@ -117,38 +117,59 @@ function createTicketCard(id, data) {
     // Use targetRole if available, else infer generic
     const role = data.targetRole ? data.targetRole.toUpperCase() : 'USER';
 
+    // Determine badge class
+    let badgeClass = 'cs-badge-user';
+    let avatarBg = 'bg-green-50 text-green-600 dark:bg-green-900/20 dark:text-green-400';
+
+    if (role === 'DRIVER') {
+        badgeClass = 'cs-badge-driver';
+        avatarBg = 'bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400';
+    } else if (role === 'ADMIN') {
+        badgeClass = 'cs-badge-admin';
+        avatarBg = 'bg-purple-50 text-purple-600 dark:bg-purple-900/20 dark:text-purple-400';
+    } else {
+        // Default User
+        badgeClass = 'cs-badge-user';
+        avatarBg = 'bg-green-50 text-green-600 dark:bg-green-900/20 dark:text-green-400';
+    }
+
     return `
-        <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-gray-700 h-full flex flex-col justify-between hover:shadow-md transition-all duration-300 relative group">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-gray-700 hover:shadow-md transition-all duration-300 cs-card">
             
-            <!-- Actions (Edit/Delete) -->
-            <div class="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                <button onclick="window.openEditTicketModal('${id}')" class="p-1.5 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-lg hover:bg-blue-100 hover:text-blue-600 transition-colors" title="Edit Ticket">
-                    <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
-                </button>
-                <button onclick="window.deleteTicket('${id}')" class="p-1.5 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-lg hover:bg-red-100 hover:text-red-600 transition-colors" title="Delete Ticket">
-                    <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+            <!-- Actions (Delete) -->
+            <div class="cs-card-actions">
+                <button onclick="window.deleteTicket('${id}')" class="cs-action-btn cs-btn-delete" title="Delete Ticket">
+                    <i data-lucide="trash-2" class="w-4 h-4"></i>
                 </button>
             </div>
 
-            <div class="flex justify-between items-start mb-5">
-                 <div class="w-12 h-12 rounded-2xl bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400 flex items-center justify-center font-bold text-lg">
+            <!-- Header: Avatar + Info + Badge -->
+            <div class="cs-card-header">
+                 <div class="cs-avatar ${avatarBg}">
                     ${data.userName ? data.userName.charAt(0).toUpperCase() : 'U'}
                  </div>
-                 <span class="px-3 py-1 bg-gray-100 dark:bg-gray-700 text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase rounded-full tracking-wider mr-14 group-hover:mr-20 transition-all">
-                    ${role}
-                 </span>
+                 <div class="flex flex-col min-w-0">
+                    <div class="flex items-center gap-2 mb-1">
+                        <h4 class="font-bold text-gray-900 dark:text-white text-base truncate max-w-[120px]" title="${data.userName}">${data.userName || 'Unknown User'}</h4>
+                    </div>
+                    <span class="cs-role-badge ${badgeClass}">${role}</span>
+                 </div>
             </div>
             
-            <div class="mb-8">
-                <h4 class="font-bold text-gray-900 dark:text-white text-lg mb-1 truncate" title="${data.userName}">${data.userName || 'Unknown User'}</h4>
-                <p class="text-xs text-gray-500 dark:text-gray-400 truncate">${data.userEmail || 'No Email'}</p>
-            </div>
-
-            <div class="flex items-center justify-between pt-4 border-t border-gray-100 dark:border-gray-700">
-                <div class="flex items-center gap-1.5 text-xs text-gray-400 font-medium">
+            <!-- Body: Email -->
+             <div class="mb-6 pl-1">
+                <div class="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 mb-2">
+                    <i data-lucide="mail" class="w-3.5 h-3.5"></i>
+                    <span class="truncate block max-w-full" title="${data.userEmail}">${data.userEmail || 'No Email'}</span>
+                </div>
+                <div class="flex items-center gap-2 text-xs text-gray-400 font-medium">
                      <i data-lucide="calendar" class="w-3.5 h-3.5"></i>
                      ${dateStr}
                 </div>
+            </div>
+
+            <!-- Footer: View Details -->
+            <div class="flex items-center justify-end pt-4 border-t border-gray-100 dark:border-gray-700">
                 <button onclick="window.openTicketModal('${id}')" class="text-sm font-bold text-purple-600 hover:text-purple-700 dark:hover:text-purple-400 flex items-center gap-1 transition-colors cursor-pointer group">
                     View Details
                     <i data-lucide="arrow-right" class="w-4 h-4 transform group-hover:translate-x-1 transition-transform"></i>
@@ -248,10 +269,10 @@ window.openTicketModal = (id) => {
                     </a>` : ''}
                 </div>
 
-                <!-- Admin Reply (Outgoing) - If Exists -->
+                <!-- Admin Reply (Outgoing) -->
                 ${data.reply ? `
                 <div class="flex flex-col items-end self-end max-w-[85%] ml-auto">
-                    <div class="bg-purple-600 text-white p-4 rounded-2xl rounded-tr-sm shadow-md text-sm leading-relaxed">
+                    <div class="cs-bubble-admin text-sm leading-relaxed">
                          <div class="flex items-center gap-2 mb-1 justify-end opacity-80">
                             <i data-lucide="check-circle" class="w-3 h-3"></i>
                             <span class="text-[10px] font-bold uppercase tracking-wide">Our Response</span>
@@ -339,10 +360,27 @@ window.deleteTicket = async (id) => {
 
 // Global Reply Function
 window.sendReply = async (id) => {
+    console.log("Attempting to send reply for ticket:", id);
     const textarea = document.getElementById(`reply-${id}`);
+
+    if (!textarea) {
+        console.error("Reply textarea not found for ID:", id);
+        showNotification('error', "Error", "Reply input field not found. Please try refreshing the page.");
+        return;
+    }
+
     const replyText = textarea.value.trim();
 
-    if (!replyText) return;
+    if (!replyText) {
+        showNotification('error', "Validation Error", "Please enter a reply message.");
+        return;
+    }
+
+    const sendBtn = textarea.nextElementSibling;
+    const originalBtnContent = sendBtn.innerHTML;
+    sendBtn.disabled = true;
+    sendBtn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i>`;
+    lucide.createIcons();
 
     try {
         await updateDoc(doc(db, "contact_messages", id), {
@@ -351,9 +389,25 @@ window.sendReply = async (id) => {
             repliedAt: serverTimestamp()
         });
         showNotification('success', "Ticket Resolved", "Reply sent and ticket marked as resolved.");
+
+        // Close modal after short delay
+        setTimeout(() => {
+            closeTicketModal();
+        }, 1500);
+
     } catch (e) {
         console.error("Reply Error", e);
-        showNotification('error', "Reply Failed", e.message);
+        if (e.code === 'permission-denied') {
+            showNotification('error', "Permission Denied", "You do not have permission to reply. Ensure your account is set as 'admin' in the database.");
+        } else {
+            showNotification('error', "Reply Failed", "Could not send reply: " + e.message);
+        }
+    } finally {
+        if (sendBtn) {
+            sendBtn.disabled = false;
+            sendBtn.innerHTML = originalBtnContent;
+            lucide.createIcons();
+        }
     }
 };
 

@@ -25,7 +25,7 @@
 
         <!-- Driver Sidebar -->
         <aside id="sidebar"
-            class="md:w-72 bg-white md:bg-white/80 dark:bg-gray-900 md:dark:bg-gray-900/90 backdrop-blur-xl border-r border-gray-200 dark:border-gray-800 hidden md:flex flex-col z-50 transition-all duration-300">
+            class="md:w-72 bg-white md:bg-white/80 dark:bg-gray-900 md:dark:bg-gray-900/90 backdrop-blur-xl border-r border-gray-200 dark:border-gray-800 hidden md:flex flex-col z-50 transition-all duration-300 overflow-y-auto">
             <div class="p-6 flex items-center justify-between gap-3 mb-2">
                 <div class="flex items-center gap-3">
                     <div
@@ -38,7 +38,7 @@
                         <span class="text-xs font-bold text-purple-500 tracking-widest uppercase">Driver</span>
                     </div>
                 </div>
-                <button id="sidebar-close-btn"
+                <button id="sidebar-close" onclick="window.closeSidebar()"
                     class="md:hidden p-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors">
                     <i data-lucide="x" class="w-6 h-6"></i>
                 </button>

@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Support Inbox - Admin</title>
     <link href="./css/style.css" rel="stylesheet">
+    <link href="./css/contact-service.css" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <script>
         if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
@@ -164,12 +165,12 @@
 
                             <div class="flex items-center gap-2 overflow-x-auto pb-1 md:pb-0">
                                 <button id="filter-all" onclick="window.setFilter('all')"
-                                    class="px-4 py-2 bg-purple-600 text-white rounded-lg text-sm font-bold whitespace-nowrap shadow-md shadow-purple-500/20 transition-all">All
+                                    class="cs-filter-btn active">All
                                     Tickets</button>
                                 <button id="filter-open" onclick="window.setFilter('open')"
-                                    class="px-4 py-2 bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 border border-gray-100 dark:border-gray-600 rounded-lg text-sm font-bold whitespace-nowrap transition-colors">Open</button>
+                                    class="cs-filter-btn">Open</button>
                                 <button id="filter-resolved" onclick="window.setFilter('resolved')"
-                                    class="px-4 py-2 bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 border border-gray-100 dark:border-gray-600 rounded-lg text-sm font-bold whitespace-nowrap transition-colors">Resolved</button>
+                                    class="cs-filter-btn">Resolved</button>
                             </div>
                         </div>
                         <div id="tickets-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -185,7 +186,7 @@
 
 
     <!-- Ticket Details Modal -->
-    <div id="ticket-modal" class="fixed inset-0 z-[200] hidden" aria-labelledby="modal-title" role="dialog"
+    <div id="ticket-modal" class="fixed inset-0 hidden cs-modal-z-index" aria-labelledby="modal-title" role="dialog"
         aria-modal="true">
         <!-- Backdrop -->
         <div class="fixed inset-0 bg-gray-900/75 backdrop-blur-sm transition-opacity" onclick="closeTicketModal()">

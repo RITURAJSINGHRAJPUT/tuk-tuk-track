@@ -100,7 +100,7 @@ function setupForm(user) {
                 targetRole: 'user'
             });
 
-            showNotification('success', 'Message Sent', "We'll get back to you shortly.");
+            showNotification('success', 'Ticket Submitted', "Your ticket has been created. Support will review it shortly.");
             contactForm.reset();
         } catch (error) {
             console.error("Error sending message:", error);
@@ -236,7 +236,21 @@ window.openTicketModal = (id) => {
     if (data.reply) {
         replySection.classList.remove('hidden');
         noReplySection.classList.add('hidden');
-        document.getElementById('modal-reply').textContent = data.reply;
+
+        // Update reply content and style
+        replySection.innerHTML = `
+            <div class="flex flex-col items-start">
+                <div class="cs-bubble-user-view text-sm leading-relaxed">
+                    <div class="flex items-center gap-2 mb-1">
+                        <i data-lucide="shield-check" class="w-3 h-3 text-purple-600"></i>
+                        <p class="text-xs font-bold text-gray-500 uppercase tracking-wide">Support Team</p>
+                    </div>
+                    <p class="leading-relaxed whitespace-pre-wrap">${data.reply}</p>
+                </div>
+            </div>
+        `;
+        // Re-run lucide for injected icon
+        lucide.createIcons();
     } else {
         replySection.classList.add('hidden');
         noReplySection.classList.remove('hidden');

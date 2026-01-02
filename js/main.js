@@ -41,55 +41,13 @@ document.addEventListener('DOMContentLoaded', () => {
     // -------------------------------------------------------------------------
     // Sidebar Toggle Logic
     // -------------------------------------------------------------------------
-    const sidebarToggle = document.getElementById('sidebar-toggle');
-    const sidebar = document.getElementById('sidebar');
-    const sidebarBackdrop = document.getElementById('sidebar-backdrop');
+    // Expose global functions for robust inline calling
+    window.closeSidebar = () => {
+        const sidebar = document.getElementById('sidebar');
+        const sidebarBackdrop = document.getElementById('sidebar-backdrop');
+        const chatbot = document.getElementById('tuktuk-chatbot-container');
 
-    if (sidebarToggle && sidebar) {
-        sidebarToggle.addEventListener('click', () => {
-            // Toggle Logic
-            sidebar.classList.toggle('hidden');
-
-            // If showing sidebar on mobile
-            if (!sidebar.classList.contains('hidden')) {
-                sidebar.classList.add('flex', 'fixed', 'inset-0', 'z-[60]', 'shadow-2xl');
-                sidebar.style.width = '100vw';
-                sidebar.style.height = '100vh';
-                sidebar.style.margin = '0';
-                sidebar.style.borderRadius = '0';
-
-                // Hide Chatbot
-                const chatbot = document.getElementById('tuktuk-chatbot-container');
-                if (chatbot) chatbot.style.display = 'none';
-
-                if (sidebarBackdrop) {
-                    sidebarBackdrop.classList.remove('hidden');
-                    sidebarBackdrop.classList.remove('md:hidden'); // Ensure visible even if md:hidden class persists
-                }
-            } else {
-                // Close Logic
-                sidebar.classList.remove('fixed', 'inset-0', 'z-[60]', 'shadow-2xl');
-                sidebar.style.width = '';
-                sidebar.style.height = '';
-                sidebar.style.margin = '';
-                sidebar.style.borderRadius = '';
-
-                // Show Chatbot
-                const chatbot = document.getElementById('tuktuk-chatbot-container');
-                if (chatbot) chatbot.style.display = '';
-
-                sidebar.classList.remove('flex'); // Go back to hidden state
-                if (sidebarBackdrop) {
-                    sidebarBackdrop.classList.add('hidden');
-                }
-            }
-        });
-    }
-
-    // Close on X button click
-    const sidebarClose = document.getElementById('sidebar-close');
-    if (sidebarClose && sidebar) {
-        sidebarClose.addEventListener('click', () => {
+        if (sidebar) {
             sidebar.classList.add('hidden');
             sidebar.classList.remove('flex', 'fixed', 'inset-0', 'z-[60]', 'shadow-2xl');
             sidebar.style.width = '';
@@ -98,36 +56,74 @@ document.addEventListener('DOMContentLoaded', () => {
             sidebar.style.borderRadius = '';
 
             // Show Chatbot
-            const chatbot = document.getElementById('tuktuk-chatbot-container');
             if (chatbot) chatbot.style.display = '';
+        }
+        if (sidebarBackdrop) {
+            sidebarBackdrop.classList.add('hidden');
+        }
+    };
+
+    window.toggleSidebar = () => {
+        const sidebar = document.getElementById('sidebar');
+        const sidebarBackdrop = document.getElementById('sidebar-backdrop');
+        const chatbot = document.getElementById('tuktuk-chatbot-container');
+
+        if (!sidebar) return;
+
+        // Toggle
+        if (sidebar.classList.contains('hidden')) {
+            // OPEN IT
+            sidebar.classList.remove('hidden');
+            sidebar.classList.add('flex', 'fixed', 'inset-0', 'z-[60]', 'shadow-2xl');
+            sidebar.style.width = '100vw';
+            sidebar.style.height = '100vh';
+            sidebar.style.margin = '0';
+            sidebar.style.borderRadius = '0';
+
+            // Hide Chatbot
+            if (chatbot) chatbot.style.display = 'none';
 
             if (sidebarBackdrop) {
-                sidebarBackdrop.classList.add('hidden');
+                sidebarBackdrop.classList.remove('hidden');
+                sidebarBackdrop.classList.remove('md:hidden');
             }
+        } else {
+            // CLOSE IT
+            window.closeSidebar();
+        }
+    };
+
+
+    // Event Listeners (Keep these for backward compatibility/standard behavior)
+    const sidebarToggle = document.getElementById('sidebar-toggle');
+    const sidebarClose = document.getElementById('sidebar-close');
+    const sidebarBackdrop = document.getElementById('sidebar-backdrop');
+
+    if (sidebarToggle) {
+        sidebarToggle.addEventListener('click', (e) => {
+            e.stopPropagation(); // Prevent immediate bubbling issues
+            window.toggleSidebar();
         });
     }
 
-    // Close on backdrop click
+    if (sidebarClose) {
+        sidebarClose.addEventListener('click', (e) => {
+            e.stopPropagation();
+            window.closeSidebar();
+        });
+    }
+
     if (sidebarBackdrop) {
         sidebarBackdrop.addEventListener('click', () => {
-            if (sidebar) {
-                sidebar.classList.add('hidden');
-                sidebar.classList.remove('flex', 'fixed', 'inset-0', 'z-[60]', 'shadow-2xl');
-                sidebar.style.width = '';
-                sidebar.style.height = '';
-                sidebar.style.margin = '';
-                sidebar.style.borderRadius = '';
-
-                // Show Chatbot
-                const chatbot = document.getElementById('tuktuk-chatbot-container');
-                if (chatbot) chatbot.style.display = '';
-            }
-            sidebarBackdrop.classList.add('hidden');
+            window.closeSidebar();
         });
     }
 
     // Safety check: Ensure sidebar is reset on resize to desktop
     window.addEventListener('resize', () => {
+        const sidebar = document.getElementById('sidebar');
+        const sidebarBackdrop = document.getElementById('sidebar-backdrop');
+
         if (window.innerWidth >= 768) {
             if (sidebar) {
                 sidebar.classList.remove('hidden', 'fixed', 'inset-0', 'z-[60]', 'shadow-2xl');
@@ -136,6 +132,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 sidebar.style.margin = '';
                 sidebar.style.borderRadius = '';
                 sidebar.classList.add('flex'); // Ensure it's visible as flex in sidebar mode
+
+                // Ensure chatbot is visible on desktop
+                const chatbot = document.getElementById('tuktuk-chatbot-container');
+                if (chatbot) chatbot.style.display = '';
             }
             if (sidebarBackdrop) {
                 sidebarBackdrop.classList.add('hidden');

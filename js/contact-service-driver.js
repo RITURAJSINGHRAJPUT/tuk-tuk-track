@@ -16,7 +16,7 @@ auth.onAuthStateChanged(async (user) => {
         // Update Profile in Sidebar
         if (profileSection) {
             profileSection.innerHTML = `
-                <a href="#" class="flex items-center gap-3 p-3 rounded-xl bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                <a href="profile.html" class="flex items-center gap-3 p-3 rounded-xl bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
                     <div class="w-10 h-10 rounded-full bg-purple-100 dark:bg-purple-900 flex items-center justify-center text-purple-600 dark:text-purple-400 font-bold">
                         ${user.email.charAt(0).toUpperCase()}
                     </div>

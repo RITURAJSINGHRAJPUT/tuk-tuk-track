@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Contact Support - TukTukTrack</title>
     <link href="./css/style.css" rel="stylesheet">
+    <link href="./css/contact-service.css" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <script>
         if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
@@ -221,8 +222,8 @@
     </div>
 
     <!-- Ticket Details Modal -->
-    <div id="ticket-modal" class="fixed inset-0 z-50 hidden" aria-labelledby="modal-title" role="dialog"
-        aria-modal="true">
+    <div id="ticket-modal" class="fixed inset-0 hidden" style="z-index: 9999;" aria-labelledby="modal-title"
+        role="dialog" aria-modal="true">
         <div class="fixed inset-0 bg-gray-900/50 backdrop-blur-sm transition-opacity"
             onclick="window.closeTicketModal()"></div>
         <div class="fixed inset-0 z-10 w-full overflow-y-auto">
@@ -285,9 +286,7 @@
                                             class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
                                             Support Team</p>
                                     </div>
-                                    <p class="text-sm leading-relaxed" id="modal-reply">
-                                        Reply content...
-                                    </p>
+                                    <p class="text-sm leading-relaxed" id="modal-reply"></p>
                                 </div>
                             </div>
                         </div>
