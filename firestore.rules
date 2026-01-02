@@ -70,5 +70,21 @@ service cloud.firestore {
       // Allow create if it doesn't exist yet (for first ever run)
       allow create: if isAuth(); 
     }
+
+    // Contact Messages (Support Tickets)
+    match /contact_messages/{messageId} {
+      // Users can read their own messages. Admins can read all.
+      allow read: if isAuth() && (request.auth.uid == resource.data.userId || isAdmin());
+      
+      // Users can create messages (userId must match).
+      allow create: if isAuth() && request.resource.data.userId == request.auth.uid;
+      
+      // Users/Drivers cannot update (unless we want them to close tickets? let's stick to admin reply for now)
+      // Admin can update (to add reply, change status)
+      allow update: if isAuth() && isAdmin();
+      
+      // Delete: Admins only
+      allow delete: if isAdmin();
+    }
   }
 }
