@@ -108,9 +108,19 @@
                     <span class="font-medium">Support Inbox</span>
                 </a>
             </nav>
-            <div id="user-profile-section" class="p-4 border-t border-gray-200 dark:border-gray-800 mt-auto">
-                <!-- Injected via JS -->
+            <div class="p-4 border-t border-gray-200 dark:border-gray-800">
+                <a href="admin-profile.html"
+                    class="flex items-center gap-3 p-3 rounded-xl bg-purple-50 dark:bg-purple-900/10 border border-purple-100 dark:border-purple-900/50 transition-colors group cursor-pointer hover:bg-purple-100 dark:hover:bg-purple-900/30">
+                    <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/People/Man%20Technologist.png"
+                        alt="Admin"
+                        class="w-10 h-10 rounded-full ring-2 ring-white dark:ring-gray-800 sidebar-user-img bg-white/10 p-0.5">
+                    <div class="flex-1 min-w-0">
+                        <p class="text-sm font-bold text-gray-900 dark:text-white truncate sidebar-user-name">Admin</p>
+                        <p class="text-xs text-gray-500 truncate sidebar-user-role">admin@tuktuk.com</p>
+                    </div>
+                </a>
             </div>
+
         </aside>
 
         <!-- Main Content -->
@@ -143,47 +153,27 @@
             <main class="flex-1 overflow-y-auto p-4 md:p-8">
                 <div class="max-w-4xl mx-auto space-y-8">
                     <!-- Contacts Grid (Admin specific) -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="contacts-grid">
-                        <div
-                            class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700">
-                            <div
-                                class="w-12 h-12 text-purple-600 bg-purple-100 dark:bg-purple-900/30 rounded-2xl flex items-center justify-center mb-4">
-                                <i data-lucide="server" class="w-6 h-6"></i>
-                            </div>
-                            <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2">System Admin</h3>
-                            <div class="space-y-2">
-                                <a href="tel:+15550001111"
-                                    class="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-purple-600">
-                                    <i data-lucide="phone" class="w-4 h-4"></i> +1 (555) 000-1111
-                                </a>
-                                <a href="mailto:sysadmin@tuktuk.com"
-                                    class="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-purple-600">
-                                    <i data-lucide="mail" class="w-4 h-4"></i> sys@tuktuk.com
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Filter Bar -->
-                    <div class="flex items-center gap-2 overflow-x-auto pb-2">
-                        <button
-                            class="px-4 py-2 bg-purple-600 text-white rounded-lg text-sm font-bold whitespace-nowrap">All
-                            Tickets</button>
-                        <button
-                            class="px-4 py-2 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700 rounded-lg text-sm font-bold whitespace-nowrap">Open</button>
-                        <button
-                            class="px-4 py-2 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700 rounded-lg text-sm font-bold whitespace-nowrap">Resolved</button>
-                    </div>
-
-                    <!-- Tickets Inbox -->
                     <div id="tickets-section"
                         class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 md:p-8">
-                        <h2 class="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2 mb-6">
-                            <i data-lucide="inbox" class="w-5 h-5 text-purple-500"></i>
-                            <span>Incoming Tickets</span>
-                        </h2>
-                        <div id="tickets-list" class="space-y-4">
-                            <p class="text-center text-gray-500 py-4">Loading inbox...</p>
+
+                        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+                            <h2 class="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                                <i data-lucide="inbox" class="w-5 h-5 text-purple-500"></i>
+                                <span>Incoming Tickets</span>
+                            </h2>
+
+                            <div class="flex items-center gap-2 overflow-x-auto pb-1 md:pb-0">
+                                <button id="filter-all" onclick="window.setFilter('all')"
+                                    class="px-4 py-2 bg-purple-600 text-white rounded-lg text-sm font-bold whitespace-nowrap shadow-md shadow-purple-500/20 transition-all">All
+                                    Tickets</button>
+                                <button id="filter-open" onclick="window.setFilter('open')"
+                                    class="px-4 py-2 bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 border border-gray-100 dark:border-gray-600 rounded-lg text-sm font-bold whitespace-nowrap transition-colors">Open</button>
+                                <button id="filter-resolved" onclick="window.setFilter('resolved')"
+                                    class="px-4 py-2 bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 border border-gray-100 dark:border-gray-600 rounded-lg text-sm font-bold whitespace-nowrap transition-colors">Resolved</button>
+                            </div>
+                        </div>
+                        <div id="tickets-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            <p class="text-center text-gray-500 py-4 col-span-full">Loading inbox...</p>
                         </div>
                     </div>
                 </div>
@@ -192,19 +182,96 @@
     </div>
 
     <!-- Notification Toast -->
-    <div id="toast"
-        class="fixed bottom-4 right-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-xl rounded-xl p-4 flex items-center gap-3 transform translate-y-24 transition-all duration-300 z-[100]">
-        <div id="toast-icon" class="w-8 h-8 rounded-full bg-green-100 text-green-600 flex items-center justify-center">
-            <i data-lucide="check" class="w-4 h-4"></i>
+
+
+    <!-- Ticket Details Modal -->
+    <div id="ticket-modal" class="fixed inset-0 z-[200] hidden" aria-labelledby="modal-title" role="dialog"
+        aria-modal="true">
+        <!-- Backdrop -->
+        <div class="fixed inset-0 bg-gray-900/75 backdrop-blur-sm transition-opacity" onclick="closeTicketModal()">
         </div>
-        <div>
-            <h4 id="toast-title" class="text-sm font-bold text-gray-900 dark:text-white">Success</h4>
-            <p id="toast-message" class="text-xs text-gray-500 dark:text-gray-400">Action completed successfully.</p>
+
+        <div class="fixed inset-0 z-10 w-full overflow-y-auto">
+            <div class="flex min-h-full items-center justify-center p-4 text-center">
+                <div
+                    class="relative overflow-hidden rounded-2xl bg-white dark:bg-gray-800 text-left shadow-2xl w-full max-w-2xl mx-auto my-8 border border-gray-200 dark:border-gray-700">
+
+                    <!-- Header -->
+                    <div
+                        class="bg-gray-50 dark:bg-gray-700/50 px-6 py-4 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center">
+                        <h3 class="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                            <div
+                                class="w-8 h-8 rounded-lg bg-purple-100 dark:bg-purple-900/50 text-purple-600 flex items-center justify-center">
+                                <i data-lucide="message-square" class="w-4 h-4"></i>
+                            </div>
+                            Ticket Details
+                        </h3>
+                        <button onclick="closeTicketModal()"
+                            class="text-gray-400 hover:text-gray-500 transition-colors">
+                            <span class="sr-only">Close</span>
+                            <i data-lucide="x" class="w-6 h-6"></i>
+                        </button>
+                    </div>
+
+                    <!-- Body -->
+                    <div class="px-6 py-6" id="modal-content">
+                        <!-- Dynamic Content injected by JS -->
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Ticket Modal -->
+    <div id="edit-ticket-modal" class="fixed inset-0 z-[200] hidden" aria-labelledby="modal-title" role="dialog"
+        aria-modal="true">
+        <div class="fixed inset-0 bg-gray-900/75 backdrop-blur-sm transition-opacity" onclick="closeEditTicketModal()">
+        </div>
+        <div class="fixed inset-0 z-10 w-full overflow-y-auto">
+            <div class="flex min-h-full items-center justify-center p-4 text-center">
+                <div
+                    class="relative overflow-hidden rounded-2xl bg-white dark:bg-gray-800 text-left shadow-2xl w-full max-w-md mx-auto my-8 border border-gray-200 dark:border-gray-700">
+                    <div
+                        class="bg-gray-50 dark:bg-gray-700/50 px-6 py-4 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center">
+                        <h3 class="text-lg font-bold text-gray-900 dark:text-white">Edit Ticket</h3>
+                        <button onclick="closeEditTicketModal()"
+                            class="text-gray-400 hover:text-gray-500 transition-colors">
+                            <i data-lucide="x" class="w-6 h-6"></i>
+                        </button>
+                    </div>
+                    <div class="p-6 space-y-4">
+                        <input type="hidden" id="edit-ticket-id">
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700 dark:text-gray-200 mb-2">Status</label>
+                            <select id="edit-ticket-status"
+                                class="w-full p-3 bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-xl outline-none focus:ring-2 focus:ring-purple-500 text-gray-700 dark:text-white">
+                                <option value="new">New</option>
+                                <option value="in-progress">In Progress</option>
+                                <option value="resolved">Resolved</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label
+                                class="block text-sm font-bold text-gray-700 dark:text-gray-200 mb-2">Priority</label>
+                            <select id="edit-ticket-priority"
+                                class="w-full p-3 bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-xl outline-none focus:ring-2 focus:ring-purple-500 text-gray-700 dark:text-white">
+                                <option value="low">Low</option>
+                                <option value="medium">Medium</option>
+                                <option value="high">High</option>
+                            </select>
+                        </div>
+                        <button onclick="saveTicketChanges()"
+                            class="w-full py-3 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-xl shadow-lg transition-colors cursor-pointer">Save
+                            Changes</button>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
     <script src="js/main.js"></script>
-    <script type="module" src="js/contact-service-admin.js"></script>
+    <script type="module" src="js/contact-service-admin.js?v=2"></script>
 </body>
 
 </html>

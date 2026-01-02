@@ -4,6 +4,8 @@ import { getAuth, RecaptchaVerifier, signInWithPhoneNumber, createUserWithEmailA
 import { getFirestore, collection, addDoc, getDocs, getDoc, doc, setDoc, updateDoc, deleteDoc, query, where, orderBy, onSnapshot, runTransaction, limit, arrayUnion, Timestamp, getCountFromServer, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 import { getDatabase, ref, onValue, get, child } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
+import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
+
 // Your web app's Firebase configuration
 const firebaseConfig = {
   apiKey: "AIzaSyChften8EKj_v3hr-3tMMgn1DID9xolWws",
@@ -20,6 +22,7 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 const rtdb = getDatabase(app);
+const storage = getStorage(app);
 
 // Initialize separate Admin App for isolated session
 const adminApp = initializeApp(firebaseConfig, "AdminApp");
@@ -34,6 +37,10 @@ export {
   db,
   adminDb,
   adminRtdb,
+  storage,
+  storageRef,
+  uploadBytes,
+  getDownloadURL,
   RecaptchaVerifier,
   signInWithPhoneNumber,
   createUserWithEmailAndPassword,

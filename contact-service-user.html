@@ -57,7 +57,7 @@
                     <span
                         class="font-medium group-hover:text-gray-900 dark:group-hover:text-white transition-colors">Tracking</span>
                 </a>
-                
+
                 <a href="request.html"
                     class="flex items-center gap-3 px-4 py-3.5 text-gray-600 dark:text-gray-400 hover:bg-white dark:hover:bg-gray-800 hover:shadow-md hover:shadow-gray-200/50 dark:hover:shadow-black/20 rounded-xl transition-all group">
                     <i data-lucide="package-plus" class="w-5 h-5 group-hover:text-blue-500 transition-colors"></i>
@@ -71,8 +71,18 @@
                     <span class="font-medium">Contact Service</span>
                 </a>
             </nav>
-            <div id="user-profile-section" class="p-4 border-t border-gray-200 dark:border-gray-800 mt-auto">
-                <!-- Injected via JS -->
+
+            <!-- User Profile -->
+            <div class="p-4 border-t border-gray-200 dark:border-gray-800">
+                <a href="profile.html"
+                    class="flex items-center gap-3 p-3 rounded-xl bg-blue-50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-900/50 transition-colors group cursor-pointer hover:bg-blue-100 dark:hover:bg-blue-900/30">
+                    <img src="https://ui-avatars.com/api/?name=User&background=3b82f6&color=fff" alt="User"
+                        class="w-10 h-10 rounded-xl shadow-sm sidebar-user-img">
+                    <div class="overflow-hidden">
+                        <p class="text-sm font-bold text-gray-900 dark:text-white truncate sidebar-user-name">User</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 truncate sidebar-user-role">Customer</p>
+                    </div>
+                </a>
             </div>
         </aside>
 
@@ -155,8 +165,10 @@
                                     <select id="subject"
                                         class="bg-gray-50 dark:bg-gray-700/50 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white text-sm rounded-xl focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
                                         <option value="General Inquiry">General Inquiry</option>
-                                        <option value="Technical Support">Technical Support</option>
-                                        <option value="Billing">Billing Issue</option>
+                                        <option value="Shipment Delay">Shipment Delay</option>
+                                        <option value="Temperature Issue">Temperature Issue</option>
+                                        <option value="Damaged Goods">Damaged Goods</option>
+                                        <option value="Billing Issue">Billing Issue</option>
                                     </select>
                                 </div>
                                 <div>
@@ -169,50 +181,144 @@
                                         <option value="High">High</option>
                                     </select>
                                 </div>
+                                <div>
+                                    <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Shipment
+                                        Reference (Optional)</label>
+                                    <select id="shipmentRef"
+                                        class="bg-gray-50 dark:bg-gray-700/50 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white text-sm rounded-xl focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                                        <option value="">Select a Shipment (Optional)</option>
+                                    </select>
+                                </div>
+                                <!-- Attachment Field Removed -->
                             </div>
                             <div>
                                 <label
                                     class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Message</label>
                                 <textarea id="message" rows="4"
                                     class="bg-gray-50 dark:bg-gray-700/50 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white text-sm rounded-xl focus:ring-blue-500 focus:border-blue-500 block w-full p-3"
-                                    required></textarea>
+                                    placeholder="Describe your issue..." required></textarea>
                             </div>
                             <div class="flex justify-end">
-                                <button type="submit"
-                                    class="text-white bg-blue-600 hover:bg-blue-700 font-medium rounded-xl text-sm px-5 py-2.5 flex items-center gap-2 transition-all shadow-lg shadow-blue-500/30">
-                                    <i data-lucide="send" class="w-4 h-4"></i> Send Message
+                                <button type="submit" id="submit-btn"
+                                    class="text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-xl text-sm px-6 py-3 text-center transition-colors flex items-center gap-2">
+                                    <i data-lucide="send" class="w-4 h-4"></i>
+                                    Send Message
                                 </button>
                             </div>
-                        </form>
-                    </div>
+                            <hr class="my-8 border-gray-100 dark:border-gray-700">
 
-                    <!-- Tickets History -->
-                    <div id="tickets-section"
-                        class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 md:p-8">
-                        <h2 class="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2 mb-6">
-                            <i data-lucide="history" class="w-5 h-5 text-blue-500"></i>
-                            <span>Support History</span>
-                        </h2>
-                        <div id="tickets-list" class="space-y-4">
-                            <p class="text-center text-gray-500 py-4">Loading tickets...</p>
-                        </div>
+                            <h2 class="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2 mb-6">
+                                <i data-lucide="history" class="w-5 h-5 text-blue-500"></i>
+                                <span>Support History</span>
+                            </h2>
+                            <div id="tickets-list" class="space-y-4">
+                                <p class="text-center text-gray-500 py-4">Loading tickets...</p>
+                            </div>
                     </div>
                 </div>
             </main>
         </div>
     </div>
 
-    <!-- Notification Toast -->
-    <div id="toast"
-        class="fixed bottom-4 right-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-xl rounded-xl p-4 flex items-center gap-3 transform translate-y-24 transition-all duration-300 z-[100]">
-        <div id="toast-icon" class="w-8 h-8 rounded-full bg-green-100 text-green-600 flex items-center justify-center">
-            <i data-lucide="check" class="w-4 h-4"></i>
-        </div>
-        <div>
-            <h4 id="toast-title" class="text-sm font-bold text-gray-900 dark:text-white">Success</h4>
-            <p id="toast-message" class="text-xs text-gray-500 dark:text-gray-400">Action completed successfully.</p>
+    <!-- Ticket Details Modal -->
+    <div id="ticket-modal" class="fixed inset-0 z-50 hidden" aria-labelledby="modal-title" role="dialog"
+        aria-modal="true">
+        <div class="fixed inset-0 bg-gray-900/50 backdrop-blur-sm transition-opacity"
+            onclick="window.closeTicketModal()"></div>
+        <div class="fixed inset-0 z-10 w-full overflow-y-auto">
+            <div class="flex min-h-full items-center justify-center p-4 text-center">
+                <div
+                    class="relative overflow-hidden rounded-2xl bg-white dark:bg-gray-800 text-left shadow-xl w-full max-w-2xl mx-auto my-8 border border-gray-100 dark:border-gray-700">
+
+                    <!-- Header -->
+                    <div
+                        class="px-6 py-4 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between bg-gray-50/50 dark:bg-gray-800/50">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 flex items-center justify-center font-bold text-lg shadow-sm"
+                                id="modal-avatar">
+                                #
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-bold text-gray-900 dark:text-white leading-tight"
+                                    id="modal-subject">Ticket Subject</h3>
+                                <p class="text-xs text-gray-500 dark:text-gray-400 font-medium" id="modal-date">Jan 12,
+                                    2024</p>
+                            </div>
+                        </div>
+                        <span id="modal-status"
+                            class="px-3 py-1 rounded-full text-xs font-bold bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300 uppercase tracking-wide border border-gray-200 dark:border-gray-600">
+                            STATUS
+                        </span>
+                    </div>
+
+                    <!-- Chat Content -->
+                    <div class="p-6 space-y-6 max-h-[60vh] overflow-y-auto bg-white dark:bg-gray-900/20">
+
+                        <!-- User Message (Right) -->
+                        <div class="flex flex-col items-end">
+                            <div
+                                class="bg-blue-600 dark:bg-blue-600 text-white rounded-2xl rounded-tr-sm p-4 max-w-[85%] shadow-sm">
+                                <p class="text-xs font-bold text-blue-100 uppercase tracking-wide mb-1 opacity-80">You
+                                </p>
+                                <p class="text-sm leading-relaxed" id="modal-message">
+                                    Message content...
+                                </p>
+                            </div>
+                            <!-- Attachment Link (If any) -->
+                            <div id="modal-attachment-container" class="mt-2 hidden">
+                                <a id="modal-attachment-link" href="#" target="_blank"
+                                    class="flex items-center gap-2 text-xs font-medium text-blue-600 dark:text-blue-400 hover:underline bg-blue-50 dark:bg-blue-900/20 px-3 py-1.5 rounded-lg border border-blue-100 dark:border-blue-800 transition-colors">
+                                    <i data-lucide="paperclip" class="w-3 h-3"></i>
+                                    <span>View Attachment</span>
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- Admin Reply (Left) -->
+                        <div id="modal-reply-section" class="hidden">
+                            <div class="flex flex-col items-start">
+                                <div
+                                    class="bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-800 dark:text-gray-200 rounded-2xl rounded-tl-sm p-4 max-w-[85%] shadow-sm">
+                                    <div class="flex items-center gap-2 mb-1">
+                                        <i data-lucide="shield-check" class="w-3 h-3 text-purple-500"></i>
+                                        <p
+                                            class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                                            Support Team</p>
+                                    </div>
+                                    <p class="text-sm leading-relaxed" id="modal-reply">
+                                        Reply content...
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- No Reply Placeholder -->
+                        <div id="modal-no-reply" class="flex flex-col items-center justify-center py-8 text-center">
+                            <div
+                                class="w-12 h-12 bg-gray-50 dark:bg-gray-800 rounded-full flex items-center justify-center mb-3">
+                                <i data-lucide="clock" class="w-5 h-5 text-gray-300 dark:text-gray-600"></i>
+                            </div>
+                            <p class="text-sm text-gray-400 dark:text-gray-500">Ticket submitted. Waiting for a
+                                response.</p>
+                        </div>
+
+                    </div>
+
+                    <!-- Footer -->
+                    <div
+                        class="bg-gray-50 dark:bg-gray-800/50 px-6 py-4 flex justify-end border-t border-gray-100 dark:border-gray-700">
+                        <button type="button" onclick="window.closeTicketModal()"
+                            class="px-5 py-2.5 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-bold text-sm rounded-xl border border-gray-200 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all shadow-sm hover:shadow active:scale-95">
+                            Close Details
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
+
+    <!-- Notification Toast -->
+
 
     <script src="js/main.js"></script>
     <script type="module" src="js/contact-service-user.js"></script>

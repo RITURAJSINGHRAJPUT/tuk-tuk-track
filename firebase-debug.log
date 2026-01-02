@@ -1,0 +1,21 @@
+[debug] [2026-01-02T09:41:05.107Z] ----------------------------------------------------------------------
+[debug] [2026-01-02T09:41:05.142Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\Rituraj\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js deploy --only firestore:rules
+[debug] [2026-01-02T09:41:05.143Z] CLI Version:   14.27.0
+[debug] [2026-01-02T09:41:05.143Z] Platform:      win32
+[debug] [2026-01-02T09:41:05.143Z] Node Version:  v24.11.1
+[debug] [2026-01-02T09:41:05.238Z] Time:          Fri Jan 02 2026 15:11:05 GMT+0530 (India Standard Time)
+[debug] [2026-01-02T09:41:05.239Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2026-01-02T09:41:05.246Z] >>> [apiv2][query] GET https://firebase-public.firebaseio.com/cli.json [none]
+[error] 
+[error] Error: Not in a Firebase app directory (could not locate firebase.json)
+[debug] [2026-01-02T09:41:13.628Z] Error: EBUSY: resource busy or locked, unlink 'e:\project\CMR 3.0 2025-26\tuk-tuk-track\firebase-debug.log'
+    at Object.unlinkSync (node:fs:1942:11)
+    at process.<anonymous> (C:\Users\Rituraj\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\cli.js:44:16)
+    at process.emit (node:events:520:35)
+    at process.exit (node:internal/process/per_thread:236:15)
+    at Timeout._onTimeout (C:\Users\Rituraj\AppData\Roaming\npm\node_modules\firebase-tools\lib\errorOut.js:20:17)
+    at listOnTimeout (node:internal/timers:605:17)
+    at process.processTimers (node:internal/timers:541:7)
+[error] 
+[error] Error: An unexpected error has occurred.

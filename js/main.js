@@ -58,6 +58,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 sidebar.style.margin = '0';
                 sidebar.style.borderRadius = '0';
 
+                // Hide Chatbot
+                const chatbot = document.getElementById('tuktuk-chatbot-container');
+                if (chatbot) chatbot.style.display = 'none';
+
                 if (sidebarBackdrop) {
                     sidebarBackdrop.classList.remove('hidden');
                     sidebarBackdrop.classList.remove('md:hidden'); // Ensure visible even if md:hidden class persists
@@ -69,6 +73,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 sidebar.style.height = '';
                 sidebar.style.margin = '';
                 sidebar.style.borderRadius = '';
+
+                // Show Chatbot
+                const chatbot = document.getElementById('tuktuk-chatbot-container');
+                if (chatbot) chatbot.style.display = '';
 
                 sidebar.classList.remove('flex'); // Go back to hidden state
                 if (sidebarBackdrop) {
@@ -89,6 +97,10 @@ document.addEventListener('DOMContentLoaded', () => {
             sidebar.style.margin = '';
             sidebar.style.borderRadius = '';
 
+            // Show Chatbot
+            const chatbot = document.getElementById('tuktuk-chatbot-container');
+            if (chatbot) chatbot.style.display = '';
+
             if (sidebarBackdrop) {
                 sidebarBackdrop.classList.add('hidden');
             }
@@ -105,6 +117,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 sidebar.style.height = '';
                 sidebar.style.margin = '';
                 sidebar.style.borderRadius = '';
+
+                // Show Chatbot
+                const chatbot = document.getElementById('tuktuk-chatbot-container');
+                if (chatbot) chatbot.style.display = '';
             }
             sidebarBackdrop.classList.add('hidden');
         });
