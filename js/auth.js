@@ -12,11 +12,11 @@ if (registerForm) {
         const password = document.getElementById('password').value;
 
         let role = 'user';
-        let status = 'approved';
+        let status = 'pending'; // Default to pending for everyone
 
         if (email.endsWith('.driver@tuktuk.com')) {
             role = 'driver';
-            status = 'pending';
+            // status is already pending
         }
 
         const submitBtn = registerForm.querySelector('button[type="submit"]');

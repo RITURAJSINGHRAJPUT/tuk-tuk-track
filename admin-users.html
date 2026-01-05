@@ -268,6 +268,11 @@
 
             <!-- Footer -->
             <div class="p-4 border-t border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50">
+                <button id="modal-approve-btn"
+                    class="w-full mb-3 py-3 bg-green-50 hover:bg-green-100 dark:bg-green-900/20 dark:hover:bg-green-900/40 text-green-600 dark:text-green-400 rounded-xl font-medium transition-colors flex items-center justify-center gap-2 hidden">
+                    <i data-lucide="check-circle" class="w-4 h-4"></i>
+                    Approve User
+                </button>
                 <button
                     class="w-full py-3 bg-red-50 hover:bg-red-100 dark:bg-red-900/20 dark:hover:bg-red-900/40 text-red-600 dark:text-red-400 rounded-xl font-medium transition-colors flex items-center justify-center gap-2">
                     <i data-lucide="trash-2" class="w-4 h-4"></i>
@@ -384,7 +389,7 @@
     <script src="js/main.js"></script>
     <script type="module">
         import { initAdminGuard } from './js/admin-guard.js';
-        import { adminDb as db, collection, getDocs, query, orderBy, where, doc, deleteDoc } from './firebase-config.js';
+        import { adminDb as db, collection, getDocs, query, orderBy, where, doc, deleteDoc, updateDoc } from './firebase-config.js';
 
         initAdminGuard();
         lucide.createIcons();
@@ -404,6 +409,7 @@
         const modalJoined = document.getElementById('modal-user-joined');
         const modalShipmentsList = document.getElementById('modal-shipments-list');
         const modalDeleteBtn = document.querySelector('#user-modal button.bg-red-50');
+        const modalApproveBtn = document.getElementById('modal-approve-btn');
 
         // Shipment Modal Elements
         const shipmentModal = document.getElementById('shipment-modal');
@@ -459,6 +465,8 @@
             users.forEach(user => {
                 const initial = user.name ? user.name.charAt(0).toUpperCase() : 'U';
                 const date = user.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'N/A';
+                const statusColor = user.status === 'pending' ? 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400' : 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400';
+                const statusText = user.status === 'pending' ? 'Pending' : 'Active';
 
                 const card = document.createElement('div');
                 card.className = "bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-md hover:border-purple-200 dark:hover:border-purple-900/50 transition-all cursor-pointer group";
@@ -469,7 +477,10 @@
                         <div class="w-12 h-12 rounded-xl bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 flex items-center justify-center text-xl font-bold group-hover:scale-110 transition-transform">
                             ${initial}
                         </div>
-                        <span class="px-2 py-1 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 text-xs font-bold uppercase tracking-wider">
+                        <span class="px-2 py-1 rounded-lg ${statusColor} text-xs font-bold uppercase tracking-wider scale-90 origin-right ml-auto">
+                            ${statusText}
+                        </span>
+                        <span class="px-2 py-1 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 text-xs font-bold uppercase tracking-wider ml-2">
                             ${user.role || 'User'}
                         </span>
                     </div>
@@ -521,6 +532,14 @@
             setTimeout(() => {
                 modalContent.classList.remove('translate-x-full');
             }, 10);
+
+            // Show/Hide Approve Button
+            if (user.status === 'pending') {
+                modalApproveBtn.classList.remove('hidden');
+                modalApproveBtn.onclick = () => approveUser(user.id);
+            } else {
+                modalApproveBtn.classList.add('hidden');
+            }
 
             // 4. Fetch Shipments
             modalShipmentsList.innerHTML = '<div class="text-center py-8 text-gray-400 text-sm"><i data-lucide="loader-2" class="w-5 h-5 animate-spin inline mr-2"></i>Loading shipments...</div>';
@@ -609,6 +628,38 @@
             } finally {
                 modalDeleteBtn.innerHTML = originalText;
                 modalDeleteBtn.disabled = false;
+                lucide.createIcons();
+            }
+        };
+
+        window.approveUser = async (userId) => {
+            const btn = document.getElementById('modal-approve-btn');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Approving...';
+            btn.disabled = true;
+            lucide.createIcons();
+
+            try {
+                await updateDoc(doc(db, "users", userId), {
+                    status: 'approved'
+                });
+
+                // Update local list
+                const userIndex = allUsers.findIndex(u => u.id === userId);
+                if (userIndex !== -1) {
+                    allUsers[userIndex].status = 'approved';
+                }
+
+                closeUserModal();
+                fetchUsers(); // Refresh grid
+                // alert("User approved successfully!");
+
+            } catch (error) {
+                console.error("Error approving user:", error);
+                alert("Failed to approve user: " + error.message);
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
                 lucide.createIcons();
             }
         };

@@ -92,26 +92,10 @@
         </p>
     </div>
 
+    <script src="js/main.js"></script>
     <script type="module" src="js/auth.js"></script>
     <script>
         lucide.createIcons();
-
-        // Theme Toggle Logic for Auth Pages
-        const themeToggleBtn = document.getElementById('theme-toggle');
-        const htmlElement = document.documentElement;
-
-        if (themeToggleBtn) {
-            themeToggleBtn.addEventListener('click', function () {
-                // Simple toggle based on current visual state
-                if (htmlElement.classList.contains('dark')) {
-                    htmlElement.classList.remove('dark');
-                    localStorage.setItem('color-theme', 'light');
-                } else {
-                    htmlElement.classList.add('dark');
-                    localStorage.setItem('color-theme', 'dark');
-                }
-            });
-        }
 
         // Password Toggle Logic
         const showPasswordCheckbox = document.getElementById('show-password-checkbox');
