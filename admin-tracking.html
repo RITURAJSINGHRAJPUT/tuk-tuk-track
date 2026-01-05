@@ -9,6 +9,8 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.css" />
+    <script src="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
@@ -936,57 +938,84 @@
         }
 
         function drawShipmentPath(shipment) {
+            // Remove existing routing control if any
+            if (window.currentRoutingControl) {
+                map.removeControl(window.currentRoutingControl);
+                window.currentRoutingControl = null;
+            }
+
+            // Clear simple polyline layer just in case
             currentPathLayer.clearLayers();
 
             if (!shipment.locationHistory || shipment.locationHistory.length === 0) return;
 
             // Sort history
-            const history = shipment.locationHistory.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
-            const pathCoords = history.map(h => [h.lat, h.lng]);
+            const history = [...shipment.locationHistory].sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
 
-            // Add current location if available
+            // Build Waypoints
+            // Start with Pickup or First History
+            let waypoints = [];
+
+            // 1. Pickup (if valid)
+            if (shipment.pickup && shipment.pickup.lat && shipment.pickup.lng) {
+                waypoints.push(L.latLng(shipment.pickup.lat, shipment.pickup.lng));
+            } else if (history.length > 0) {
+                waypoints.push(L.latLng(history[0].lat, history[0].lng));
+            }
+
+            // 2. Intermediate Points (Sampled to avoid OSRM limits)
+            // Limit total waypoints to ~10 for safety
+            if (history.length > 0) {
+                const maxIntermediates = 8;
+                const step = Math.ceil(history.length / maxIntermediates);
+                for (let i = step; i < history.length; i += step) {
+                    waypoints.push(L.latLng(history[i].lat, history[i].lng));
+                }
+            }
+
+            // 3. Current Location
             if (shipment.currentLocation) {
-                pathCoords.push([shipment.currentLocation.lat, shipment.currentLocation.lng]);
+                waypoints.push(L.latLng(shipment.currentLocation.lat, shipment.currentLocation.lng));
+            } else if (history.length > 0) {
+                // Fallback to last history if current not set explicitly separate
+                waypoints.push(L.latLng(history[history.length - 1].lat, history[history.length - 1].lng));
             }
 
-            // Draw Route using simple Polyline (Robust for History)
-            if (pathCoords.length > 1) {
-                // Draw effective path
-                L.polyline(pathCoords, {
-                    color: '#9333ea', // Purple-600
-                    weight: 4,
-                    opacity: 0.8,
-                    lineJoin: 'round',
-                    lineCap: 'round'
-                }).addTo(currentPathLayer);
+            // Remove duplicates (simple check)
+            waypoints = waypoints.filter((wp, index, self) =>
+                index === self.findIndex((t) => (t.lat === wp.lat && t.lng === wp.lng))
+            );
 
-                // Add Markers for history points
-                history.forEach((point) => {
-                    let pointTemp = 'N/A';
-                    if (shipment.temperatureHistory) {
-                        const matching = shipment.temperatureHistory.find(t => t.timestamp === point.timestamp);
-                        if (matching) pointTemp = matching.temp;
-                    }
+            if (waypoints.length < 2) return;
 
-                    const timeStr = point.timestamp ? new Date(point.timestamp).toLocaleTimeString() : 'Unknown';
+            // Draw Route using OSRM
+            window.currentRoutingControl = L.Routing.control({
+                waypoints: waypoints,
+                routeWhileDragging: false,
+                addWaypoints: false,
+                draggableWaypoints: false,
+                fitSelectedRoutes: true,
+                show: false, // Hide instructions
+                creater: function (cluster) { return null; }, // Disable default markers interaction
+                lineOptions: {
+                    styles: [{ color: '#9333ea', opacity: 0.8, weight: 5 }]
+                },
+                createMarker: function (i, wp, nWps) {
+                    // Custom markers for Start/End only, or none (since we have vehicle marker)
+                    // Let's show small dots for waypoints to visualize the path, or nothing?
+                    // The main vehicle marker is already there. 
+                    // Let's return null to avoid clutter, or simple circles
+                    return L.marker(wp.latLng, {
+                        icon: L.divIcon({
+                            className: 'bg-purple-500 w-2 h-2 rounded-full border border-white',
+                            iconSize: [8, 8]
+                        })
+                    });
+                }
+            }).addTo(map);
 
-                    const circle = L.circleMarker([point.lat, point.lng], {
-                        radius: 4,
-                        color: '#9333ea',
-                        fillColor: 'white',
-                        fillOpacity: 1,
-                        weight: 2
-                    }).addTo(currentPathLayer);
-
-                    circle.bindPopup(`
-                        <div class="text-xs font-sans p-1">
-                            <strong class="text-purple-600">History Point</strong><br>
-                            <span class="text-gray-500">Time:</span> ${timeStr}<br>
-                            <span class="text-gray-500">Temp:</span> ${pointTemp}°C
-                        </div>
-                    `);
-                });
-            }
+            // Hide the panel container explicitly via CSS if needed, usually 'show: false' handles logic but container might exist
+            // The CSS .leaflet-routing-container { display: none } should be added to head
         }
 
     </script>

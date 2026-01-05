@@ -667,71 +667,82 @@
             }
         }
 
+        let vehicleMarker = null;
+
         function updateMap(lat, lng, status, temp, shipmentData) {
-            // Re-init map if needed or just update marker?
-            // Existing logic re-inits map which is safer for routing lines.
-
-            if (map) {
-                map.remove();
-                map = null;
-                window.routingControl = null;
+            // Initialize Map if not exists
+            if (!map) {
+                map = L.map('tracking-map').setView([lat, lng], 13);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '&copy; OpenStreetMap'
+                }).addTo(map);
+            } else {
+                // Just pan to new location if needed, or let user control?
+                // Usually for tracking keeping vehicle in view is good, but maybe not forced every second if user dragged away.
+                // For simplicity, let's just pan.
+                // map.panTo([lat, lng]); 
             }
 
-            map = L.map('tracking-map').setView([lat, lng], 13);
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '&copy; OpenStreetMap'
-            }).addTo(map);
+            // Path Logic with OSRM Routing
+            if (shipmentData.locationHistory || shipmentData.pickup) {
+                let waypoints = [];
+                const history = shipmentData.locationHistory ? [...shipmentData.locationHistory].sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp)) : [];
 
-            // Path Logic
-            // Path Logic
-            let pathCoords = [];
-            if (shipmentData.locationHistory && shipmentData.locationHistory.length > 0) {
-                const history = shipmentData.locationHistory.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
-                pathCoords = history.map(h => [parseFloat(h.lat), parseFloat(h.lng)]);
-            }
-            pathCoords.push([parseFloat(lat), parseFloat(lng)]);
-
-            if (pathCoords.length > 1) {
-                // Remove existing controls/layers handled by manual Routing Control
-                if (window.routingControl) {
-                    map.removeControl(window.routingControl);
-                    window.routingControl = null;
+                // 1. Pickup (Start)
+                if (shipmentData.pickup && shipmentData.pickup.lat && shipmentData.pickup.lng) {
+                    waypoints.push(L.latLng(shipmentData.pickup.lat, shipmentData.pickup.lng));
+                } else if (history.length > 0) {
+                    waypoints.push(L.latLng(history[0].lat, history[0].lng));
                 }
 
-                // Use simple Polyline for robust history tracking
-                L.polyline(pathCoords, {
-                    color: '#3b82f6', // Blue-500
-                    weight: 5,
-                    opacity: 0.8,
-                    lineJoin: 'round'
-                }).addTo(map);
+                // 2. Intermediate Points (Sampled)
+                if (history.length > 0) {
+                    const maxIntermediates = 8;
+                    const step = Math.ceil(history.length / maxIntermediates);
+                    for (let i = step; i < history.length; i += step) {
+                        waypoints.push(L.latLng(history[i].lat, history[i].lng));
+                    }
+                }
 
-                // Add simple circle markers for history points
-                pathCoords.slice(0, -1).forEach(coord => {
-                    L.circleMarker(coord, {
-                        radius: 3,
-                        color: '#3b82f6',
-                        fillColor: 'white',
-                        fillOpacity: 1,
-                        weight: 1
-                    }).addTo(map);
-                });
+                // 3. Current Location (End)
+                waypoints.push(L.latLng(lat, lng));
 
-                // Fit bounds to show entire path
-                map.fitBounds(L.latLngBounds(pathCoords), { padding: [50, 50] });
+                // Remove duplicates
+                waypoints = waypoints.filter((wp, index, self) =>
+                    index === self.findIndex((t) => (t.lat === wp.lat && t.lng === wp.lng))
+                );
+
+                if (waypoints.length > 1) {
+                    if (window.routingControl) {
+                        // Update waypoints
+                        window.routingControl.setWaypoints(waypoints);
+                    } else {
+                        // Create control
+                        window.routingControl = L.Routing.control({
+                            waypoints: waypoints,
+                            routeWhileDragging: false,
+                            addWaypoints: false,
+                            draggableWaypoints: false,
+                            fitSelectedRoutes: true, // This might auto-fit bounds, usually good.
+                            show: false,
+                            creater: function (cluster) { return null; },
+                            lineOptions: {
+                                styles: [{ color: '#3b82f6', opacity: 0.8, weight: 5 }]
+                            },
+                            createMarker: function (i, wp, nWps) {
+                                return L.marker(wp.latLng, {
+                                    icon: L.divIcon({
+                                        className: 'bg-blue-500 w-2 h-2 rounded-full border border-white',
+                                        iconSize: [8, 8]
+                                    })
+                                });
+                            }
+                        }).addTo(map);
+                    }
+                }
             }
 
             // Vehicle Marker
-            const vehicleIcon = L.divIcon({
-                className: 'custom-div-icon',
-                html: `<div class="relative">
-                <div class="w-4 h-4 bg-blue-600 rounded-full border-2 border-white shadow-lg"></div>
-                <div class="absolute -top-1 -left-1 w-6 h-6 bg-blue-500 rounded-full opacity-30 animate-ping"></div>
-            </div>`,
-                iconSize: [24, 24],
-                iconAnchor: [12, 12]
-            });
-
             const popupContent = `
                 <div class="text-sm">
                     <p class="font-bold text-gray-900 mb-1">Current Status</p>
@@ -743,7 +754,26 @@
                 </div>
             `;
 
-            L.marker([lat, lng], { icon: vehicleIcon }).addTo(map).bindPopup(popupContent).openPopup();
+            if (vehicleMarker) {
+                vehicleMarker.setLatLng([lat, lng]);
+                vehicleMarker.getPopup().setContent(popupContent);
+                if (!map.getBounds().contains([lat, lng])) {
+                    map.panTo([lat, lng]);
+                }
+            } else {
+                const vehicleIcon = L.divIcon({
+                    className: 'custom-div-icon',
+                    html: `<div class="relative">
+                    <div class="w-4 h-4 bg-blue-600 rounded-full border-2 border-white shadow-lg"></div>
+                    <div class="absolute -top-1 -left-1 w-6 h-6 bg-blue-500 rounded-full opacity-30 animate-ping"></div>
+                </div>`,
+                    iconSize: [24, 24],
+                    iconAnchor: [12, 12]
+                });
+
+                vehicleMarker = L.marker([lat, lng], { icon: vehicleIcon }).addTo(map).bindPopup(popupContent);
+                vehicleMarker.openPopup();
+            }
         }
 
         function updateDriverInfo(shipmentData) {

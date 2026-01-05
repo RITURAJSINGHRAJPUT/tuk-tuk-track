@@ -7,7 +7,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const htmlElement = document.documentElement;
 
     // Check for saved user preference, if any, on load of the website
-    if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+    // Check for 'force-dark' override or saved user preference
+    if (htmlElement.classList.contains('force-dark') || localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
         htmlElement.classList.add('dark');
     } else {
         htmlElement.classList.remove('dark');

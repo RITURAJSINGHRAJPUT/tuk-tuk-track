@@ -24,9 +24,9 @@ auth.onAuthStateChanged(async (user) => {
 function setupForm(user) {
     contactForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        const subject = document.getElementById('subject').value;
-        const priority = document.getElementById('priority').value;
-        const message = document.getElementById('message').value;
+        const subject = document.getElementById('subject').value || 'General Inquiry';
+        const priority = document.getElementById('priority').value || 'Medium';
+        const message = document.getElementById('message').value || '';
         const submitBtn = contactForm.querySelector('button[type="submit"]');
         const originalBtnText = submitBtn.innerHTML;
 
@@ -35,22 +35,28 @@ function setupForm(user) {
         lucide.createIcons();
 
         try {
-            await addDoc(collection(db, "contact_messages"), {
+            // Sanitize data -> Undefined values cause Firestore errors
+            const payload = {
                 userId: user.uid,
-                userEmail: user.email,
+                userEmail: user.email || null, // null is valid in Firestore, undefined is not
                 userName: user.displayName || 'Driver',
-                subject,
-                priority,
-                message,
+                subject: subject,
+                priority: priority,
+                message: message,
                 status: 'new',
                 createdAt: serverTimestamp(),
-                targetRole: 'driver' // useful metadata
-            });
+                targetRole: 'driver'
+            };
+
+            await addDoc(collection(db, "contact_messages"), payload);
+
             showNotification('success', 'Message Sent', "We'll get back to you shortly.");
             contactForm.reset();
         } catch (error) {
             console.error("Error sending message:", error);
-            showNotification('error', 'Error', "Failed to send message. Please try again.");
+            // Show alert for better visibility of the actual error
+            alert("Submission Failed: " + error.message);
+            showNotification('error', 'Error', "Failed to send message: " + error.message);
         } finally {
             submitBtn.disabled = false;
             submitBtn.innerHTML = originalBtnText;
