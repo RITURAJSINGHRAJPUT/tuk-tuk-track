@@ -506,7 +506,9 @@
                                 const newLocationEntry = {
                                     timestamp: timestamp,
                                     lat: parseFloat(lat),
-                                    lng: parseFloat(lng)
+                                    lng: parseFloat(lng),
+                                    temp: parseFloat(temp) || 0,
+                                    humidity: parseFloat(humidity) || 0
                                 };
 
                                 // 1. Update Local State (Immediate Feedback)
@@ -982,6 +984,18 @@
 
             console.log("Generated Waypoints:", waypoints);
 
+            // Draw Explicit Markers (Dots) using simple layer
+            waypoints.forEach(wp => {
+                L.circleMarker(wp, {
+                    radius: 6,
+                    fillColor: "#ffffff",
+                    color: "#9333ea", // purple-600
+                    weight: 2,
+                    opacity: 1,
+                    fillOpacity: 1
+                }).addTo(currentPathLayer);
+            });
+
             if (waypoints.length < 2) {
                 console.log("Not enough waypoints to draw path.");
                 // If we have a control but not enough points, maybe clear it?
@@ -1012,12 +1026,7 @@
                             styles: [{ color: '#9333ea', opacity: 0.8, weight: 5 }] // Admin Purple
                         },
                         createMarker: function (i, wp, nWps) {
-                            return L.marker(wp.latLng, {
-                                icon: L.divIcon({
-                                    className: 'bg-purple-500 w-2 h-2 rounded-full border border-white',
-                                    iconSize: [8, 8]
-                                })
-                            });
+                            return null; // Manual markers used
                         }
                     }).addTo(map);
 

@@ -638,7 +638,8 @@
                     </div>
                     <span class="text-xs text-green-700 bg-green-100 dark:bg-green-900/30 px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">Latest</span>
                 </div>
-                <p class="text-sm text-gray-600 dark:text-gray-300 font-medium" id="current-timeline-loc">Locating...</p>
+                <p class="text-sm text-gray-900 dark:text-white font-medium" id="current-timeline-loc">Locating...</p>
+                <p class="text-[10px] text-gray-400 font-mono mt-0.5">${lat.toFixed(5)}, ${lng.toFixed(5)}</p>
                 <span class="text-xs text-gray-400 mt-1 block font-mono">${new Date().toLocaleTimeString()}</span>
             `;
             timelineContainer.appendChild(currentItem);
@@ -658,7 +659,7 @@
                     item.className = 'relative mb-8';
                     const timeStr = new Date(h.timestamp).toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
 
-                    const histTemp = findTemp(h.timestamp);
+                    const histTemp = h.temp !== undefined ? h.temp : findTemp(h.timestamp);
 
                     item.innerHTML = `
                         <div class="absolute -left-[21px] top-1.5 w-4 h-4 bg-gray-200 dark:bg-gray-700 rounded-full border-2 border-white dark:border-gray-800"></div>
@@ -670,15 +671,18 @@
                                 </span>
                             ` : ''}
                         </div>
-                        <p class="text-xs text-gray-500 dark:text-gray-400 mb-1" id="hist-loc-${index}">
-                                ${h.lat.toFixed(4)}, ${h.lng.toFixed(4)}
+                        <p class="text-xs text-gray-900 dark:text-gray-200 font-medium mb-0.5" id="hist-addr-${index}">
+                            Locating...
+                        </p>
+                        <p class="text-[10px] text-gray-500 dark:text-gray-400 font-mono mb-1">
+                             ${h.lat.toFixed(5)}, ${h.lng.toFixed(5)}
                         </p>
                         <span class="text-[10px] text-gray-400 font-mono">${timeStr}</span>
                     `;
                     timelineContainer.appendChild(item);
                     setTimeout(() => {
                         getReadableAddress(h.lat, h.lng).then(addr => {
-                            const el = item.querySelector(`#hist-loc-${index}`);
+                            const el = item.querySelector(`#hist-addr-${index}`);
                             if (el) el.innerText = addr;
                         });
                     }, index * 200);
@@ -704,6 +708,8 @@
 
         let vehicleMarker = null;
 
+        let markersLayer = null;
+
         function updateMap(lat, lng, status, temp, shipmentData) {
             // Initialize Map if not exists
             if (!map) {
@@ -713,12 +719,12 @@
                     subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
                     attribution: '&copy; Google Maps'
                 }).addTo(map);
-            } else {
-                // Just pan to new location if needed, or let user control?
-                // Usually for tracking keeping vehicle in view is good, but maybe not forced every second if user dragged away.
-                // For simplicity, let's just pan.
-                // map.panTo([lat, lng]); 
+
+                markersLayer = L.layerGroup().addTo(map);
             }
+
+            // Clear previous markers
+            if (markersLayer) markersLayer.clearLayers();
 
             // Path Logic with OSRM Routing
             if (shipmentData.locationHistory || shipmentData.pickup) {
@@ -749,6 +755,18 @@
                     index === self.findIndex((t) => (t.lat === wp.lat && t.lng === wp.lng))
                 );
 
+                // Draw Explicit Markers (Dots)
+                waypoints.forEach(wp => {
+                    L.circleMarker(wp, {
+                        radius: 6,
+                        fillColor: "#ffffff",
+                        color: "#2563eb", // blue-600
+                        weight: 2,
+                        opacity: 1,
+                        fillOpacity: 1
+                    }).addTo(markersLayer);
+                });
+
                 if (waypoints.length > 1) {
                     if (window.routingControl) {
                         // Update waypoints
@@ -760,19 +778,14 @@
                             routeWhileDragging: false,
                             addWaypoints: false,
                             draggableWaypoints: false,
-                            fitSelectedRoutes: true, // This might auto-fit bounds, usually good.
+                            fitSelectedRoutes: true,
                             show: false,
                             creater: function (cluster) { return null; },
                             lineOptions: {
                                 styles: [{ color: '#3b82f6', opacity: 0.8, weight: 5 }]
                             },
                             createMarker: function (i, wp, nWps) {
-                                return L.marker(wp.latLng, {
-                                    icon: L.divIcon({
-                                        className: 'bg-blue-500 w-2 h-2 rounded-full border border-white',
-                                        iconSize: [8, 8]
-                                    })
-                                });
+                                return null; // Disable default markers, we drew our own
                             }
                         }).addTo(map);
                     }
