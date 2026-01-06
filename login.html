@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" class="dark force-dark">
+<html lang="en" class="dark">
 
 <head>
     <meta charset="UTF-8">
@@ -8,10 +8,11 @@
     <link href="./css/style.css" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <script>
-        // Anti-flicker script - Always start in DARK mode for Auth pages
-        document.documentElement.classList.add('dark');
-        // We do not check for 'light' preference here to ensure the requested "default" behavior.
-        // It can still be toggled manually.
+        if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
     </script>
 </head>
 
@@ -27,12 +28,12 @@
             style="animation-delay: 2s;"></div>
     </div>
 
-    <!-- Theme Toggle Button - Forced Position -->
-    <!-- <button id="theme-toggle" style="position: fixed; top: 1.5rem; right: 1.5rem; z-index: 9999;"
+    <!-- Theme Toggle Button -->
+    <button id="theme-toggle" style="position: fixed; top: 1.5rem; right: 1.5rem; z-index: 9999;"
         class="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 focus:outline-none focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 shadow-lg border border-gray-200 dark:border-gray-700 transition-all">
         <i data-lucide="moon" class="w-5 h-5 hidden dark:block"></i>
         <i data-lucide="sun" class="w-5 h-5 block dark:hidden"></i>
-    </button> -->
+    </button>
 
     <!-- Login Card -->
     <div

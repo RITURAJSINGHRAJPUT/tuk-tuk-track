@@ -203,6 +203,30 @@
                                     <!-- Timeline Items will be injected here -->
                                 </div>
                             </div>
+
+                            <!-- Driver Info -->
+                            <div id="driver-card-container"
+                                class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700">
+                                <h3 class="font-semibold mb-6 text-gray-900 dark:text-white flex items-center gap-2">
+                                    <i data-lucide="user" class="w-5 h-5 text-blue-500"></i>
+                                    Driver
+                                </h3>
+                                <div class="flex items-center gap-4">
+                                    <img src="https://ui-avatars.com/api/?name=Rajesh+Kumar&background=0D8ABC&color=fff"
+                                        alt="Driver" class="w-12 h-12 rounded-full">
+                                    <div>
+                                        <h4 class="font-medium text-gray-900 dark:text-white">Rajesh Kumar</h4>
+                                        <div class="flex items-center gap-1 text-yellow-500 text-sm">
+                                            <i data-lucide="star" class="w-3 h-3 fill-current"></i>
+                                            <span class="font-medium text-gray-700 dark:text-gray-300">4.8</span>
+                                        </div>
+                                    </div>
+                                    <button
+                                        class="ml-auto p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-full">
+                                        <i data-lucide="phone" class="w-5 h-5"></i>
+                                    </button>
+                                </div>
+                            </div>
                         </div>
 
                         <!-- Stats Column -->
@@ -254,6 +278,72 @@
                                 </div>
                             </div>
 
+                            <!-- Shipment Details -->
+                            <div
+                                class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700">
+                                <h3 class="font-semibold mb-6 text-gray-900 dark:text-white flex items-center gap-2">
+                                    <i data-lucide="package" class="w-5 h-5 text-blue-500"></i>
+                                    Shipment Details
+                                </h3>
+                                <div class="space-y-4">
+                                    <!-- Route -->
+                                    <div class="flex gap-4">
+                                        <!-- Visual Column -->
+                                        <div class="flex flex-col items-center pt-1">
+                                            <!-- From Dot -->
+                                            <div
+                                                class="w-3 h-3 rounded-full bg-blue-500 border-2 border-white dark:border-gray-800 shadow-sm shrink-0 z-10">
+                                            </div>
+                                            <!-- Line -->
+                                            <div class="w-0.5 flex-1 bg-gray-200 dark:bg-gray-700 min-h-[3rem]"></div>
+                                            <!-- To Dot -->
+                                            <div
+                                                class="w-3 h-3 rounded-full bg-green-500 border-2 border-white dark:border-gray-800 shadow-sm shrink-0 z-10">
+                                            </div>
+                                        </div>
+
+                                        <!-- Text Column -->
+                                        <div class="flex-1 flex flex-col justify-between gap-6 pb-1">
+                                            <!-- From Content -->
+                                            <div>
+                                                <p
+                                                    class="text-xs text-gray-500 dark:text-gray-400 uppercase font-semibold mb-1">
+                                                    From</p>
+                                                <p id="detail-from"
+                                                    class="font-medium text-gray-900 dark:text-white text-sm leading-snug">
+                                                    --</p>
+                                            </div>
+                                            <!-- To Content -->
+                                            <div>
+                                                <p
+                                                    class="text-xs text-gray-500 dark:text-gray-400 uppercase font-semibold mb-1">
+                                                    To</p>
+                                                <p id="detail-to"
+                                                    class="font-medium text-gray-900 dark:text-white text-sm leading-snug">
+                                                    --</p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Temp Range separator -->
+                                    <div class="border-t border-gray-100 dark:border-gray-700 pt-4 mt-2">
+                                        <div class="flex items-center justify-between">
+                                            <div class="flex items-center gap-2 text-gray-500 dark:text-gray-400">
+                                                <i data-lucide="thermometer" class="w-4 h-4"></i>
+                                                <span class="text-xs font-medium uppercase">Temp Range</span>
+                                            </div>
+                                            <p class="font-bold text-gray-900 dark:text-white text-sm font-mono">
+                                                <span id="detail-min-temp"
+                                                    class="text-blue-600 dark:text-blue-400">--</span>
+                                                <span class="text-gray-400 mx-1">to</span>
+                                                <span id="detail-max-temp"
+                                                    class="text-red-600 dark:text-red-400">--</span>
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
                             <!-- Vehicle Stats -->
                             <div
                                 class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700">
@@ -277,7 +367,8 @@
                                         </div>
                                         <p id="vehicle-location"
                                             class="text-sm font-bold text-gray-900 dark:text-white line-clamp-2"
-                                            title="Loading...">Locating...</p>
+                                            title="Loading...">
+                                            Locating...</p>
                                     </div>
                                 </div>
                                 <div class="mt-6">
@@ -289,29 +380,7 @@
                                 </div>
                             </div>
 
-                            <!-- Driver Info -->
-                            <div id="driver-card-container"
-                                class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700">
-                                <h3 class="font-semibold mb-6 text-gray-900 dark:text-white flex items-center gap-2">
-                                    <i data-lucide="user" class="w-5 h-5 text-blue-500"></i>
-                                    Driver
-                                </h3>
-                                <div class="flex items-center gap-4">
-                                    <img src="https://ui-avatars.com/api/?name=Rajesh+Kumar&background=0D8ABC&color=fff"
-                                        alt="Driver" class="w-12 h-12 rounded-full">
-                                    <div>
-                                        <h4 class="font-medium text-gray-900 dark:text-white">Rajesh Kumar</h4>
-                                        <div class="flex items-center gap-1 text-yellow-500 text-sm">
-                                            <i data-lucide="star" class="w-3 h-3 fill-current"></i>
-                                            <span class="font-medium text-gray-700 dark:text-gray-300">4.8</span>
-                                        </div>
-                                    </div>
-                                    <button
-                                        class="ml-auto p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-full">
-                                        <i data-lucide="phone" class="w-5 h-5"></i>
-                                    </button>
-                                </div>
-                            </div>
+
                         </div>
                     </div>
                 </div>
@@ -575,6 +644,18 @@
 
             // Update Distance & ETA
             calcDistanceAndEta(shipmentData);
+
+            // Update Shipment Details Card
+            const fromEl = document.getElementById('detail-from');
+            const toEl = document.getElementById('detail-to');
+            const minTempEl = document.getElementById('detail-min-temp');
+            const maxTempEl = document.getElementById('detail-max-temp');
+
+            if (fromEl) fromEl.textContent = (shipmentData.pickup && shipmentData.pickup.place) ? shipmentData.pickup.place : (shipmentData.pickup ? shipmentData.pickup.address : 'N/A');
+            if (toEl) toEl.textContent = (shipmentData.delivery && shipmentData.delivery.place) ? shipmentData.delivery.place : (shipmentData.delivery ? shipmentData.delivery.address : 'N/A');
+
+            if (minTempEl) minTempEl.textContent = (shipmentData.minTemp !== undefined && shipmentData.minTemp !== "") ? `${shipmentData.minTemp}°C` : 'N/A';
+            if (maxTempEl) maxTempEl.textContent = (shipmentData.maxTemp !== undefined && shipmentData.maxTemp !== "") ? `${shipmentData.maxTemp}°C` : 'N/A';
         }
 
         // --- Helper Functions Extracted for Clarity ---
@@ -624,7 +705,7 @@
             const currentItem = document.createElement('div');
             currentItem.className = 'relative mb-8';
             currentItem.innerHTML = `
-                <div class="absolute -left-[21px] top-0 w-4 h-4 bg-green-500 rounded-full border-2 border-white dark:border-gray-800 shadow-sm"></div>
+                <div class="absolute top-1.5 w-4 h-4 bg-green-500 rounded-full border-2 border-white dark:border-gray-800 shadow-sm" style="left: -25px;"></div>
                 <div class="mb-1 flex justify-between items-start">
                     <div>
                         <h4 class="font-bold text-gray-900 dark:text-white text-lg">${status}</h4>
@@ -662,7 +743,7 @@
                     const histTemp = h.temp !== undefined ? h.temp : findTemp(h.timestamp);
 
                     item.innerHTML = `
-                        <div class="absolute -left-[21px] top-1.5 w-4 h-4 bg-gray-200 dark:bg-gray-700 rounded-full border-2 border-white dark:border-gray-800"></div>
+                        <div class="absolute top-0.5 w-4 h-4 bg-gray-200 dark:bg-gray-700 rounded-full border-2 border-white dark:border-gray-800" style="left: -25px;"></div>
                         <div class="mb-1 flex justify-between items-start">
                             <h4 class="font-medium text-gray-900 dark:text-white text-sm">Location Update</h4>
                             ${histTemp !== null ? `
@@ -694,7 +775,7 @@
                 const startItem = document.createElement('div');
                 startItem.className = 'relative';
                 startItem.innerHTML = `
-                        <div class="absolute -left-[21px] top-1.5 w-4 h-4 bg-blue-500 rounded-full border-2 border-white dark:border-gray-800"></div>
+                        <div class="absolute top-0.5 w-4 h-4 bg-blue-500 rounded-full border-2 border-white dark:border-gray-800" style="left: -25px;"></div>
                     <div class="mb-1">
                         <h4 class="font-medium text-gray-900 dark:text-white text-sm">Shipment Started</h4>
                     </div>
