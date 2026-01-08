@@ -700,12 +700,16 @@
             const shipment = allShipments.find(s => s.id === id);
             if (!shipment) return alert("Shipment data not found");
 
+            console.log("[Download CSV] Shipment Data:", shipment);
+
             let csvContent = "data:text/csv;charset=utf-8,";
             csvContent += "Timestamp,Date,Time,Latitude,Longitude,Temperature (C),Location Name\n";
 
             const events = getShipmentHistory(shipment);
+            console.log("[Download CSV] Parsed Events:", events.length);
 
             if (events.length === 0) {
+                alert("Notice: No historical data found for this shipment. The report will only contain the current state.");
                 const now = new Date();
                 const currentLat = shipment.currentLocation ? shipment.currentLocation.lat : '';
                 const currentLng = shipment.currentLocation ? shipment.currentLocation.lng : '';
@@ -752,6 +756,8 @@
 
             // Table Data
             const events = getShipmentHistory(shipment);
+            console.log("[Download PDF] Parsed Events:", events.length);
+
             const tableData = events.map(e => {
                 const d = new Date(e.timestamp);
                 return [
@@ -763,6 +769,7 @@
             });
 
             if (tableData.length === 0) {
+                alert("Notice: No historical data found for PDF. The report will only contain the current state.");
                 const now = new Date();
                 const currentLat = shipment.currentLocation ? shipment.currentLocation.lat.toFixed(6) : '-';
                 const currentLng = shipment.currentLocation ? shipment.currentLocation.lng.toFixed(6) : '-';

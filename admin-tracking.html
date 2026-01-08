@@ -538,6 +538,7 @@
 
                                 // 3. Sync to Firestore (Persist History)
                                 const shipmentRef = doc(db, "shipments", shipment.id);
+                                console.log(`[RTDB-Sync] Updating Firestore for ${shipment.id}`, { lat, lng, temp });
                                 updateDoc(shipmentRef, {
                                     currentLocation: { lat, lng },
                                     currentTemperature: temp,
@@ -546,7 +547,8 @@
                                     // Append to history array in Firestore
                                     temperatureHistory: arrayUnion(newTempEntry),
                                     locationHistory: arrayUnion(newLocationEntry)
-                                }).catch(err => console.error("Error syncing to Firestore:", err));
+                                }).then(() => console.log("[RTDB-Sync] Success"))
+                                    .catch(err => console.error("[RTDB-Sync] Error syncing to Firestore:", err));
 
                                 // Find popup element if open
                                 if (markers[shipment.id]) {

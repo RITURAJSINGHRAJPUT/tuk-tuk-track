@@ -242,7 +242,7 @@
     <script src="js/main.js"></script>
     <script type="module">
         import { initAdminGuard } from './js/admin-guard.js';
-        import { adminDb as db, collection, query, where, getDocs, onSnapshot, doc, updateDoc, arrayUnion, Timestamp } from './firebase-config.js';
+        import { adminDb as db, collection, query, where, getDocs, onSnapshot, doc, updateDoc, arrayUnion, Timestamp, getDoc } from './firebase-config.js';
 
         initAdminGuard();
         lucide.createIcons();
@@ -299,9 +299,13 @@
         // Update Data
         window.updateTrackingData = async () => {
             const shipmentId = shipmentSelect.value;
+            // Force Float parsing to be safe
             const lat = parseFloat(latInput.value);
             const lng = parseFloat(lngInput.value);
             const temp = parseFloat(tempInput.value);
+
+            console.log(`[Update] Attempting update for ID: ${shipmentId}`);
+            console.log(`[Update] Data: Lat=${lat}, Lng=${lng}, Temp=${temp}`);
 
             if (!shipmentId) return alert("Please select a shipment.");
             if (isNaN(lat) || isNaN(lng) || isNaN(temp)) return alert("Please enter valid numbers.");
@@ -313,20 +317,34 @@
 
             try {
                 const shipmentRef = doc(db, "shipments", shipmentId);
-                const timestamp = new Date().toISOString(); // Use string for standard JSON compatibility
+                const timestamp = new Date().toISOString();
 
-                await updateDoc(shipmentRef, {
+                const updatePayload = {
                     currentLocation: { lat, lng },
                     currentTemperature: temp,
                     // Append to history
                     locationHistory: arrayUnion({ lat, lng, timestamp }),
                     temperatureHistory: arrayUnion({ temp, timestamp })
+                };
+
+                console.log("[Update] Payload:", JSON.stringify(updatePayload, null, 2));
+
+                await updateDoc(shipmentRef, updatePayload);
+
+                console.log("[Update] Write Success!");
+
+                // START DEBUG READBACK
+                getDoc(shipmentRef).then(snap => {
+                    const data = snap.data();
+                    console.log("[Debug Readback] Location History Length:", data.locationHistory ? data.locationHistory.length : 0);
+                    console.log("[Debug Readback] Temperature History Length:", data.temperatureHistory ? data.temperatureHistory.length : 0);
                 });
+                // END DEBUG READBACK
 
                 alert("Shipment updated successfully!");
 
             } catch (error) {
-                console.error("Error updating:", error);
+                console.error("[Update] Error:", error);
                 alert("Failed to update: " + error.message);
             } finally {
                 btn.innerHTML = originalText;
