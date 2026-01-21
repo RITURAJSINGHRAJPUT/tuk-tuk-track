@@ -1,7 +1,6 @@
 <p align="center">
   <img src="https://img.shields.io/badge/Version-1.0.0-blue?style=for-the-badge" alt="Version">
   <img src="https://img.shields.io/badge/License-ISC-green?style=for-the-badge" alt="License">
-  <img src="https://img.shields.io/badge/Firebase-Integrated-orange?style=for-the-badge&logo=firebase" alt="Firebase">
   <img src="https://img.shields.io/badge/TailwindCSS-3.4-38B2AC?style=for-the-badge&logo=tailwind-css" alt="TailwindCSS">
 </p>
 
@@ -20,7 +19,7 @@ TukTukTrack is a smart logistics platform that connects **Administrators**, **Dr
 |:---:|:---:|:---:|
 | ![Landing](screenshots/landing.png) | ![Dashboard](screenshots/dashboard.png) | ![Admin](screenshots/admin.png) |
 
-> 💡 *Add screenshots to a `screenshots/` folder in your project root*
+> 💡 *Add screenshots to the `screenshots/` folder in your project root*
 
 ---
 
@@ -57,7 +56,7 @@ TukTukTrack is a smart logistics platform that connects **Administrators**, **Dr
 - Seamless escalation to human support
 
 ### 🔒 Security Features
-- Firebase Authentication with role-based access
+- Role-based authentication
 - Admin approval workflow for new registrations
 - Secure data encryption
 - Session management and guards
@@ -76,7 +75,6 @@ TukTukTrack is a smart logistics platform that connects **Administrators**, **Dr
 | **Frontend** | HTML5, JavaScript (ES6+), CSS3 |
 | **Styling** | Tailwind CSS v3.4 |
 | **Icons** | Lucide Icons |
-| **Backend** | Firebase (Authentication, Firestore, Realtime Database) |
 | **Maps** | Leaflet.js / Google Maps API |
 | **Build Tools** | Node.js, npm, PostCSS, Autoprefixer |
 
@@ -90,7 +88,6 @@ tuk-tuk-track/
 ├── login.html                  # User login
 ├── register.html               # User registration
 ├── admin-login.html            # Admin login
-├── init-admin.html             # Initialize admin account
 │
 ├── dashboard.html              # User dashboard
 ├── driver-dashboard.html       # Driver dashboard
@@ -127,9 +124,7 @@ tuk-tuk-track/
 ├── src/                        # Source files
 │   └── input.css               # Tailwind input
 │
-├── firebase-config.js          # Firebase configuration
-├── firestore.rules             # Firestore security rules
-├── database.rules.json         # Realtime DB rules
+├── screenshots/                # App screenshots
 ├── tailwind.config.js          # Tailwind configuration
 └── package.json                # Node dependencies
 ```
@@ -141,7 +136,6 @@ tuk-tuk-track/
 ### Prerequisites
 
 - **Node.js** v16+ and **npm** installed
-- **Firebase** project configured
 - **Git** for version control
 - Code editor (VS Code recommended)
 
@@ -158,31 +152,13 @@ tuk-tuk-track/
    npm install
    ```
 
-3. **Configure Firebase:**
-   - Create a Firebase project at [Firebase Console](https://console.firebase.google.com)
-   - Enable Authentication (Email/Password)
-   - Enable Firestore Database
-   - Enable Realtime Database
-   - Copy your config to `firebase-config.js`:
-     ```javascript
-     const firebaseConfig = {
-       apiKey: "YOUR_API_KEY",
-       authDomain: "YOUR_PROJECT.firebaseapp.com",
-       databaseURL: "https://YOUR_PROJECT.firebaseio.com",
-       projectId: "YOUR_PROJECT_ID",
-       storageBucket: "YOUR_PROJECT.appspot.com",
-       messagingSenderId: "YOUR_SENDER_ID",
-       appId: "YOUR_APP_ID"
-     };
-     ```
-
-4. **Start development server:**
+3. **Start development server:**
    ```bash
    npm run build
    ```
    > This runs Tailwind CSS in watch mode: `tailwindcss -i ./src/input.css -o ./css/style.css --watch`
 
-5. **Open in browser:**
+4. **Open in browser:**
    - Use VS Code **Live Server** extension, or
    - Open `index.html` directly in your browser
 
@@ -190,66 +166,27 @@ tuk-tuk-track/
 
 ## 🚀 Deployment
 
-### Option 1: Firebase Hosting (Recommended)
-
-1. **Install Firebase CLI:**
-   ```bash
-   npm install -g firebase-tools
-   ```
-
-2. **Login to Firebase:**
-   ```bash
-   firebase login
-   ```
-
-3. **Initialize hosting:**
-   ```bash
-   firebase init hosting
-   ```
-   - Select your Firebase project
-   - Set public directory to `.` (current directory)
-   - Configure as single-page app: **No**
-
-4. **Build production CSS:**
-   ```bash
-   npx tailwindcss -i ./src/input.css -o ./css/style.css --minify
-   ```
-
-5. **Deploy:**
-   ```bash
-   firebase deploy --only hosting
-   ```
-
-### Option 2: Netlify
+### Option 1: Netlify (Recommended)
 
 1. Connect your GitHub repository to [Netlify](https://netlify.com)
 2. Set build command: `npx tailwindcss -i ./src/input.css -o ./css/style.css --minify`
 3. Set publish directory: `.`
 4. Deploy!
 
-### Option 3: Vercel
+### Option 2: Vercel
 
 1. Import your project to [Vercel](https://vercel.com)
 2. Configure build settings similar to Netlify
 3. Deploy with one click
 
-### Option 4: GitHub Pages
+### Option 3: GitHub Pages
 
-1. Build production CSS locally
+1. Build production CSS locally:
+   ```bash
+   npx tailwindcss -i ./src/input.css -o ./css/style.css --minify
+   ```
 2. Push to `main` or `gh-pages` branch
 3. Enable GitHub Pages in repository settings
-
----
-
-## 🔧 Environment Configuration
-
-Create a `.env` file (if using environment variables):
-
-```env
-FIREBASE_API_KEY=your_api_key
-FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
-FIREBASE_PROJECT_ID=your_project_id
-```
 
 ---
 
