@@ -89,3 +89,7 @@
 * **Predictive AI Routing:** Applying Machine Learning models against historical traffic data to dynamically optimize routes.
 * **Hardware API Extensions:** Deeper integration options supporting external ESP32/Arduino firmwares explicitly built for TukTukTrack payloads.
 * **Third-Party Logistics (3PL) Adapters:** API bridges built to seamlessly hand off shipments to external couriers for last-mile delivery tracking.
+# admin : [EMAIL_ADDRESS]
+# password: Utsav@799020
+# utsavsingh612
+# password : 799020

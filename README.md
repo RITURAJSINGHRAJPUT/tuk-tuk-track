@@ -246,5 +246,5 @@ This project is licensed under the **ISC License** - see the [LICENSE](LICENSE) 
 
 <p align="center">
   Made with ❤️ by the TukTukTrack Team<br>
-  © 2026 TukTukTrack™. All Rights Reserved.
+  © 2026 TukTukTrack™. All Rights Reserved (Sparsh).
 </p>
